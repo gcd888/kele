@@ -17,8 +17,8 @@
             "ext": "./lib/zeqaht.json"
         },
         {
-            "key": "XBPQ_白嫖",
-            "name": "🛍️白嫖|测试",
+            "key": "XBPQ_白",
+            "name": "🛍️白|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/baipiaoys.json"
