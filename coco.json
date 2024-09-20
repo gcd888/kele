@@ -2,7 +2,7 @@
     "sites": [
         {
             "key": "豆dou",
-            "name": "🏠┃更多福利接口关注┃公众号：玩偶软件",
+            "name": "🏠┃COCO",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "searchable": 0,
@@ -11,42 +11,42 @@
         },
         {
             "key": "XBPQ_免费",
-            "name": "🚀秒播┃影视",
+            "name": "🚀秒播|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/zeqaht.json"
         },
         {
             "key": "XBPQ_白嫖",
-            "name": "🛍️白嫖┃影视",
+            "name": "🛍️白嫖|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/baipiaoys.json"
         },
         {
             "key": "XBPQ_4kvm",
-            "name": "🥭五楼┃影视",
+            "name": "🥭五楼|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/4kvm.json"
         },
         {
             "key": "XBPQ_南坊",
-            "name": "🏠南坊┃影视",
+            "name": "🏠南坊|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/南坊.json"
         },
         {
             "key": "XBPQ_黑木耳",
-            "name": "♠️黑木耳┃影视",
+            "name": "♠️黑木耳|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/heimuer.json"
         },
         {
             "key": "cjzy_360资源",
-            "name": "🧭卫士┃影视",
+            "name": "🧭卫士|测试",
             "type": 1,
             "api": "https://360zy.com/api.php/provide/vod",
             "playUrl": "",
@@ -82,7 +82,7 @@
         },
         {
             "key": "drpy_365",
-            "name": " 📡365┃影视",
+            "name": " 📡365|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/365.js"
@@ -96,28 +96,28 @@
         },
         {
             "key": "XBPQ_98影视",
-            "name": "🍸酒吧┃影视",
+            "name": "🍸酒吧|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/98影视.json"
         },
         {
             "key": "XBPQ_黑狐",
-            "name": "🦝黑狐┃影视",
+            "name": "🦝黑狐|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/黑狐影视.json"
         },
         {
             "key": "XBPQ_2BT",
-            "name": "🤥鼻涕┃影视",
+            "name": "🤥鼻涕|测试",
             "type": 3,
             "api": "csp_XBPQ",
             "ext": "./lib/2bt.json"
         },
         {
             "key": "drpy_好看",
-            "name": "👀好看┃影视",
+            "name": "👀好看|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/好看.js"
@@ -262,7 +262,7 @@
         },
         {
             "key": "drpy_vip",
-            "name": "💳威鸭屁┃影视",
+            "name": "💳威鸭屁|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/tvbox29.js"
@@ -302,7 +302,7 @@
         },
         {
             "key": "appys_影探",
-            "name": "🍝影探┃影视",
+            "name": "🍝影探|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "playerType": 1,
@@ -310,7 +310,7 @@
         },
         {
             "key": "app_嘛艺",
-            "name": "📛嘛艺┃影视",
+            "name": "📛嘛艺|测试",
             "type": 3,
             "api": "csp_AppYsV2",
             "ext": "http://122.228.84.103:5822/api.php/app/"
@@ -324,28 +324,28 @@
         },
         {
             "key": "app_兜摔",
-            "name": "🏂兜摔┃影视",
+            "name": "🏂兜摔|测试",
             "type": 1,
             "api": "http://103.97.176.128:9527/api.php/provide/vod/?ac=list",
             "playUrl": "json:http://27.159.67.238:6688/?url="
         },
         {
             "key": "drpy_爱迪",
-            "name": "🆔爱迪┃影视",
+            "name": "🆔爱迪|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/A8音乐.js"
         },
         {
             "key": "drpy_网飞",
-            "name": "🥅网飞┃影视",
+            "name": "🥅网飞|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/网飞.js"
         },
         {
             "key": "appys_4kgod6",
-            "name": "🥬白菜┃影视",
+            "name": "🥬白菜|测试",
             "type": 3,
             "api": "csp_AppYsV2",
             "playerType": 1,
@@ -353,7 +353,7 @@
         },
         {
             "key": "XYQHAL_Wog1",
-            "name": "❤玩偶┃影视",
+            "name": "❤玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -361,7 +361,7 @@
         },
         {
             "key": "XYQHAL_Wog2",
-            "name": "💙玩偶┃影视",
+            "name": "💙玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -369,7 +369,7 @@
         },
         {
             "key": "XYQHAL_Wog3",
-            "name": "🖤玩偶┃影视",
+            "name": "🖤玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -377,7 +377,7 @@
         },
         {
             "key": "XYQHAL_Wog4",
-            "name": "💚玩偶┃影视",
+            "name": "💚玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -385,7 +385,7 @@
         },
         {
             "key": "XYQHAL_Wog5",
-            "name": "🌅玩偶┃影视",
+            "name": "🌅玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -393,7 +393,7 @@
         },
         {
             "key": "XYQHAL_Wog6",
-            "name": "🌄玩偶┃影视",
+            "name": "🌄玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -401,7 +401,7 @@
         },
         {
             "key": "XYQHAL_Wog7",
-            "name": "🌌玩偶┃影视",
+            "name": "🌌玩偶|测试",
             "type": 3,
             "api": "csp_XYQHikerAL",
             "playerType": 1,
@@ -416,35 +416,35 @@
         },
         {
             "key": "drpy_企鹅",
-            "name": "🐧企鹅┃影视",
+            "name": "🐧企鹅|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/txtv.js"
         },
         {
             "key": "drpy_奇异",
-            "name": "🥝奇异┃影视",
+            "name": "🥝奇异|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/iqytv.js"
         },
         {
             "key": "drpy_芒果",
-            "name": "🥭忙果┃影视",
+            "name": "🥭忙果|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/mgtv.js"
         },
         {
             "key": "drpy_优酷",
-            "name": "👑优库┃影视",
+            "name": "👑优库|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/yktv.js"
         },
         {
             "key": "drpy_菜狗",
-            "name": "🐕️菜狗┃影视",
+            "name": "🐕️菜狗|测试",
             "type": 3,
             "api": "./lib/drpy2.min.js",
             "ext": "./lib/sogou.js"
@@ -476,7 +476,7 @@
         },
         {
             "key": "zycj_暴風",
-            "name": "🌀暴風┃影视",
+            "name": "🌀暴風|测试",
             "type": 1,
             "api": "https://bfzyapi.com/api.php/provide/vod/?wd=",
             "playUrl": "",
@@ -518,7 +518,7 @@
         },
         {
             "key": "zycj_索尼",
-            "name": "📀索尼┃影视",
+            "name": "📀索尼|测试",
             "type": 1,
             "api": "https://suoniapi.com/api.php/provide/vod",
             "playUrl": "",
@@ -560,7 +560,7 @@
         },
         {
             "key": "zycj_快云",
-            "name": "☁️快云┃影视",
+            "name": "☁️快云|测试",
             "type": 1,
             "api": "https://kuaiyun-api.com/api.php/provide/vod/?wd=",
             "searchable": 1,
@@ -583,7 +583,7 @@
         },
         {
             "key": "zycj_非凡",
-            "name": "🦅非凡┃影视",
+            "name": "🦅非凡|测试",
             "type": 1,
             "api": "http://cj.ffzyapi.com/api.php/provide/vod/",
             "playUrl": "",
@@ -624,7 +624,7 @@
         },
         {
             "key": "zycj_量子",
-            "name": "🛰️量子┃影视",
+            "name": "🛰️量子|测试",
             "type": 0,
             "api": "https://cj.lziapi.com/api.php/provide/vod/at/xml/",
             "playUrl": "",
@@ -666,7 +666,7 @@
         },
         {
             "key": "zycj_天天",
-            "name": "📅天天┃影视",
+            "name": "📅天天|测试",
             "type": 1,
             "api": "https://api.1080zyku.com/inc/apijson.php",
             "playUrl": "",
