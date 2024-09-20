@@ -1,20 +1,20 @@
 {
-    "urls": [
-        {
-            "url": "http://www.饭太硬.com/tv",
-            "name": "🚀饭太硬"
-        },
-        {
-            "url": "https://肥猫.com/",
-            "name": "✈️肥猫"
-        },
-        {
-            "url": "http://我不是.摸鱼儿.top",
-            "name": "🚅摸鱼儿"
-        },
-        {
-            "url": "http://tvbox.稳定接口.com",
-            "name": "🚞V哥"
-        }
-    ]
+  "urls": [
+    {
+      "url": "https://gitee.com/mzrjk1/BHapp/raw/master/bhapp.json",
+      "name": "💗宝盒app"
+    },
+    {
+      "url": "https://gitee.com/bhapp/zs/raw/kl/feimao.json",
+      "name": "💗我是肥猫"
+    },  
+    {
+      "url": "https://gitee.com/bhapp/zs/raw/xs/xiaosa.json",
+      "name": "💗我是摸鱼"
+    },  
+    {
+      "url": "http://mzrjk.top/app.json",
+      "name": "💗备用宝盒"
+    }   
+  ]
 }
