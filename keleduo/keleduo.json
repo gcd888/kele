@@ -2,27 +2,27 @@
     "urls": [
         
         {
-            "url": "http://www.饭太硬.com/tv",
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/饭太硬/fty.jar",
             "name": "🚀饭太硬"
         },
         {
-            "url": "http://我不是.摸鱼儿.top",
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/摸鱼儿/我不是.摸鱼儿.json",
             "name": "✈️摸鱼儿"
         },
         {
-            "url": "https://肥猫.com/",
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/肥猫/肥猫.json",
             "name": "🚅肥猫"
         },
         {
-            "url": "http://tvbox.稳定接口.com",
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/V哥/tvbox.稳定接口.json",
             "name": "🚞V哥"
         },
         {
-            "url": "https://weixine.net/ysc.json",
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/运输车/ysc.json",
             "name": "🚗运输车"
         },
         {
-            "url":"https://gitee.com/blssss/jk/raw/api/bls.json",
+            "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/玩偶软件/bls.json",
             "name":"🏍️玩偶软件"
         }
 
