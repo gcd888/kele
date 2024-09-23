@@ -1,7 +1,6 @@
 {
     "urls": [
-        {"url":"https://gitee.com/blssss/jk/raw/api/bls.json",
-        "name":"🛸玩偶哥哥"},
+        
         {
             "url": "http://www.饭太硬.com/tv",
             "name": "🚀饭太硬"
@@ -21,6 +20,11 @@
         {
             "url": "https://weixine.net/ysc.json",
             "name": "🚗运输车"
+        },
+        {
+            "url":"https://gitee.com/blssss/jk/raw/api/bls.json",
+            "name":"🛸玩偶软件"
         }
+
     ]
 }
