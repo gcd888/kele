@@ -23,7 +23,7 @@
         },
         {
             "url":"https://gitee.com/blssss/jk/raw/api/bls.json",
-            "name":"🛸玩偶软件"
+            "name":"🏍️玩偶软件"
         }
 
     ]
