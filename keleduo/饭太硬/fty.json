@@ -1,10 +1,10 @@
 {
-  "spider": "./fty.jar;md5;5769450f1eccd0c8dc347327736e870a",
+  "spider": "./fty.jar;md5;8d7cdd390b32a57772e293584d4ff728",
   "wallpaper": "https://深色壁纸.xxooo.cf/",
   "sites": [
     {
       "key": "豆豆",
-      "name": "🅱豆瓣┃推荐",
+      "name": "神秘接口-公众号：宝盒助手",
       "type": 3,
       "api": "csp_DouDou",
       "searchable": 0,
@@ -137,6 +137,27 @@
       "changeable": 1
     },
     {
+      "key": "热播",
+      "name": "📺热播┃多线",
+      "type": 3,
+      "api": "csp_AppTT",
+      "timeout": 15,
+      "playerType": 2,
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1,
+      "ext": "AO7TcBkd8I/B5wQc4Qma+pU="
+    },
+    {
+      "key": "萌米",
+      "name": "👀萌米┃多线",
+      "type": 3,
+      "api": "csp_AppTT",
+      "timeout": 15,
+      "playerType": 1,
+      "ext": "AO7TcBkd8Iifux0Y8Qze6tVlMg=="
+    },
+    {
       "key": "南瓜",
       "name": "🎃南瓜┃多线",
       "type": 3,
@@ -157,27 +178,6 @@
       "searchable": 1,
       "quickSearch": 1,
       "changeable": 1
-    },
-    {
-      "key": "热播",
-      "name": "📺热播┃多线",
-      "type": 3,
-      "api": "csp_AppTT",
-      "timeout": 15,
-      "playerType": 2,
-      "searchable": 1,
-      "quickSearch": 1,
-      "changeable": 1,
-      "ext": "AO7TcBkd8I/B5wQc4Qma+pU="
-    },
-    {
-      "key": "萌米",
-      "name": "👀萌米┃多线",
-      "type": 3,
-      "api": "csp_AppTT",
-      "timeout": 15,
-      "playerType": 1,
-      "ext": "AO7TcBkd8Iifux0Y8Qze6tVlMg=="
     },
     {
       "key": "zxzj",
@@ -418,11 +418,14 @@
       "key": "Sso",
       "name": "🐌盘他┃三盘",
       "type": 3,
-      "api": "./lib/drpy2.min.js",
-      "ext": "./lib/盘他.js",
+      "api": "csp_PanSso",
       "searchable": 1,
       "quickSearch": 1,
-      "changeable": 0
+      "changeable": 0,
+      "ext": {
+        "Cloud-drive": "tvfan/Cloud-drive.txt",
+        "from": "4k|auto"
+      }
     },
     {
       "key": "夸搜",
