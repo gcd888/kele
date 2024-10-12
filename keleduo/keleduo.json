@@ -2,15 +2,11 @@
     "urls": [
         {
             "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/可乐/kele.json",
-            "name": "🚀可乐定制"
+            "name": "🥤可乐定制"
         },
         {
             "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/饭太硬/fty.json",
             "name": "🚀饭太硬"
-        },
-        {
-            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/摸鱼/moyu.json",
-            "name": "✈️摸鱼"
         },
 		{
             "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/摸鱼儿/我不是.摸鱼儿.json",
@@ -28,13 +24,17 @@
             "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/运输车/ysc.json",
             "name": "🚗运输车"
         },
+		{
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/讴歌/ouge.json",
+            "name": "🚌讴歌"
+        },
         {
             "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/玩偶软件/bls.json",
             "name":"🏍️玩偶软件"
         },
         {
             "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/短剧/duanju.json",
-            "name":"🏍️短剧"
+            "name":"🎦短剧"
         }
 
     ]
