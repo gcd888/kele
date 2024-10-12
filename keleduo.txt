@@ -6,7 +6,7 @@
             "name": "🚀饭太硬"
         },
         {
-            "url": "http://我不是.摸鱼儿.top",
+            "url": "http://我不是.摸鱼儿.com",
             "name": "✈️摸鱼儿"
         },
         {
@@ -21,6 +21,11 @@
             "url": "https://weixine.net/ysc.json",
             "name": "🚗运输车"
         },
+	{
+            "url": "http://tv.nxog.top/m/",
+            "name": "🚌讴歌"
+        },
+
         {
             "url":"https://gitee.com/blssss/jk/raw/api/bls.json",
             "name":"🏍️玩偶软件"
