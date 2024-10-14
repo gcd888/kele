@@ -1,15 +1,15 @@
 {
 	"storeHouse": [
 		{
-			"sourceName": "🌹可乐定制仓库🌹",
+			"sourceName": "🏅可乐定制仓库🏅",
 			"sourceUrl": "https://gitee.com/henryguan/kele/raw/master/keleduo/keleduo.json"
 		},
 		{
-			"sourceName": "🌹可乐网络仓库🌹",
+			"sourceName": "🏄🏻‍♂️可乐网络仓库🏄🏻‍♂️",
 			"sourceUrl": "https://gitee.com/henryguan/kele/raw/master/keleduo/keleduo.txt"
 		},
 		{
-			"sourceName": "☘️可乐本地助手☘️",
+			"sourceName": "👨🏻‍💻️可乐本地仓库👨🏻‍💻‍‍",
 			"sourceUrl": "clan://localhost/kele/keleday.txt"
 		}
 	]
