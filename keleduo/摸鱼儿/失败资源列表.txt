@@ -1,3 +1,8 @@
+https://gitlab.com/fantaiying/ext/-/raw/main/drpy2.min.js
+https://gitlab.com/fantaiying/ext/-/raw/main/jp.js
+https://github.moeyy.xyz/https://raw.githubusercontent.com/PizazzGY/TVBox/main/JS/碟调影视.js
+https://github.moeyy.xyz/https://raw.githubusercontent.com/PizazzGY/TVBox/main/JS/去看吧.js
 http://127.0.0.1:9978/file/TVBox/quark.txt
 http://127.0.0.1:9978/file/TVBox/uc.txt
+https://gitlab.com/fantaiying/ext/-/raw/main/企鹅直播.json
 https://live.fanmingming.com/tv/m3u/ipv6.m3u
