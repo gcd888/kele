@@ -1,26 +1,26 @@
 
 
 {
-"wallpaper":"https://tv.nxog.top/m/t/",
-"logo":"https://tv.nxog.top/m//LOGO2.gif",
+"wallpaper":"https://xn--xffx-rp5imh.v.nxog.top/m/t/",
+"logo":"https://xn--xffx-rp5imh.v.nxog.top/m//LOGO2.gif",
 "spider":"./jar.php?id=dm&ou=公众号欧歌app;md5;b85ef5b7adadb054eeee553c54662610","warningText":"公众号欧歌app提示:
 📢接口软件永远免费 
 📢长期维护切勿贩卖",
 
 
 "lives":[
-{"name":"公众号欧歌app","type":0,"url":"https://tv.nxog.top/m/tv/","playerType":1,"ua": "okhttp/3.12.13","logo": "https://live.fanmingming.com/tv/{name}.png"},
-{"name":"IPV4V6","type":0,"url":"https://tv.nxog.top/m/tv/1/","playerType":1,"ua": "okhttp/3.12.13","logo": "https://live.fanmingming.com/tv/{name}.png"}
+{"name":"公众号欧歌app","type":0,"url":"https://xn--xffx-rp5imh.v.nxog.top/m/tv/","playerType":1,"ua": "okhttp/3.12.13","logo": "https://live.fanmingming.com/tv/{name}.png"},
+{"name":"IPV4V6","type":0,"url":"https://xn--xffx-rp5imh.v.nxog.top/m/tv/1/","playerType":1,"ua": "okhttp/3.12.13","logo": "https://live.fanmingming.com/tv/{name}.png"}
 ],
 "sites": [
-{"key":"豆瓣2","name":"📢公众号欧歌app榜单o.nxog.top","type":3,"api":"csp_Douban","searchable":0},
-{"key":"豆瓣1","name":"📢公众号欧歌app公告❤更新:10/10❤","type":3,"api":"csp_Notice","searchable":0,"changeable": 0,"jar":"https://tv.nxog.top/m/jar.php?id=dm&ou=公众号欧歌app;md5;b85ef5b7adadb054eeee553c54662610","ext": "https://nxog.top/%E5%85%AC%E4%BC%97%E5%8F%B7%E6%AC%A7%E6%AD%8CAPP/ts/?b=公众号欧歌app"},
+{"key":"豆瓣2","name":"📢公众号欧歌app榜单u.nxog.top","type":3,"api":"csp_Douban","searchable":0},
+{"key":"豆瓣1","name":"📢公众号欧歌app公告❤更新:10/10❤","type":3,"api":"csp_Notice","searchable":0,"changeable": 0,"jar":"https://xn--xffx-rp5imh.v.nxog.top/m/jar.php?id=dm&ou=公众号欧歌app;md5;b85ef5b7adadb054eeee553c54662610","ext": "https://nxog.top/%E5%85%AC%E4%BC%97%E5%8F%B7%E6%AC%A7%E6%AD%8CAPP/ts/?b=公众号欧歌app"},
 
 
-{"key":"csp_woog","name":"🐲欧歌┃4K","type":3,"api":"csp_woog","changeable":0,"filterable":1,"jar":"https://tv.nxog.top/m/jar.php?id=og&ou=公众号欧歌app;md5;511b71a61034fa01053d20582f62c402","ext":{"site_urls":["https://woog.nxog.asia"]}},
+{"key":"csp_woog","name":"🐲欧歌┃4K","type":3,"api":"csp_woog","changeable":0,"filterable":1,"jar":"https://xn--xffx-rp5imh.v.nxog.top/m/jar.php?id=og&ou=公众号欧歌app;md5;511b71a61034fa01053d20582f62c402","ext":{"site_urls":["https://woog.nxog.asia"]}},
 {"key":"欧歌js","name":"🐲欧歌┃4K备","type":3,"api":"./lib/4k.min.js","ext":"./lib/og4K.js","searchable": 1,
 "quickSearch": 1,"filterable": 1},
-{"key":"csp_欧歌G","name":"🐲欧歌4K┃配置","type":3,"api":"csp_Configog","searchable":0,"quickSearch": 0,"filterable": 1,"jar":"https://tv.nxog.top/m/jar.php?id=config&ou=公众号欧歌app;md5;2d68907e16b4a9809ca25071c739245c"},
+{"key":"csp_欧歌G","name":"🐲欧歌4K┃配置","type":3,"api":"csp_Configog","searchable":0,"quickSearch": 0,"filterable": 1,"jar":"https://xn--xffx-rp5imh.v.nxog.top/m/jar.php?id=config&ou=公众号欧歌app;md5;2d68907e16b4a9809ca25071c739245c"},
 
 {"key":"配置中心","name":"❤通用┃配置","type":3,"api":"csp_Config","searchable":0,"changeable":0,"style":{"type":"rect","ratio":1.597}},
 {"key":"荐片","name":"💡荐片｜影视","type":3,"api":"csp_Jianpian","playerType":1,"searchable":1,"quickSearch":1,"filterable":1},
@@ -155,8 +155,8 @@
 
 {"key":"采集之王","name":"🌸采王┃采集","type":3,"api":"./lib/drpy2.min.js","searchable":1,"quickSearch":1,"order_num":142,"ext":"./lib/采集静态.json"},
 {"key":"本地","name":"🌸本地｜视频","type":3,"api":"csp_LocalFile"},
-{"key":"push_agent","name":"🎱推送┃电视","type":3,"api":"csp_Push","searchable":0,"filterable":0,"changeable":0,"jar":"https://tv.nxog.top/m/jar.php?id=og&ou=公众号欧歌app;md5;511b71a61034fa01053d20582f62c402",ext":{"token":"http://127.0.0.1:9978/file/TVBox/tok.txt","cookie":"http://127.0.0.1:9978/file/TVBox/quark.txt","uc_cookie":"http://127.0.0.1:9978/file/TVBox/uc.txt"}},
-{"key": "应用商店","name": "🛒影视应用商店","type": 3,"jar":"https://tv.nxog.top/m/jar.php?id=dm&ou=公众号欧歌app;md5;b85ef5b7adadb054eeee553c54662610","api": "csp_Market","searchable": 0,"changeable": 0,"ext": "https://nxog.top/%E5%85%AC%E4%BC%97%E5%8F%B7%E6%AC%A7%E6%AD%8CAPP/ts/sd.php"},
+{"key":"push_agent","name":"🎱推送┃电视","type":3,"api":"csp_Push","searchable":0,"filterable":0,"changeable":0,"jar":"https://xn--xffx-rp5imh.v.nxog.top/m/jar.php?id=og&ou=公众号欧歌app;md5;511b71a61034fa01053d20582f62c402",ext":{"token":"http://127.0.0.1:9978/file/TVBox/tok.txt","cookie":"http://127.0.0.1:9978/file/TVBox/quark.txt","uc_cookie":"http://127.0.0.1:9978/file/TVBox/uc.txt"}},
+{"key": "应用商店","name": "🛒影视应用商店","type": 3,"jar":"https://xn--xffx-rp5imh.v.nxog.top/m/jar.php?id=dm&ou=公众号欧歌app;md5;b85ef5b7adadb054eeee553c54662610","api": "csp_Market","searchable": 0,"changeable": 0,"ext": "https://nxog.top/%E5%85%AC%E4%BC%97%E5%8F%B7%E6%AC%A7%E6%AD%8CAPP/ts/sd.php"},
 {"key":"豆瓣3","name":"📢接口软件永远免费","type":3,"api":"csp_Douban","searchable":0},
 {"key":"豆瓣4","name":"📢长期维护切勿贩卖","type":3,"api":"csp_Douban","searchable":0}
 
