@@ -1,1 +1,1 @@
-clan://localhost/tvbox/api/api.json
+clan://localhost/tvbox/m/m.json
