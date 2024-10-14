@@ -1,0 +1,2 @@
+http://127.0.0.1:9978/file/fatcat/kk.txt
+https://github.moeyy.xyz/https://raw.githubusercontent.com/yoursmile66/TVBox/main/sub/Bili.json

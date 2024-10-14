@@ -20,6 +20,10 @@
             "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/V哥/tvbox.稳定接口.json",
             "name": "🚞V哥"
         },
+		{
+            "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/小米/DEMO.json",
+            "name": "🚗小米"
+        },
         {
             "url": "https://gitee.com/henryguan/kele/raw/master/keleduo/运输车/ysc.json",
             "name": "🚗运输车"

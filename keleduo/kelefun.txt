@@ -1,0 +1,14 @@
+"storeHouse": [
+		{
+			"sourceName": "🌹可乐定制仓库🌹",
+			"sourceUrl": "https://xn--dkw0c.v.nxog.top/nxog/ou1.php?b=欧歌"
+		},
+		{
+			"sourceName": "🌹可乐网络仓库🌹",
+			"sourceUrl": "https://2.nxog.eu.org/nxog/ou1.php?b=欧歌"
+		},
+		{
+			"sourceName": "☘️可乐本地助手☘️",
+			"sourceUrl": "clan://localhost/tvbox/dc.txt"
+		}
+	]

@@ -21,15 +21,18 @@
             "url": "https://weixine.net/ysc.json",
             "name": "🚗运输车"
         },
-	{
+		{
             "url": "http://tv.nxog.top/m/",
             "name": "🚌讴歌"
         },
-
         {
             "url":"https://gitee.com/blssss/jk/raw/api/bls.json",
             "name":"🏍️玩偶软件"
-        }
+        },
+		{
+			"url":"http://www.mpanso.com/小米/DEMO.json",
+			"name":"小米"
+		}
 
     ]
 }
