@@ -1,4 +1,5 @@
-"storeHouse": [
+{
+	"storeHouse": [
 		{
 			"sourceName": "🌹可乐定制仓库🌹",
 			"sourceUrl": "https://gitee.com/henryguan/kele/raw/master/keleduo/keleduo.json"
@@ -12,3 +13,4 @@
 			"sourceUrl": "clan://localhost/kele/keleday.txt"
 		}
 	]
+}
