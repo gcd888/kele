@@ -1,10 +1,10 @@
-{https://origin.eqing.tech/#/chat
+{
   "spider": "./jar.php;md5;11996bd06b6692c6785adb899fc47fe3",
   "wallpaper": "http://我不是.摸鱼儿.top/wallpaper/moyu.php",
   "sites": [
     {
       "key": "drpy_js_豆瓣",
-      "name": "📘┃豆瓣",
+      "name": "📘┃公众号┃TVBox",
       "type": 3,
       "api": "csp_Douban",
       "searchable": 0
@@ -369,7 +369,7 @@
       "api": "csp_Bili",
       "searchable": 0,
       "quickSearch": 0,
-      "ext": "./lib/MTV.json"
+      "ext": "https://gitlab.com/fantaiying/ext/-/raw/main/MTV.json"
     },
     {
       "key": " 在线┃直播1",
@@ -463,7 +463,7 @@
       "type": 3,
       "api": "csp_Bili",
       "playerType": 1,
-      "ext": "./lib/bilibili.json"
+      "ext": "https://gitlab.com/fantaiying/ext/-/raw/main/bilibili.json"
     },
     {
       "key": "儿童",
@@ -505,7 +505,7 @@
         "type": "rect",
         "ratio": 1.597
       },
-      "ext": "./lib/小学课堂.json"
+      "ext": "https://gitlab.com/fantaiying/ext/-/raw/main/小学课堂.json"
     },
     {
       "key": "初中",
@@ -533,11 +533,11 @@
         "type": "rect",
         "ratio": 1.597
       },
-      "ext": "./lib/高中课堂.json"
+      "ext": "https://gitlab.com/fantaiying/ext/-/raw/main/高中课堂.json"
     },
     {
       "key": "push_agent",
-      "name": "TVBox",
+      "name": "关注公众号：TVBox",
       "type": 3,
       "api": "csp_Push",
       "playerType": "1",
@@ -557,7 +557,7 @@
       "url": "Web"
     },
     {
-      "name": "84jia",
+      "name": "公众号：TVBox",
       "type": 1,
       "url": "http://json.84jia.com/home/api?type=ys&uid=335253&key=demprsyzBMQRVY0234&url=",
       "ext": {

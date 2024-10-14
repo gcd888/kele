@@ -1,1 +1,5 @@
+https://gitlab.com/fantaiying/ext/-/raw/main/MTV.json
 http://127.0.0.1:9978/file/fatcat/kk.txt
+https://gitlab.com/fantaiying/ext/-/raw/main/bilibili.json
+https://gitlab.com/fantaiying/ext/-/raw/main/小学课堂.json
+https://gitlab.com/fantaiying/ext/-/raw/main/高中课堂.json
