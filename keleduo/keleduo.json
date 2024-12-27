@@ -39,6 +39,10 @@
         {
             "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/短剧狗/duanjugou.json",
             "name":"🎦短剧狗"
+        },
+        {
+            "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/儿童堡/儿童堡.json",
+            "name":"👦🏻儿童堡"
         }
 
     ]
