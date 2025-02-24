@@ -253,3 +253,120 @@
       "changeable": 0,
       "ext": "./lib/guazi.js"
     },
+{
+      "key": "南瓜弹幕",
+      "name": "🎃南瓜┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_NanGua",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "世纪",
+      "name": "📅世纪┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_Drama",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "playerType": 2,
+      "ext": "saHR0cDovLzExMC40Mi40OS4xODg6OTkwMnxBTEhNWkpWVk9GVk5RMkhUT0VQRlpaRlhZV0gxRDJSTnwyQzFBMDZFMTk3RUYxMENGM0Y2MDU4Q0E3QTgwM0I1RXwyMA=="
+    },
+    {
+      "key": "雪诺",
+      "name": "❄️雪诺┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_Xdai",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "playerType": 1,
+      "ext": "jaHR0cHM6Ly9hcGlhcHBkeXl6dHZ5eWRzcXdkeS42OC5neTo1Njg5fGR5eXp0dmFwaWFwcHl5ZHN8ZHl5enR2YXBpYXBweXlkc3wxMDA="
+    },
+    {
+      "key": "风听影视",
+      "name": "🌀风听┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_Shark",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "playerType": 1,
+      "ext": "saHR0cDovL21pdG8ubWlub3R2LmNuL3xhYXNzZGR3d3h4bGxzeDF4fGJic3NxZGJic3NsbDI1c3g="
+    },
+    {
+      "key": "星河",
+      "name": "⭐️星河┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_Muou",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "playerType": 2,
+      "ext": "caHR0cDovL2EubXVxaXhoLnRvcDo1NjIzfOW5leWQr+aYn+ays3w0LjEuOA=="
+    },
+    {
+      "key": "二三",
+      "name": "🍧二三┃蓝光┃纯净",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "type": 3,
+      "api": "csp_Muou",
+      "playerType": 2,
+      "ext": "caHR0cHM6Ly8xMjN5c3cuY29tfDIz5b2x6KeGfDQuMS44"
+    },
+    {
+      "key": "图图",
+      "name": "🪐图图┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_APPTT",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "playerType": 1,
+      "ext": "cTTFtUDdPa0x3SzNyanpQKnxFNW9WTzFlek40cGgxVTV3MXFORjVaa0NzMEFZanpQKnxodHRwOi8vNDMuMjQ4LjExNy4yNTM6NTU4OC98RERIR2xKNmVVSHoyNmxnZHxxT3FaOU9QNEsxTkxCZjRIaDVKQnc5VUxsSzg5R2V1VA=="
+    },
+    {
+      "key": "洽洽影视",
+      "name": "🍆洽洽┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_AppGZ",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "农民影视",
+      "name": "🌼农民┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_Nmys",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "浪酷",
+      "name": "😎浪酷┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_TianTian",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": {
+        "danmu": true,
+        "site": "aHR0cDovL3YubGt1eXMuY24="
+      }
+    },
+    {
+      "key": "蝴蝶",
+      "name": "🦋蝴蝶┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_Hudie",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "playerType": 2,
+      "ext": "eaHR0cHM6Ly9kLmRjbW92aWUudG9w"
+    },
+    {
+      "key": "韩小圈",
+      "name": "🍥韩圈┃蓝光┃纯净",
+      "type": 3,
+      "api": "csp_HanXiaoQuan",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
