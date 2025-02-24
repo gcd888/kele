@@ -80,7 +80,7 @@
         "danmu": true
       }
     },
-    {
+{
       "key": "樱花影视",
       "name": "🌸樱花如雪┃4K纯净",
       "type": 3,
@@ -91,11 +91,44 @@
       "filterable": 1
     },
     {
-      "key": "yidong",
-      "name": "🍥yidong急速┃4K纯净",
+      "key": "移动",
+      "name": "🍥移动急速┃4K纯净",
       "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
       "type": 3,
       "api": "csp_YD",
       "searchable": 1,
       "quickSearch": 1
+    },
+    {
+      "key": "夸克蜡笔弹幕",
+      "name": "🖍︎蜡笔资源┃4K弹幕",
+      "type": 3,
+      "api": "csp_Wobg",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "quickSearch": 1,
+      "changeable": 1,
+      "filterable": 1,
+      "ext": {
+        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+        "site": "http://labipan.com/",
+        "danmu": true
+      }
+    },
+    {
+      "key": "夸克至臻弹幕",
+      "name": "🏆️夸克至臻┃4K弹幕",
+      "type": 3,
+      "api": "csp_Wobg",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "quickSearch": 1,
+      "changeable": 1,
+      "filterable": 1,
+      "ext": {
+        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+        "uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
+        "site": "https://mihdr.top",
+        "danmu": true
+      }
     },
