@@ -2,7 +2,7 @@
 	"spider": "./kele.jar;md5;2c42532410c381e1c8a5326f5a85e248",
 	"wallpaper": "https://深色壁纸.xxooo.cf/",
 	"logo": "https://s1.imagehub.cc/images/2024/06/11/80538bfb3835ffebf7c5fd0716280801.jpeg",
-	"warningText": "👧🏻可乐妈妈|笑口常开",
+	"warningText": "笑口常开",
 	"sites": [
 		{
 			"key": "豆瓣",
@@ -62,118 +62,110 @@
 			}
 		},
 		{
-      "key": "闪电弹幕",
-      "name": "⚡️闪电优汐",
-      "type": 3,
-      "api": "csp_Wobg",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "changeable": 1,
-      "ext": {
-        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
-        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
-        "uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
-        "site": "http://1.95.79.193",
-        "danmu": true
-      }
-    },
-    {
-      "key": "樱花影视",
-      "name": "🌸樱花如雪",
-      "type": 3,
-      "api": "csp_Lggys",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1
-    },
-    {
-      "key": "移动",
-      "name": "🍥移动急速",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "type": 3,
-      "api": "csp_YD",
-      "searchable": 1,
-      "quickSearch": 1
-    },
-    {
-      "key": "夸克蜡笔",
-      "name": "🖍︎蜡笔资源",
-      "type": 3,
-      "api": "csp_Wobg",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "quickSearch": 1,
-      "changeable": 1,
-      "filterable": 1,
-      "ext": {
-        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
-        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
-        "site": "http://labipan.com/",
-        "danmu": true
-      }
-    },
-    {
-      "key": "夸克至臻",
-      "name": "🏆️夸克至臻",
-      "type": 3,
-      "api": "csp_Wobg",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "quickSearch": 1,
-      "changeable": 1,
-      "filterable": 1,
-      "ext": {
-        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
-        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
-        "uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
-        "site": "https://mihdr.top",
-        "danmu": true
-      }
-    },
-    {
-      "key": "夸克小米",
-      "name": "💎夸克小米",
-      "type": 3,
-      "api": "csp_Wobg",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "quickSearch": 1,
-      "changeable": 1,
-      "filterable": 1,
-      "ext": {
-        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
-        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
-        "uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
-        "site": "http://www.mucpan.cc",
-        "danmu": true
-      }
-    },
-    {
-      "key": "笔触琉璃",
-      "name": "❤️笔触琉璃",
-      "type": 3,
-      "api": "csp_Bilimd",
-      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "style": {
-        "type": "rect",
-        "ratio": 1.433
-      },
-      "ext": {
-        "cookie": "file://tvbox/bilibili.txt"
-      },
-      "timeout": 10
-    },
-	
-	
-	
-	
-	
-	
-	
-	
+			"key": "闪电弹幕",
+			"name": "⚡️闪电优汐",
+			"type": 3,
+			"api": "csp_Wobg",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"ext": {
+				"token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+				"cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+				"uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
+				"site": "http://1.95.79.193",
+				"danmu": true
+			}
+		},
+		{
+			"key": "樱花影视",
+			"name": "🌸樱花如雪",
+			"type": 3,
+			"api": "csp_Lggys",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1
+		},
+		{
+			"key": "移动",
+			"name": "🍥移动急速",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"type": 3,
+			"api": "csp_YD",
+			"searchable": 1,
+			"quickSearch": 1
+		},
+		{
+			"key": "夸克蜡笔",
+			"name": "🖍︎蜡笔资源",
+			"type": 3,
+			"api": "csp_Wobg",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"quickSearch": 1,
+			"changeable": 1,
+			"filterable": 1,
+			"ext": {
+				"token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+				"cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+				"site": "http://labipan.com/",
+				"danmu": true
+			}
+		},
+		{
+			"key": "夸克至臻",
+			"name": "🏆️夸克至臻",
+			"type": 3,
+			"api": "csp_Wobg",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"quickSearch": 1,
+			"changeable": 1,
+			"filterable": 1,
+			"ext": {
+				"token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+				"cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+				"uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
+				"site": "https://mihdr.top",
+				"danmu": true
+			}
+		},
+		{
+			"key": "夸克小米",
+			"name": "💎夸克小米",
+			"type": 3,
+			"api": "csp_Wobg",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"quickSearch": 1,
+			"changeable": 1,
+			"filterable": 1,
+			"ext": {
+				"token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+				"cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+				"uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
+				"site": "http://www.mucpan.cc",
+				"danmu": true
+			}
+		},
+		{
+			"key": "笔触琉璃",
+			"name": "❤️笔触琉璃",
+			"type": 3,
+			"api": "csp_Bilimd",
+			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"style": {
+				"type": "rect",
+				"ratio": 1.433
+			},
+			"ext": {
+				"cookie": "file://tvbox/bilibili.txt"
+			},
+			"timeout": 10
+		},
 		{
 			"key": "上头短剧",
 			"name": "🌈上头短剧",
