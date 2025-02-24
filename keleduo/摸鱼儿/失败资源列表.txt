@@ -80,3 +80,22 @@
         "danmu": true
       }
     },
+    {
+      "key": "樱花影视",
+      "name": "🌸樱花如雪┃4K纯净",
+      "type": 3,
+      "api": "csp_Lggys",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "移动",
+      "name": "🍥移动急速┃4K纯净",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "type": 3,
+      "api": "csp_YD",
+      "searchable": 1,
+      "quickSearch": 1
+    },
