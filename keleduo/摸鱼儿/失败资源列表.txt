@@ -15,7 +15,7 @@
     },
     {
       "key": "update",
-      "name": "🎬️摸鱼┃┃预告",
+      "name": "🎬️摸鱼┃dianying┃预告",
       "type": 3,
       "api": "csp_YGP",
       "searchable": 0,
@@ -80,7 +80,7 @@
         "danmu": true
       }
     },
-{
+    {
       "key": "樱花影视",
       "name": "🌸樱花如雪┃4K纯净",
       "type": 3,
@@ -132,7 +132,7 @@
         "danmu": true
       }
     },
-{
+    {
       "key": "夸克小米弹幕",
       "name": "💎小米夸克┃4K弹幕",
       "type": 3,
@@ -167,7 +167,7 @@
       },
       "timeout": 10
     },
- {
+    {
       "key": "alllive",
       "name": "📽️星河共影┃2K直播",
       "type": 3,
@@ -188,7 +188,7 @@
       "filterable": 0,
       "ext": "w7TClcK8w5rDrcKYwoPCmcKkw57ClcK0wpvCnF9SwoPCmcOtw5jDj8Orw6ZValLCmMOtw6fDqsOswrRiX8KdacOcw57CrMKxw6DCqmbCnmPDpsKow6XCsMKywpRhYMKUwqfDl8Ozw7LDtGVewpPCn8Omwq3Cr8KvwrJsX8KRwqDDosKhw6rDocOqVVxSecOnw5zDrsOQw6nCpcKUUmrCm8KVwqbCm8OuwpzCoFJqwpvDjuWHv+mFoeaQn+WQllzlhpzkvYflkbDCreW/q+iov+i2vua7g+esicKNUsKlwpXCu8Oew61+wpXCqVLCs8KVw57DssOzwq3CpMKmwpHDqcOcw5vDqcOqwqzCqcKUwqPCm8KfwpzCusOfwqZ5wqZSwrPClcOew7LDs8KtwqTCpsKRw6nDnMObw6nDqsKswqnClMKjwpvDsA=="
     },
-{
+    {
       "key": "悠悠影视",
       "name": "☁️悠悠┃蓝光┃无广",
       "type": 3,
@@ -199,7 +199,7 @@
       "filterable": 0,
       "ext": "w7TCmsK8w5rDrcKYwoPCmcKkw57CmsK0wpnCoVpcUFfDgsOhw6PDrcORwqLCosKUV8KzwpPCocOiw6jCnMKkwoZhwqrCrMKhwqXCmlrCpMKZwqDCoMKtwprCoMOV5Ya46YSY5o+V5ZCTwqXlh5/kvpHlkbDCtOW+pOintui1tOa7gOetksOQwqHCpcKaWnHClcKjw4TDmMOzwqDCtFNXdMKow7DCvMOtw63DrMKXwofCksKJw6nDlcOmw7DDqFpcUFfCusOYw63DgsOwWmpQV8K9w6vDscOCw63Cp8KiwpTCh8Obw4zDqsObw6bCqsKeV1zCmcKaw43DosOuwpjChcKiwpzCoMKtwprCoMOiwqfCpMKgasKowqLCq8KuwrBhYmJlwqfCpsKqwqfCsGhqZWXCr8KpwqnDmsOqwpxewqDCmMOpwprCpsKZwqHCl8KVwpPCosOyw6PDrsOEw5/CrFdqUMKgw6zDm8Oow7HClMKewpdgwqrCpcKwwqDDtw=="
     },
-{
+    {
       "key": "多多影视",
       "name": "🚙多多┃蓝光┃无广",
       "type": 3,
@@ -232,7 +232,7 @@
       "filterable": 0,
       "ext": "w7TCmsK8w5rDrcKYwoPCmcKkw57CmsK0wpnCocKbwqTCpMKgw6zCrcKpwqjDpsKcwpHCnsKXw6vDmMOowqbCq2ZhZ2fCqsKqwrDCscKsYcKTwp/Co8Knw5TDqsKmw6HCqMKRwp7Cl8Ozw5vDqcOuwqjCoMKpwqHCk8Olw6LDr8OdwqjClsKfwp1fw6XDnMObw6fDocKlwpXCnl7DrcOrw67CoMKmU1fCg8KZw63DmMOPw6vDplpqUFfCoMKfwprCoMOuwpzCoFdqwpnCmsOV5Ye+6YWi5o+Y5ZCTXOWGnOS+kOWRqsK05b+q6KmA6LW35ruA56yJwo3CoMKfwprCoMK7wpjCo3vClcOywprCtMKZwqF3ZsKhZ8Ohw53DnMKxwrF5emBpwr/CqsKxwqDCplNXccKVw6zCvMOwwqDCtFNXdGbDqsKqw6LDo8Oca2d2esKpwqzDgMKwwrFaXFBXw53DmMOdw6vDs8KjwqR7wpXDssKawrTCmcKhwqzCkcKfwqfDmsOhw6HCqcKrZWZXwq0="
     },
- {
+    {
       "key": "云播影视",
       "name": "📻️云播┃蓝光┃无广",
       "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
@@ -253,7 +253,7 @@
       "changeable": 0,
       "ext": "./lib/guazi.js"
     },
-{
+    {
       "key": "南瓜弹幕",
       "name": "🎃南瓜┃蓝光┃纯净",
       "type": 3,
@@ -369,4 +369,53 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
+    },
+    {
+      "key": "西瓜视频",
+      "name": "🍉西瓜┃视频┃纯净",
+      "type": 3,
+      "api": "csp_AmuXiguaV2",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 0,
+      "changeable": 0,
+      "style": {
+        "type": "rect",
+        "ratio": 1.433
+      }
+    },
+    {
+      "key": "小米尘落",
+      "name": "🩶小米┃尘洛┃蓝光",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "type": 3,
+      "api": "csp_Wetv"
+    },
+    {
+      "key": "小米虎虎",
+      "name": "🐯小米┃虎虎┃蓝光",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "type": 3,
+      "searchable": 1,
+      "quickSearch": 1,
+      "api": "csp_AppHuhu"
+    },
+    {
+      "key": "小米眼镜",
+      "name": "👓️小米┃眼镜┃蓝光",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "type": 3,
+      "searchable": 1,
+      "quickSearch": 1,
+      "api": "csp_AppYanjing"
+    },
+    {
+      "key": "小米玉米",
+      "name": "🌽小米┃玉米┃蓝光",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "type": 3,
+      "searchable": 1,
+      "quickSearch": 1,
+      "api": "csp_YuMiApp"
     },
