@@ -15,7 +15,7 @@
     },
     {
       "key": "update",
-      "name": "🎬️摸鱼┃dianying┃预告",
+      "name": "🎬️摸鱼┃电影┃预告",
       "type": 3,
       "api": "csp_YGP",
       "searchable": 0,
@@ -420,8 +420,8 @@
       "api": "csp_YuMiApp"
     },
     {
-      "key": "小米dianying",
-      "name": "🎫小米┃dianying┃蓝光",
+      "key": "小米电影",
+      "name": "🎫小米┃电影┃蓝光",
       "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
       "type": 3,
       "searchable": 1,
@@ -1519,8 +1519,8 @@
       "filterable": 1
     },
     {
-      "key": "Mp4dianying",
-      "name": "🧲Mp4dianying｜磁力",
+      "key": "Mp4电影",
+      "name": "🧲Mp4电影｜磁力",
       "type": 3,
       "api": "csp_Mp4Mov",
       "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
@@ -1529,8 +1529,8 @@
       "filterable": 1
     },
     {
-      "key": "酷吧dianying",
-      "name": "🧲酷吧dianying｜磁力",
+      "key": "酷吧电影",
+      "name": "🧲酷吧电影｜磁力",
       "type": 3,
       "api": "csp_KubaCL",
       "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
