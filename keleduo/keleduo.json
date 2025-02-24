@@ -36,6 +36,10 @@
             "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/玩偶软件/bls.json",
             "name":"🏍️玩偶软件"
         },
+		 {
+            "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/ok/ok.json",
+            "name":"🏍️ok"
+        },
         {
             "url":"https://gitee.com/henryguan/kele/raw/master/keleduo/短剧狗/duanjugou.json",
             "name":"🎦短剧狗"
