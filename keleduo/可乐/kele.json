@@ -1576,7 +1576,7 @@
 	],
 	"lives": [
 		{
-			"name": "肥猫",
+			"name": "我不是肥猫",
 			"type": 0,
 			"playerType": 1,
 			"url": "",
@@ -1598,14 +1598,7 @@
 			"playerType": 1
 		},
 		{
-			"name": "平台直播",
-			"type": 0,
-			"url": "http://tv.iill.top/m3u/Live",
-			"ua": "okhttp/3.15",
-			"playerType": 2
-		},
-		{
-			"name": "摸鱼",
+			"name": "摸鱼儿",
 			"type": 0,
 			"url": "http://我不是.摸鱼儿.com/live.php",
 			"playerType": 1,
@@ -1614,36 +1607,11 @@
 			"logo": "https://live.fanmingming.com/tv/{name}.png"
 		},
 		{
-			"name": "虎牙",
-			"type": 3,
-			"api": "csp_Feiyang",
-			"url": "./摸鱼儿/lib/huyayqk.m3u",
-			"timeout": 10,
-			"ua": "okhttp/3.15"
-		},
-		{
-			"name": "斗鱼",
-			"type": 3,
-			"api": "csp_Feiyang",
-			"url": "./摸鱼儿/lib/douyuyqk.m3u",
-			"timeout": 10,
-			"ua": "okhttp/3.15"
-		},
-		{
-			"name": "YY",
-			"type": 3,
-			"api": "csp_Feiyang",
-			"url": "./摸鱼儿/lib/yylunbo.m3u",
-			"timeout": 10,
-			"ua": "okhttp/3.15"
-		},
-		{
-			"name": "肥羊",
-			"type": 3,
-			"api": "csp_Feiyang",
-			"url": "./摸鱼儿/lib/live.m3u",
-			"timeout": 10,
-			"ua": "okhttp/3.15"
+			"name": "平台直播",
+			"type": 0,
+			"url": "http://tv.iill.top/m3u/Live",
+			"ua": "okhttp/3.15",
+			"playerType": 2
 		},
 		{
 			"name": "范明明",
