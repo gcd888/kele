@@ -13,3 +13,37 @@
       "quickSearch": 0,
       "filterable": 0
     },
+    {
+      "key": "update",
+      "name": "🎬️摸鱼┃电影┃预告",
+      "type": 3,
+      "api": "csp_YGP",
+      "searchable": 0,
+      "quickSearch": 0,
+      "changeable": 0
+    },
+    {
+      "key": "配置中心",
+      "name": "🚀配置┃中心┃设置",
+      "type": 3,
+      "api": "csp_Config",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 0,
+      "changeable": 0,
+      "indexs": 0,
+      "style": {
+        "type": "rect",
+        "ratio": 1.597
+      }
+    },
+    {
+      "key": "版本信息",
+      "name": "🐏本地┃肥羊┃直播",
+      "type": 3,
+      "api": "csp_Market",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 0,
+      "changeable": 0,
+      "indexs": 0,
+      "ext": "http://我不是.摸鱼儿.com/api/moyu.php?file=ailive"
+    },
