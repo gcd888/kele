@@ -132,3 +132,38 @@
         "danmu": true
       }
     },
+{
+      "key": "夸克小米弹幕",
+      "name": "💎小米夸克┃4K弹幕",
+      "type": 3,
+      "api": "csp_Wobg",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "quickSearch": 1,
+      "changeable": 1,
+      "filterable": 1,
+      "ext": {
+        "token": "http://127.0.0.1:9978/file/TVBox/token.txt",
+        "cookie": "http://127.0.0.1:9978/file/TVBox/quark.txt",
+        "uc_cookie": "http://127.0.0.1:9978/file/TVBox/uc.txt",
+        "site": "http://www.mucpan.cc",
+        "danmu": true
+      }
+    },
+    {
+      "key": "笔触琉璃",
+      "name": "❤️笔触琉璃┃4K弹幕",
+      "type": 3,
+      "api": "csp_Bilimd",
+      "jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "style": {
+        "type": "rect",
+        "ratio": 1.433
+      },
+      "ext": {
+        "cookie": "file://tvbox/bilibili.txt"
+      },
+      "timeout": 10
+    },
