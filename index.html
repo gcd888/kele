@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电影电视剧资源聚合搜索</title>
+    <link rel="stylesheet" href="source/index.css">
+</head>
+<body>
+    <!-- 模式切换按钮 -->
+    <div class="mode-toggle">
+        <button class="toggle-btn" id="modeToggle"><span id="modeText">切换到深色模式</span></button>
+    </div>
+
+    <div class="container">
+        <!-- 网站标题 -->
+        <header class="website-header">
+            <h1 class="website-title"><img src="pic/可乐.svg" alt="可乐" class="logo-icon">可乐影视资源聚合搜索</h1>
+        </header>
+        
+        <!-- 公告信息 -->
+        <div class="announcement-container">
+            <div class="announcement-content">
+                <span>温馨提示： 所有来源均为搜集，仅供交流学习 本站不存储任何数据，数据来自于网络！如有侵权，请联系gcd888@163.com删除</span>
+            </div>
+        </div>
+
+        <!-- 当前时间 -->
+        <div class="time-container">
+            <div class="time-display" id="timeDisplay"></div>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div class="search-container">
+            <div class="filter-options">
+                <span>网盘：</span>
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="baidu">百度网盘</button>
+                <button class="filter-btn" data-filter="kuake">夸克网盘</button>
+                <button class="filter-btn" data-filter="uc">UC网盘</button>
+                <button class="filter-btn" data-filter="ali">阿里网盘</button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="请输入电影或电视剧名称">
+                <button id="searchBtn">搜索</button>
+            </div>
+        </div>
+
+        <!-- 热搜剧集 -->
+        <div class="hot-search-container">
+            <h2>热搜剧集</h2>
+            <div class="hot-search-list" id="hotTvList">
+                <!-- 热搜剧集内容将通过JS动态添加 -->
+            </div>
+        </div>
+
+        <!-- 热搜电影 -->
+        <div class="hot-search-container">
+            <h2>热搜电影</h2>
+            <div class="hot-search-list" id="hotMovieList">
+                <!-- 热搜电影内容将通过JS动态添加 -->
+            </div>
+        </div>
+
+        <!-- 搜索结果 -->
+        <div class="search-results-container" id="searchResultsContainer" style="display: none;">
+            <h2>搜索结果</h2>
+            <div class="search-results-content" id="searchResultsContent">
+                <!-- 搜索结果将通过JS动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="source/index.js"></script>
+</body>
+</html>
