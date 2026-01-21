@@ -99,7 +99,7 @@ body {
     position: absolute;
     width: 32px;
     height: 32px;
-    background-image: url('../pic/太阳.svg');
+    background-image: url('pic/太阳.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -111,7 +111,7 @@ body {
     position: absolute;
     width: 32px;
     height: 32px;
-    background-image: url('../pic/月亮.svg');
+    background-image: url('pic/月亮.svg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
