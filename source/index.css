@@ -152,10 +152,9 @@ body.dark-mode .toggle-btn::after {
     font-weight: 800;
     color: var(--text-primary);
     position: relative;
-    display: inline-block;
     letter-spacing: 2px;
     transition: all 0.3s ease;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 12px;
 }

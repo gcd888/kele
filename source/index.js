@@ -38,7 +38,8 @@ function initModeToggle() {
     const body = document.body;
     
     // 检查本地存储中的模式偏好
-    const savedMode = localStorage.getItem('mode');
+    //const savedMode = localStorage.getItem('mode');
+    const savedMode = false;
     
     // 如果没有保存的偏好，则根据当前时间设置默认模式
     if (!savedMode) {
@@ -859,7 +860,7 @@ function displaySearchResults(data) {
                 } else {
                     // 没有图片资源，显示可乐.svg
                     const img = document.createElement('img');
-                    img.src = 'source/pic/可乐.svg';
+                    img.src = 'source/pic/喝完的可乐.svg';
                     img.alt = '可乐';
                     img.className = 'result-image';
                     imagesDiv.appendChild(img);
@@ -1045,7 +1046,7 @@ function displayCombinedSearchResults(results) {
                 } else {
                     // 没有图片资源，显示可乐.svg
                     const img = document.createElement('img');
-                    img.src = 'source/pic/可乐.svg';
+                    img.src = 'source/pic/喝完的可乐.svg';
                     img.alt = '可乐';
                     img.className = 'result-image';
                     imagesDiv.appendChild(img);
@@ -1161,37 +1162,48 @@ function getFilterName(filter) {
 }
 
 // 初始化热搜资源
+/**
+ * 从API获取热播内容
+ * @param {string} type - 类型：tv|电视剧热榜；movie|电影热榜
+ * @returns {Promise<Array>} 热播内容列表
+ */
+async function fetchHotContent(type) {
+    try {
+        const apiUrl = `https://xzdx.top/api/tophub/?type=${type}`;
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            throw new Error('网络请求失败');
+        }
+        
+        const data = await response.json();
+        if (data.code !== 0) {
+            throw new Error(data.msg || '获取数据失败');
+        }
+        
+        // 筛选出area是大陆的内容，并限制数量为12个
+        const filteredData = data.data
+            .filter(item => item.area === '大陆')
+            .slice(0, 12);
+        
+        return filteredData;
+    } catch (error) {
+        console.error(`获取${type === 'tv' ? '电视剧' : '电影'}热榜错误:`, error);
+        return [];
+    }
+}
+
 function initHotSearch() {
-    // 模拟热搜剧集数据
-    const hotTvData = [
-        { rank: 1, title: '繁花', score: '8.8' },
-        { rank: 2, title: '狂飙', score: '9.0' },
-        { rank: 3, title: '三体', score: '8.2' },
-        { rank: 4, title: '长相思', score: '7.6' },
-        { rank: 5, title: '莲花楼', score: '8.1' },
-        { rank: 6, title: '三体2', score: '8.5' },
-        { rank: 7, title: '隐秘的角落', score: '9.2' },
-        { rank: 8, title: '沉默的真相', score: '9.1' },
-        { rank: 9, title: '开端', score: '7.9' },
-        { rank: 10, title: '梦华录', score: '8.0' }
-    ];
-    
-    // 模拟热搜电影数据
-    const hotMovieData = [
-        { rank: 1, title: '流浪地球3', score: '9.2' },
-        { rank: 2, title: '满江红', score: '8.5' },
-        { rank: 3, title: '消失的她', score: '7.8' },
-        { rank: 4, title: '孤注一掷', score: '8.0' },
-        { rank: 5, title: '八角笼中', score: '8.3' },
-        { rank: 6, title: '长安三万里', score: '8.7' },
-        { rank: 7, title: '独行月球', score: '7.7' },
-        { rank: 8, title: '满江红2', score: '8.2' },
-        { rank: 9, title: '流浪地球2', score: '8.3' },
-        { rank: 10, title: '唐人街探案3', score: '6.5' }
-    ];
-    
-    displayHotTv(hotTvData);
-    displayHotMovie(hotMovieData);
+    // 并行获取电视剧和电影热榜
+    Promise.all([
+        fetchHotContent('tv'),
+        fetchHotContent('movie')
+    ]).then(([tvData, movieData]) => {
+        displayHotTv(tvData);
+        displayHotMovie(movieData);
+    }).catch(error => {
+        console.error('获取热榜错误:', error);
+    });
 }
 
 // 显示热搜剧集
@@ -1203,11 +1215,33 @@ function displayHotTv(data) {
         const hotSearchItem = document.createElement('div');
         hotSearchItem.className = 'hot-search-item';
         
-        hotSearchItem.innerHTML = `
-            <div class="rank">${item.rank}</div>
+        // 设置图片容器
+        const imageContainer = document.createElement('div');
+        imageContainer.style.width = '100%';
+        imageContainer.style.height = '150px';
+        imageContainer.style.borderRadius = '8px';
+        imageContainer.style.overflow = 'hidden';
+        
+        // 设置背景图片
+        if (item.cover) {
+            imageContainer.style.backgroundImage = `url(${item.cover})`;
+            imageContainer.style.backgroundSize = 'cover';
+            imageContainer.style.backgroundPosition = 'center';
+        }
+        
+        // 设置文字容器
+        const textContainer = document.createElement('div');
+        textContainer.style.marginTop = '10px';
+        textContainer.style.color = 'var(--text-primary)';
+        
+        textContainer.innerHTML = `
             <div class="title">${item.title}</div>
-            <div class="info">剧集 | ${item.score}分</div>
+            <div class="info">剧集 | ${item.avg || 0}分</div>
         `;
+        
+        // 组装元素
+        hotSearchItem.appendChild(imageContainer);
+        hotSearchItem.appendChild(textContainer);
         
         // 添加点击事件，点击后将标题填入搜索框并搜索
         hotSearchItem.addEventListener('click', function() {
@@ -1228,11 +1262,33 @@ function displayHotMovie(data) {
         const hotSearchItem = document.createElement('div');
         hotSearchItem.className = 'hot-search-item';
         
-        hotSearchItem.innerHTML = `
-            <div class="rank">${item.rank}</div>
+        // 设置图片容器
+        const imageContainer = document.createElement('div');
+        imageContainer.style.width = '100%';
+        imageContainer.style.height = '150px';
+        imageContainer.style.borderRadius = '8px';
+        imageContainer.style.overflow = 'hidden';
+        
+        // 设置背景图片
+        if (item.cover) {
+            imageContainer.style.backgroundImage = `url(${item.cover})`;
+            imageContainer.style.backgroundSize = 'cover';
+            imageContainer.style.backgroundPosition = 'center';
+        }
+        
+        // 设置文字容器
+        const textContainer = document.createElement('div');
+        textContainer.style.marginTop = '10px';
+        textContainer.style.color = 'var(--text-primary)';
+        
+        textContainer.innerHTML = `
             <div class="title">${item.title}</div>
-            <div class="info">电影 | ${item.score}分</div>
+            <div class="info">电影 | ${item.avg || 0}分</div>
         `;
+        
+        // 组装元素
+        hotSearchItem.appendChild(imageContainer);
+        hotSearchItem.appendChild(textContainer);
         
         // 添加点击事件，点击后将标题填入搜索框并搜索
         hotSearchItem.addEventListener('click', function() {
