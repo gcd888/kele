@@ -33,12 +33,14 @@
         <!-- 搜索栏 -->
         <div class="search-container">
             <div class="filter-options">
-                <span>网盘：</span>
+                <span>网盘类型：</span>
                 <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="quark">夸克网盘</button>
+                <button class="filter-btn" data-filter="aliyun">阿里网盘</button>
                 <button class="filter-btn" data-filter="baidu">百度网盘</button>
-                <button class="filter-btn" data-filter="kuake">夸克网盘</button>
                 <button class="filter-btn" data-filter="uc">UC网盘</button>
-                <button class="filter-btn" data-filter="ali">阿里网盘</button>
+                <button class="filter-btn" data-filter="xunlei">迅雷网盘</button>
+                <button class="filter-btn" data-filter="tianyi">天翼网盘</button>
             </div>
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="请输入电影或电视剧名称">
@@ -54,19 +56,19 @@
             </div>
         </div>
 
-        <!-- 热搜剧集 -->
+        <!-- 热播剧集 -->
         <div class="hot-search-container">
-            <h2>热搜剧集</h2>
+            <h2>热播剧集</h2>
             <div class="hot-search-list" id="hotTvList">
-                <!-- 热搜剧集内容将通过JS动态添加 -->
+                <!-- 热播剧集内容将通过JS动态添加 -->
             </div>
         </div>
 
-        <!-- 热搜电影 -->
+        <!-- 热播电影 -->
         <div class="hot-search-container">
-            <h2>热搜电影</h2>
+            <h2>热播电影</h2>
             <div class="hot-search-list" id="hotMovieList">
-                <!-- 热搜电影内容将通过JS动态添加 -->
+                <!-- 热播电影内容将通过JS动态添加 -->
             </div>
         </div>
     </div>

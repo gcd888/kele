@@ -491,12 +491,14 @@ body.dark-mode::before {
 
 .result-item {
     display: flex;
-    flex-direction: column;
     padding: 15px;
     background-color: var(--bg-primary);
     border-radius: 8px;
     transition: all 0.3s ease;
     border: 1px solid var(--border-color);
+    gap: 15px;
+    align-items: center;
+    height: 120px;
 }
 
 .result-item:hover {
@@ -504,11 +506,97 @@ body.dark-mode::before {
     box-shadow: 0 4px 12px var(--shadow-color);
 }
 
+.result-images {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.result-image {
+    max-width: 100px;
+    width: 100px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.result-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.result-content {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.result-content-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-content-middle {
+    flex: 0 0 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-content-right {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    text-align: right;
+}
+
+.source-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.password-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--accent-color);
+    color: white;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.time-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    width: fit-content;
+}
+
 .result-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 10px;
 }
 
 .result-url {
@@ -536,7 +624,6 @@ body.dark-mode::before {
 .result-note {
     font-size: 14px;
     color: var(--text-primary);
-    margin-bottom: 10px;
 }
 
 .result-meta {
