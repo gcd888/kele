@@ -232,6 +232,32 @@ body.dark-mode::before {
     }
 }
 
+/* 超小屏幕优化 */
+@media (max-width: 360px) {
+    .hot-search-list {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+    
+    .hot-search-item {
+        padding: 12px;
+    }
+    
+    .hot-search-image {
+        width: 80px;
+        height: 107px;
+        margin: 0 auto 8px;
+    }
+    
+    .hot-search-item .title {
+        font-size: 13px;
+    }
+    
+    .hot-search-item .info {
+        font-size: 11px;
+    }
+}
+
 /* 当前时间样式 */
 .time-container {
     background-color: var(--bg-secondary);
@@ -463,6 +489,15 @@ body.dark-mode::before {
     margin: 0 auto 12px;
     position: relative;
     overflow: hidden;
+    background-color: var(--bg-tertiary);
+    /* 添加移动端优化 */
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    /* 添加图片加载失败时的备用样式 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hot-search-text {
@@ -829,5 +864,12 @@ body.dark-mode::before {
 
     .hot-search-item .info {
         font-size: 12px;
+    }
+
+    /* 移动端图片优化 */
+    .hot-search-image {
+        width: 100px;
+        height: 133px;
+        margin: 0 auto 10px;
     }
 }

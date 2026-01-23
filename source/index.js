@@ -1186,6 +1186,22 @@ async function fetchHotContent(type) {
             .filter(item => item.area === '大陆')
             .slice(0, 12);
         
+        // 处理图片URL，确保移动端兼容性
+        filteredData.forEach(item => {
+            if (item.cover) {
+                // 确保使用HTTPS协议
+                if (item.cover.startsWith('http://')) {
+                    item.cover = item.cover.replace('http://', 'https://');
+                }
+                
+                // 添加图片代理服务，解决跨域问题
+                if (item.cover.includes('douban') || item.cover.includes('img')) {
+                    // 使用图片代理服务
+                    item.cover = `https://images.weserv.nl/?url=${encodeURIComponent(item.cover)}`;
+                }
+            }
+        });
+        
         return filteredData;
     } catch (error) {
         console.error(`获取${type === 'tv' ? '电视剧' : '电影'}热榜错误:`, error);
@@ -1219,9 +1235,31 @@ function displayHotTv(data) {
         const imageContainer = document.createElement('div');
         imageContainer.className = 'hot-search-image';
         
-        // 设置背景图片
+        // 设置背景图片 - 添加移动端优化
         if (item.cover) {
-            imageContainer.style.backgroundImage = `url(${item.cover})`;
+            // 确保图片URL使用HTTPS协议
+            let imageUrl = item.cover;
+            if (imageUrl.startsWith('http://')) {
+                imageUrl = imageUrl.replace('http://', 'https://');
+            }
+            
+            // 添加图片加载错误处理
+            imageContainer.style.backgroundImage = `url(${imageUrl})`;
+            
+            // 创建备用图片元素用于错误处理
+            const img = new Image();
+            img.onload = function() {
+                // 图片加载成功
+                imageContainer.style.backgroundImage = `url(${imageUrl})`;
+            };
+            img.onerror = function() {
+                // 图片加载失败，使用备用图片
+                imageContainer.style.backgroundImage = 'url(source/pic/可乐.svg)';
+            };
+            img.src = imageUrl;
+        } else {
+            // 没有封面图片时使用默认图片
+            imageContainer.style.backgroundImage = 'url(source/pic/可乐.svg)';
         }
         
         // 设置文字容器
@@ -1260,9 +1298,31 @@ function displayHotMovie(data) {
         const imageContainer = document.createElement('div');
         imageContainer.className = 'hot-search-image';
         
-        // 设置背景图片
+        // 设置背景图片 - 添加移动端优化
         if (item.cover) {
-            imageContainer.style.backgroundImage = `url(${item.cover})`;
+            // 确保图片URL使用HTTPS协议
+            let imageUrl = item.cover;
+            if (imageUrl.startsWith('http://')) {
+                imageUrl = imageUrl.replace('http://', 'https://');
+            }
+            
+            // 添加图片加载错误处理
+            imageContainer.style.backgroundImage = `url(${imageUrl})`;
+            
+            // 创建备用图片元素用于错误处理
+            const img = new Image();
+            img.onload = function() {
+                // 图片加载成功
+                imageContainer.style.backgroundImage = `url(${imageUrl})`;
+            };
+            img.onerror = function() {
+                // 图片加载失败，使用备用图片
+                imageContainer.style.backgroundImage = 'url(source/pic/可乐.svg)';
+            };
+            img.src = imageUrl;
+        } else {
+            // 没有封面图片时使用默认图片
+            imageContainer.style.backgroundImage = 'url(source/pic/可乐.svg)';
         }
         
         // 设置文字容器
