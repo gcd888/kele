@@ -1217,6 +1217,7 @@ function displayHotTv(data) {
         
         // 设置图片容器
         const imageContainer = document.createElement('div');
+        imageContainer.className = 'hot-search-image';
         
         // 设置背景图片
         if (item.cover) {
@@ -1225,6 +1226,7 @@ function displayHotTv(data) {
         
         // 设置文字容器
         const textContainer = document.createElement('div');
+        textContainer.className = 'hot-search-text';
         
         textContainer.innerHTML = `
             <div class="title">${item.title}</div>
@@ -1256,6 +1258,7 @@ function displayHotMovie(data) {
         
         // 设置图片容器
         const imageContainer = document.createElement('div');
+        imageContainer.className = 'hot-search-image';
         
         // 设置背景图片
         if (item.cover) {
@@ -1264,6 +1267,7 @@ function displayHotMovie(data) {
         
         // 设置文字容器
         const textContainer = document.createElement('div');
+        textContainer.className = 'hot-search-text';
         
         textContainer.innerHTML = `
             <div class="title">${item.title}</div>

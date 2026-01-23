@@ -453,6 +453,23 @@ body.dark-mode::before {
     transition: all 0.3s ease;
 }
 
+.hot-search-image {
+    width: 120px;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    margin: 0 auto 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hot-search-text {
+    text-align: center;
+    padding: 0 10px;
+}
+
 /* 搜索结果 */
 .search-results-container {
     margin-top: 30px;
