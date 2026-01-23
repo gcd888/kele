@@ -1217,22 +1217,14 @@ function displayHotTv(data) {
         
         // 设置图片容器
         const imageContainer = document.createElement('div');
-        imageContainer.style.width = '100%';
-        imageContainer.style.height = '150px';
-        imageContainer.style.borderRadius = '8px';
-        imageContainer.style.overflow = 'hidden';
         
         // 设置背景图片
         if (item.cover) {
             imageContainer.style.backgroundImage = `url(${item.cover})`;
-            imageContainer.style.backgroundSize = 'cover';
-            imageContainer.style.backgroundPosition = 'center';
         }
         
         // 设置文字容器
         const textContainer = document.createElement('div');
-        textContainer.style.marginTop = '10px';
-        textContainer.style.color = 'var(--text-primary)';
         
         textContainer.innerHTML = `
             <div class="title">${item.title}</div>
@@ -1264,22 +1256,14 @@ function displayHotMovie(data) {
         
         // 设置图片容器
         const imageContainer = document.createElement('div');
-        imageContainer.style.width = '100%';
-        imageContainer.style.height = '150px';
-        imageContainer.style.borderRadius = '8px';
-        imageContainer.style.overflow = 'hidden';
         
         // 设置背景图片
         if (item.cover) {
             imageContainer.style.backgroundImage = `url(${item.cover})`;
-            imageContainer.style.backgroundSize = 'cover';
-            imageContainer.style.backgroundPosition = 'center';
         }
         
         // 设置文字容器
         const textContainer = document.createElement('div');
-        textContainer.style.marginTop = '10px';
-        textContainer.style.color = 'var(--text-primary)';
         
         textContainer.innerHTML = `
             <div class="title">${item.title}</div>
