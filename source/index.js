@@ -13,7 +13,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // 初始化搜索功能
     initSearchFunction();
 
-    // 初始化热搜资源
+    // 初始化热播资源
     initHotSearch();
 });
 
@@ -1161,7 +1161,7 @@ function getFilterName(filter) {
     return filterMap[filter] || '全部网盘';
 }
 
-// 初始化热搜资源
+// 初始化热播资源
 /**
  * 从API获取热播内容
  * @param {string} type - 类型：tv|电视剧热榜；movie|电影热榜
@@ -1206,7 +1206,7 @@ function initHotSearch() {
     });
 }
 
-// 显示热搜剧集
+// 显示热播剧集
 function displayHotTv(data) {
     const hotTvList = document.getElementById('hotTvList');
     hotTvList.innerHTML = '';
@@ -1245,7 +1245,7 @@ function displayHotTv(data) {
     });
 }
 
-// 显示热搜电影
+// 显示热播电影
 function displayHotMovie(data) {
     const hotMovieList = document.getElementById('hotMovieList');
     hotMovieList.innerHTML = '';
