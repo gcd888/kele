@@ -1,0 +1,473 @@
+/* 手机端专用样式 */
+
+/* 全局样式调整 */
+body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+    color: var(--text-primary);
+    overflow-x: hidden;
+    transition: all 0.3s ease;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+    position: relative;
+    z-index: 1;
+    background-color: var(--bg-primary);
+}
+
+/* 网站标题调整 */
+.website-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px 0;
+}
+
+.website-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    position: relative;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+/* 时间显示调整 */
+.time-container {
+    background-color: var(--bg-secondary);
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.time-display {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+/* 公告信息调整 */
+.announcement-container {
+    background-color: var(--bg-secondary);
+    border: none;
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    overflow: hidden;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.announcement-content {
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.3s ease;
+}
+
+/* 搜索容器调整 */
+.search-container {
+    background-color: var(--bg-secondary);
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+/* 筛选选项调整 */
+.filter-options {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-options span {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.filter-btn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 24px;
+    background-color: var(--bg-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.filter-btn.active {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* 搜索框调整 */
+.search-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 28px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.search-box button {
+    padding: 14px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* 热播内容调整 */
+.hot-search-container {
+    background-color: var(--bg-secondary);
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.hot-search-container h2 {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    text-align: center;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+/* 热播影视2个一行 */
+.hot-search-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.hot-search-item {
+    background-color: var(--bg-primary);
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 热播内容图片调整 */
+.hot-search-item div:first-child {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* 热播内容文字调整 */
+.hot-search-item .title {
+    font-weight: 600;
+    margin: 10px 0 6px;
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.hot-search-item .info {
+    font-size: 12px;
+    color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+/* 搜索结果调整 */
+.search-results-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.search-results-container h2 {
+    font-size: 18px;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+/* 搜索结果内容调整 */
+.search-results-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 搜索结果分类调整 */
+.result-category {
+    margin-bottom: 15px;
+}
+
+.result-category h3 {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    padding-left: 10px;
+    border-left: 4px solid var(--accent-color);
+}
+
+/* 搜索结果项调整 - 手机端最优布局 */
+.result-item {
+    display: flex;
+    flex-direction: row;
+    padding: 12px;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    gap: 12px;
+    align-items: flex-start;
+}
+
+/* 图片容器调整 */
+.result-images {
+    flex: 0 0 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.result-image {
+    width: 100px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.result-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* 内容容器调整 */
+.result-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* 结果头部调整 */
+.result-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* URL链接调整 */
+.result-url {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 13px;
+    word-break: break-all;
+    transition: all 0.3s ease;
+}
+
+.result-url:hover {
+    text-decoration: underline;
+}
+
+/* 密码调整 */
+.result-password {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    align-self: flex-start;
+    margin-top: 4px;
+}
+
+/* 备注调整 */
+.result-note {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+/* 结果底部调整 - 一行显示来源、提取码和时间 */
+.result-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    gap: 8px;
+}
+
+/* 来源调整 */
+.result-source {
+    flex-shrink: 0;
+}
+
+/* 提取码调整 */
+.result-password-tag {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+/* 时间调整 */
+.result-time {
+    flex-shrink: 0;
+}
+
+/* 加载指示器调整 */
+.loading-indicator {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* 错误信息调整 */
+.error-message {
+    text-align: center;
+    padding: 40px 0;
+    color: #ef4444;
+    font-size: 14px;
+}
+
+/* 模式切换按钮调整 */
+.mode-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+.toggle-btn {
+    padding: 8px;
+    background-color: transparent;
+    color: var(--text-primary);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 响应式调整 - 确保在小屏幕上的最佳显示 */
+@media (max-width: 480px) {
+    /* 进一步减小字体大小和间距 */
+    .website-title {
+        font-size: 1.5rem;
+    }
+    
+    .time-display {
+        font-size: 1.5rem;
+    }
+    
+    .hot-search-item div:first-child {
+        height: 120px;
+    }
+    
+    .hot-search-item .title {
+        font-size: 12px;
+    }
+    
+    .result-url {
+        font-size: 13px;
+    }
+    
+    .result-note {
+        font-size: 13px;
+    }
+    
+    /* 进一步调整搜索结果布局 */
+    .result-item {
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .result-images {
+        flex: 0 0 80px;
+    }
+    
+    .result-image {
+        width: 80px;
+        height: 59px;
+    }
+    
+    .result-footer {
+        font-size: 11px;
+        gap: 6px;
+    }
+}
