@@ -3,8 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电影电视剧资源聚合搜索</title>
-    <link rel="stylesheet" href="src/index.css">
+    <title>可乐影视资源聚合搜索</title>
+    <!-- 电脑端样式 -->
+    <link rel="stylesheet" href="src/pc.css" media="screen and (min-width: 768px)">
+    <!-- 手机端样式 -->
+    <link rel="stylesheet" href="src/phone.css" media="screen and (max-width: 767px)">
+    <!-- 动态引入设备特定脚本 -->
+    <script>
+        // 检测设备类型
+        function isMobile() {
+            return window.innerWidth <= 767;
+        }
+        
+        // 动态创建script标签
+        function loadScript(src) {
+            const script = document.createElement('script');
+            script.src = src;
+            document.head.appendChild(script);
+        }
+        
+        // 根据设备类型加载相应脚本
+        if (isMobile()) {
+            loadScript('src/phone.js');
+        } else {
+            loadScript('src/pc.js');
+        }
+    </script>
+    <!-- 主脚本 -->
+    <script type="module" src="src/index.js"></script>
 </head>
 <body>
     <!-- 模式切换按钮 -->
@@ -15,13 +41,13 @@
     <div class="container">
         <!-- 网站标题 -->
         <header class="website-header">
-            <h1 class="website-title"><img src="src/pic/可乐.svg" alt="可乐" class="logo-icon">可乐影视资源聚合搜索</h1>
+            <h1 class="website-title"><img src="src/img/logo.svg" alt="可乐" class="logo-icon">可乐影视资源聚合搜索</h1>
         </header>
         
         <!-- 公告信息 -->
         <div class="announcement-container">
             <div class="announcement-content">
-                <span>温馨提示： 所有来源均为搜集，仅供交流学习。本站不存储任何数据，数据来自于网络！如有侵权，请电邮至gcd888@139.com删除</span>
+                 <!-- 公告信息将通过Mock中JSON数据动态添加 -->
             </div>
         </div>
 
@@ -34,13 +60,7 @@
         <div class="search-container">
             <div class="filter-options">
                 <span>网盘类型：</span>
-                <button class="filter-btn active" data-filter="all">全部</button>
-                <button class="filter-btn" data-filter="quark">夸克网盘</button>
-                <button class="filter-btn" data-filter="aliyun">阿里网盘</button>
-                <button class="filter-btn" data-filter="baidu">百度网盘</button>
-                <button class="filter-btn" data-filter="uc">UC网盘</button>
-                <button class="filter-btn" data-filter="xunlei">迅雷网盘</button>
-                <button class="filter-btn" data-filter="tianyi">天翼网盘</button>
+		        <!-- 网盘类型将通过Mock中JSON数据动态添加 -->
             </div>
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="请输入电影或电视剧名称">
@@ -73,6 +93,6 @@
         </div>
     </div>
 
-    <script src="src/index.js"></script>
+    
 </body>
 </html>

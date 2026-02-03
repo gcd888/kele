@@ -1,0 +1,86 @@
+{
+    "cloudSearch": [
+        {
+            "name": "iyuns",
+            "url": "https://api.iyuns.com/api/wpysso",
+            "method": "searchApi1",
+            "status": "1"
+        },
+        {
+            "name": "eeeob-search",
+            "url": "http://z.eeeob.com/v/api/search",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "eeeob-getJuzi",
+            "url": "http://z.eeeob.com/v/api/getJuzi",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "eeeob-getXiaoyu",
+            "url": "http://z.eeeob.com/v/api/getXiaoyu",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "eeeob-getDyfx",
+            "url": "http://z.eeeob.com/v/api/getDyfx",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "dbpan-search",
+            "url": "http://m.dbpan.com/v/api/search",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "dbpan-getJuzi",
+            "url": "http://m.dbpan.com/v/api/getJuzi",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "dbpan-getXiaoyu",
+            "url": "http://m.dbpan.com/v/api/getXiaoyu",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "dbpan-getDyfx",
+            "url": "http://m.dbpan.com/v/api/getDyfx",
+            "method": "searchApi2",
+            "status": "1"
+        },
+        {
+            "name": "duoduopuzi-movies",
+            "url": " https://m.duoduopuzi.cn/mv/api/movies/search",
+            "method": "searchApi3",
+            "status": "1"
+        },
+        {
+            "name": "duoduopuzi-crawler",
+            "url": "https://m.duoduopuzi.cn/mv/api/crawler/search",
+            "method": "searchApi4",
+            "status": "1"
+        }
+    ],
+    "hotSearch": [
+        {
+            "name": "热播剧集",
+            "type": "tv",
+            "url": "https://xzdx.top/api/tophub/",
+			"method": "searchApi99",
+            "status": "1"
+        },
+        {
+            "name": "热播电影",
+            "type": "movie",
+            "url": "https://xzdx.top/api/tophub/",
+			"method": "searchApi99",
+            "status": "1"
+        }
+    ]
+}

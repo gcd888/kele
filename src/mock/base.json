@@ -1,0 +1,63 @@
+{
+    "notices": [
+        {
+            "notice": "温馨提示： 所有来源均为搜集，仅供交流学习。本站不存储任何数据，数据来自于网络！如有侵权，请电邮至gcd888@139.com删除",
+            "status": "1"
+        },
+        {
+            "notice": "可乐影视资源聚合搜索是一款多网盘聚合搜索网站，提供多种网盘资源",
+            "status": "1"
+        }
+    ],
+    "cloudTypes": [
+        {
+            "name": "全部",
+            "cloudType": "all",
+			"url":"",
+            "sort": "0",
+            "status": "1"
+        },
+        {
+            "name": "夸克网盘",
+            "cloudType": "quark",
+			"url":"https://pan.quark.cn",
+            "sort": "1",
+            "status": "1"
+        },
+        {
+            "name": "阿里网盘",
+            "cloudType": "aliyun",
+			"url":"https://www.alipan.com",
+            "sort": "2",
+            "status": "1"
+        },
+        {
+            "name": "百度网盘",
+            "cloudType": "baidu",
+			"url":"https://pan.baidu.com",
+            "sort": "3",
+            "status": "1"
+        },
+        {
+            "name": "UC网盘",
+            "cloudType": "uc",
+			"url":"https://drive.uc.cn",
+            "sort": "4",
+            "status": "1"
+        },
+        {
+            "name": "迅雷网盘",
+            "cloudType": "xunlei",
+			"url":"https://pan.xunlei.com",
+            "sort": "5",
+            "status": "1"
+        },
+        {
+            "name": "天翼网盘",
+            "cloudType": "tianyi",
+			"url":"https://cloud.189.cn",
+            "sort": "6",
+            "status": "1"
+        }
+    ]
+}
