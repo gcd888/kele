@@ -60,18 +60,36 @@ function initAnnouncement() {
             
             // 显示当前公告
             function showCurrentNotice() {
+                // 重置公告元素状态
+                announcementContent.textContent = '';
+                announcementContent.style.animationDuration = '';
+                announcementContent.classList.remove('scrolling');
+                
+                // 强制回流，确保动画重置
+                void announcementContent.offsetWidth;
+                
+                // 设置当前公告内容
                 const currentNotice = activeNotices[currentIndex].notice;
                 announcementContent.textContent = currentNotice;
-                currentIndex = (currentIndex + 1) % activeNotices.length;
                 
-                // 根据内容长度动态计算展示时间
-                // 基础时间2秒，加上每个字符0.1秒的阅读时间
-                const displayTime = 2000 + (currentNotice.length * 100);
-                // 确保最短展示时间为3秒，最长不超过10秒
-                const finalTime = Math.max(3000, Math.min(10000, displayTime));
+                // 计算下一个索引（先计算，确保顺序正确）
+                const nextIndex = (currentIndex + 1) % activeNotices.length;
+                currentIndex = nextIndex;
                 
-                // 动态时间后显示下一条公告
-                setTimeout(showCurrentNotice, finalTime);
+                // 根据内容长度动态计算动画持续时间
+                // 基础动画时间8秒，加上每个字符0.3秒的滚动时间
+                // 确保最短动画时间为10秒，最长不超过30秒
+                const baseAnimationTime = 8000;
+                const perCharacterTime = 300;
+                const animationDurationMs = Math.max(10000, Math.min(30000, baseAnimationTime + (currentNotice.length * perCharacterTime)));
+                const animationDuration = animationDurationMs / 1000;
+                
+                // 设置动画持续时间并启动动画
+                announcementContent.style.animationDuration = `${animationDuration}s`;
+                announcementContent.classList.add('scrolling');
+                
+                // 动画完成后显示下一条公告
+                setTimeout(showCurrentNotice, animationDurationMs + 500); // 加500ms缓冲，确保动画完全结束
             }
             
             // 开始轮询展示公告

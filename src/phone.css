@@ -5,7 +5,7 @@
     --bg-tertiary: #e9ecef;
     --text-primary: #333333;
     --text-secondary: #666666;
-    --accent-color: #10b981;
+    --accent-color: #000000;
     --border-color: #e5e7eb;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --container-width: 100%;
@@ -16,13 +16,13 @@
 
 /* 深色模式变量 */
 body.dark-mode {
-    --bg-primary: #0f1419;
-    --bg-secondary: #161b22;
-    --bg-tertiary: #21262d;
+    --bg-primary: #000000;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #333333;
     --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --accent-color: #10b981;
-    --border-color: #30363d;
+    --text-secondary: #999999;
+    --accent-color: #ffffff;
+    --border-color: #444444;
     --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
@@ -61,17 +61,17 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+    background: radial-gradient(circle at 20% 50%, rgba(0, 0, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 0, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 0, 0, 0.05) 0%, transparent 50%);
     z-index: -1;
     transition: all 0.3s ease;
 }
 
 body.dark-mode::before {
-    background: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+    background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
 }
 
 /* 模式切换按钮 */
@@ -221,12 +221,15 @@ body.dark-mode .toggle-btn::after {
 
 .announcement-content {
     white-space: nowrap;
-    animation: scroll 30s linear infinite;
     color: var(--text-secondary);
     font-weight: 500;
     transition: all 0.3s ease;
     font-size: 12px;
     line-height: 1.4;
+}
+
+.announcement-content.scrolling {
+    animation: scroll linear forwards;
 }
 
 .announcement-content:hover {
