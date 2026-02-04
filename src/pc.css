@@ -5,7 +5,7 @@
     --bg-tertiary: #e9ecef;
     --text-primary: #333333;
     --text-secondary: #666666;
-    --accent-color: #000000;
+    --accent-color: #10b981;
     --border-color: #e5e7eb;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --container-width: 1200px;
@@ -20,7 +20,7 @@ body.dark-mode {
     --bg-tertiary: #333333;
     --text-primary: #ffffff;
     --text-secondary: #999999;
-    --accent-color: #ffffff;
+    --accent-color: #10b981;
     --border-color: #444444;
     --shadow-color: rgba(0, 0, 0, 0.3);
 }
@@ -82,8 +82,8 @@ body.dark-mode::before {
 
 .toggle-btn {
     padding: 8px;
-    background-color: transparent;
-    color: var(--text-primary);
+    background-color: #ffffff;
+    color: #000000;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -96,6 +96,11 @@ body.dark-mode::before {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+body.dark-mode .toggle-btn {
+    background-color: #000000;
+    color: #ffffff;
 }
 
 .toggle-btn span {
