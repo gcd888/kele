@@ -59,5 +59,11 @@
             "sort": "6",
             "status": "1"
         }
-    ]
+    ],
+    "httpProxyGateway":
+    {
+        "name": "http代理网关",
+        "url": "https://1320967945-hww01ozp27.ap-guangzhou.tencentscf.com",
+        "X-App-Id":"C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9"
+    }
 }

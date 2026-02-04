@@ -1,5 +1,5 @@
 // 导入模块
-import { initData, cloudSearchAPIs, hotSearchAPIs, cloudTypes, notices } from './data.js';
+import { initData, cloudSearchAPIs, hotSearchAPIs, cloudTypes, notices, httpProxyGateway } from './data.js';
 import apiFunctions from './api.js';
 
 // 将API函数设置到window对象上，以便动态调用
@@ -276,6 +276,9 @@ async function performSearch() {
         if (selectedFilter !== 'all') {
             filteredResults = allResults.filter(result => result.cloudType === selectedFilter);
         }
+
+        // 移除结果中已经失效的资源
+        filteredResults = await removeInvalidResources(filteredResults);
         
         // 过滤和排序结果
         filteredResults = processSearchResults(filteredResults, searchTerm);
@@ -289,6 +292,150 @@ async function performSearch() {
         // 显示错误提示
         showToast('搜索失败，请检查网络连接后重试');
     }
+}
+
+// 移除失效的资源链接
+async function removeInvalidResources(results) {
+    const validResults = [];
+    
+    for (const result of results) {
+        try {
+            // 获取网盘类型
+            const cloudType = result.cloudType;
+            
+            let isValid = true;
+            
+            // 根据不同cloudType调用不同方法
+            switch (cloudType) {
+                case 'quark':
+                    // 调用夸克网盘校验方法
+                    const quarkResult = isQuarkValid(result);
+                    if (quarkResult instanceof Promise) {
+                        isValid = await quarkResult;
+                    } else {
+                        isValid = quarkResult;
+                    }
+                    break;
+                default:
+                    // 其他网盘类型暂时默认认为有效
+                    isValid = true;
+                    break;
+            }
+            
+            if (isValid) {
+                validResults.push(result);
+            }
+        } catch (error) {
+            // 发生错误时默认认为资源有效，避免误判
+            validResults.push(result);
+        }
+    }
+    
+    return validResults;
+}
+
+// 百度网盘失效判断
+function isBaiduValid(result) {
+    // TODO: 实现百度网盘失效判断逻辑
+    return true;
+}
+
+// 阿里云盘失效判断
+function isAliyunValid(result) {
+    // TODO: 实现阿里云盘失效判断逻辑
+    return true;
+}
+
+// 夸克网盘失效判断
+async function isQuarkValid(result) {
+    try {
+        const url = result.url;
+        
+        // 提取pwd_id（URL最后一段值）
+        const urlParts = url.split('/');
+        const pwd_id = urlParts[urlParts.length - 1];
+        
+        if (!pwd_id) {
+            return false;
+        }
+        
+        // 云函数配置（动态获取）
+        if (!httpProxyGateway || !httpProxyGateway.url || !httpProxyGateway['X-App-Id']) {
+            // 如果配置不存在，默认认为链接有效
+            return true;
+        }
+        
+        // 夸克API配置
+        const quarkApiUrl = 'https://drive-h.quark.cn/1/clouddrive/share/sharepage/token?pr=ucpro&fr=pc&uc_param_str=';
+        const requestBody = JSON.stringify({
+            "pwd_id": pwd_id,
+            "passcode": "",
+            "support_visit_limit_private_share": true
+        });
+        
+        // 构建云函数请求
+        const cloudFunctionRequest = {
+            url: quarkApiUrl,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: requestBody
+        };
+        
+        // 发起请求到云函数
+        const response = await fetch(httpProxyGateway.url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-App-Id': httpProxyGateway['X-App-Id']
+            },
+            body: JSON.stringify(cloudFunctionRequest)
+        });
+        
+        // 解析响应
+        try {
+            const data = await response.json();
+            
+            // 根据返回结果判断链接是否失效
+            // 如果返回status为200，则认为链接有效，否则无效
+            if (data && data.status === 200) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (jsonError) {
+            // 解析JSON失败，认为链接无效
+            return false;
+        }
+    } catch (error) {
+        // 发生错误时默认认为链接有效，避免误判
+        return true;
+    }
+}
+
+// UC网盘失效判断
+function isUcValid(result) {
+    // TODO: 实现UC网盘失效判断逻辑
+    return true;
+}
+
+// 迅雷网盘失效判断
+function isXunleiValid(result) {
+    // TODO: 实现迅雷网盘失效判断逻辑
+    return true;
+}
+
+// 天翼网盘失效判断
+function isTianyiValid(result) {
+    // TODO: 实现天翼网盘失效判断逻辑
+    return true;
+}
+
+// 其他网盘失效判断
+function isOthersValid(result) {
+    // TODO: 实现其他网盘失效判断逻辑
+    return true;
 }
 
 // 处理搜索结果：过滤无效链接并排序

@@ -3,6 +3,7 @@ let cloudSearchAPIs = [];
 let hotSearchAPIs = [];
 let cloudTypes = [];
 let notices = [];
+let httpProxyGateway = {};
 
 // 初始化数据加载
 async function initData() {
@@ -49,11 +50,17 @@ async function initData() {
             notices = baseData.notices.filter(item => item.status === '1');
         }
         
+        // 处理 httpProxyGateway 数据
+        if (baseData.httpProxyGateway) {
+            httpProxyGateway = baseData.httpProxyGateway;
+        }
+        
         return {
             cloudSearchAPIs,
             hotSearchAPIs,
             cloudTypes,
-            notices
+            notices,
+            httpProxyGateway
         };
     } catch (error) {
         console.error('数据加载失败:', error);
@@ -72,5 +79,6 @@ export {
     cloudSearchAPIs,
     hotSearchAPIs,
     cloudTypes,
-    notices
+    notices,
+    httpProxyGateway
 };
