@@ -206,6 +206,8 @@ async function performSearch() {
     }
     
     if (!searchTerm) {
+        // 清空搜索结果
+        displayCombinedSearchResults([]);
         // 替换alert为更友好的提示
         showToast('请输入搜索关键词');
         return;
