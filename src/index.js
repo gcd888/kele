@@ -1,6 +1,6 @@
 // 导入模块
 import { initData, cloudSearchAPIs, hotSearchAPIs, cloudTypes, notices, httpProxyGateway } from './data.js';
-import apiFunctions from './api.js';
+import apiFunctions, { callCloudFunction } from './api.js';
 
 // 将API函数设置到window对象上，以便动态调用
 for (const [key, value] of Object.entries(apiFunctions)) {
@@ -278,7 +278,7 @@ async function performSearch() {
         }
 
         // 移除结果中已经失效的资源
-        filteredResults = await removeInvalidResources(filteredResults);
+        filteredResults = await markInvalidResources(filteredResults);
         
         // 过滤和排序结果
         filteredResults = processSearchResults(filteredResults, searchTerm);
@@ -295,8 +295,8 @@ async function performSearch() {
 }
 
 // 移除失效的资源链接
-async function removeInvalidResources(results) {
-    const validResults = [];
+async function markInvalidResources(results) {
+    const markedResults = [];
     
     for (const result of results) {
         try {
@@ -316,28 +316,68 @@ async function removeInvalidResources(results) {
                         isValid = quarkResult;
                     }
                     break;
+                case 'baidu':
+                    // 调用百度网盘校验方法
+                    const baiduResult = isBaiduValid(result);
+                    if (baiduResult instanceof Promise) {
+                        isValid = await baiduResult;
+                    } else {
+                        isValid = baiduResult;
+                    }
+                    break;
                 default:
                     // 其他网盘类型暂时默认认为有效
                     isValid = true;
                     break;
             }
             
-            if (isValid) {
-                validResults.push(result);
-            }
+            // 添加isInvalid标记
+            const markedResult = {
+                ...result,
+                isInvalid: !isValid
+            };
+            markedResults.push(markedResult);
         } catch (error) {
             // 发生错误时默认认为资源有效，避免误判
-            validResults.push(result);
+            const markedResult = {
+                ...result,
+                isInvalid: false
+            };
+            markedResults.push(markedResult);
         }
     }
     
-    return validResults;
+    return markedResults;
 }
 
 // 百度网盘失效判断
-function isBaiduValid(result) {
-    // TODO: 实现百度网盘失效判断逻辑
-    return true;
+async function isBaiduValid(result) {
+    try {
+        const url = result.url;
+        console.log("校验链接："+url);
+        // 使用公共方法调用云函数发起GET请求
+        const response = await callCloudFunction(url, 'GET', {
+            'Content-Type': 'text/html'
+        });
+        
+        console.log("校验响应："+JSON.stringify(response));
+        
+        // 检查响应
+        if (response) {
+            const responseText = response.body || '';
+            console.log("校验响应体："+responseText);
+            // 检查返回的HTML中title是否为"百度网盘-链接不存在"
+            if (responseText.includes('<title>百度网盘-链接不存在</title>')) {
+                return false;
+            }
+        }
+        
+        return true;
+    } catch (error) {
+        // 发生错误时默认认为链接有效，避免误判
+        console.error('校验百度网盘链接时发生错误:', error);
+        return true;
+    }
 }
 
 // 阿里云盘失效判断
@@ -359,12 +399,6 @@ async function isQuarkValid(result) {
             return false;
         }
         
-        // 云函数配置（动态获取）
-        if (!httpProxyGateway || !httpProxyGateway.url || !httpProxyGateway['X-App-Id']) {
-            // 如果配置不存在，默认认为链接有效
-            return true;
-        }
-        
         // 夸克API配置
         const quarkApiUrl = 'https://drive-h.quark.cn/1/clouddrive/share/sharepage/token?pr=ucpro&fr=pc&uc_param_str=';
         const requestBody = JSON.stringify({
@@ -373,39 +407,15 @@ async function isQuarkValid(result) {
             "support_visit_limit_private_share": true
         });
         
-        // 构建云函数请求
-        const cloudFunctionRequest = {
-            url: quarkApiUrl,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: requestBody
-        };
+        // 使用公共方法调用云函数发起POST请求
+        const response = await callCloudFunction(quarkApiUrl, 'POST', {
+            'Content-Type': 'application/json'
+        }, requestBody);
         
-        // 发起请求到云函数
-        const response = await fetch(httpProxyGateway.url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-App-Id': httpProxyGateway['X-App-Id']
-            },
-            body: JSON.stringify(cloudFunctionRequest)
-        });
-        
-        // 解析响应
-        try {
-            const data = await response.json();
-            
-            // 根据返回结果判断链接是否失效
-            // 如果返回status为200，则认为链接有效，否则无效
-            if (data && data.status === 200) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (jsonError) {
-            // 解析JSON失败，认为链接无效
+        // 检查响应
+        if (response && response.status === 200) {
+            return true;
+        } else {
             return false;
         }
     } catch (error) {
@@ -432,11 +442,7 @@ function isTianyiValid(result) {
     return true;
 }
 
-// 其他网盘失效判断
-function isOthersValid(result) {
-    // TODO: 实现其他网盘失效判断逻辑
-    return true;
-}
+
 
 // 处理搜索结果：过滤无效链接并排序
 function processSearchResults(results, searchTerm) {
@@ -454,10 +460,15 @@ function processSearchResults(results, searchTerm) {
         filteredResults = results;
     }
     
-    // 排序逻辑：根据note中包含的关键词排序
+    // 排序逻辑：根据note中包含的关键词排序，且将失效链接排到最后
     const priorityKeywords = ['4K', '臻彩', '高码率', '高清', 'HDR', '超前完结', '全集', '完结'];
     
     filteredResults.sort((a, b) => {
+        // 首先按失效状态排序，有效链接在前，失效链接在后
+        if (a.isInvalid !== b.isInvalid) {
+            return a.isInvalid ? 1 : -1;
+        }
+        
         const aNote = a.note || '';
         const bNote = b.note || '';
         
@@ -902,6 +913,18 @@ function displayCombinedSearchResults(results) {
                 }
                 
                 urlDiv.appendChild(urlLink);
+                
+                // 如果链接被标记为失效，添加红色标签"疑似失效"
+                if (item.isInvalid) {
+                    const invalidLabel = document.createElement('span');
+                    invalidLabel.className = 'invalid-label';
+                    invalidLabel.textContent = '疑似失效';
+                    invalidLabel.style.color = 'red';
+                    invalidLabel.style.marginLeft = '8px';
+                    invalidLabel.style.fontSize = '12px';
+                    invalidLabel.style.fontWeight = 'bold';
+                    urlDiv.appendChild(invalidLabel);
+                }
                 leftDiv.appendChild(urlDiv);
                 
                 // 2. 名称（使用note作为名称，最多展示前50个字符）

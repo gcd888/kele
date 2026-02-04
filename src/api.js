@@ -1,5 +1,58 @@
 // 导入数据
-import { cloudTypes } from './data.js';
+import { cloudTypes, httpProxyGateway } from './data.js';
+
+// 调用云函数发起请求的公共方法
+async function callCloudFunction(url, method = 'GET', headers = {}, body = null) {
+    try {
+        console.log('调用云函数:', url, method, headers, body);
+        // 检查云函数配置
+        if (!httpProxyGateway || !httpProxyGateway.url || !httpProxyGateway['X-App-Id']) {
+            throw new Error('云函数配置不存在');
+        }
+        
+        // 构建云函数请求
+        const cloudFunctionRequest = {
+            url: url,
+            method: method,
+            headers: headers,
+            body: body
+        };
+        console.log('发起请求到云函数:', cloudFunctionRequest);
+        // 发起请求到云函数
+        const response = await fetch(httpProxyGateway.url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-App-Id': httpProxyGateway['X-App-Id']
+            },
+            body: JSON.stringify(cloudFunctionRequest)
+        });
+        
+        // 先获取响应的文本
+        const text = await response.text();
+        console.log('云函数返回响应长度:', text.length);
+        console.log('云函数返回响应前200字符:', text.substring(0, 200));
+        
+        // 尝试将文本解析为JSON
+        try {
+            const data = JSON.parse(text);
+            console.log('成功解析为JSON响应:', data);
+            return data;
+        } catch (jsonError) {
+            // 如果解析JSON失败，直接返回文本响应
+            console.log('解析JSON失败，返回文本响应:', jsonError.message);
+            // 构建模拟的响应对象，保持与JSON响应相同的结构
+            return {
+                body: text,
+                statusCode: response.status
+            };
+        }
+    } catch (error) {
+        // 发生错误时返回null
+        console.error('调用云函数时发生错误:', error);
+        return null;
+    }
+}
 
 // 生成搜索token
 function generateSearchToken(keyword, timestamp) {
@@ -502,6 +555,7 @@ async function searchApi7(searchTerm, url) {
 
 // 导出方法
 const apiFunctions = {
+    callCloudFunction,
     generateSearchToken,
     getCloudTypeByUrl,
     searchApi1,
@@ -516,6 +570,7 @@ const apiFunctions = {
 
 export default apiFunctions;
 export {
+    callCloudFunction,
     generateSearchToken,
     getCloudTypeByUrl,
     searchApi1,
