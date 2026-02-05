@@ -70,7 +70,7 @@
         {
             "name": "http-get-proxy-gateway",
             "description": "http pet代理网关",
-            "url": "https://1320967943-ki9xelcdq3.ap-guangzhou.tencentscf.com",
+            "url": "https://1320967945-3nb5t7hel3.ap-guangzhou.tencentscf.com",
             "X-App-Id": "C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9"
         }
     ]

@@ -294,7 +294,13 @@ async function performSearch() {
     }
 }
 
-// 标记失效的资源链接
+/**
+ * 标记失效的资源链接
+ * @async
+ * @function markInvalidResources
+ * @param {Array} results - 搜索结果数组
+ * @returns {Promise<Array>} 标记后的搜索结果数组
+ */
 async function markInvalidResources(results) {
     const markedResults = [];
     
@@ -350,43 +356,102 @@ async function markInvalidResources(results) {
     return markedResults;
 }
 
-// 百度网盘失效判断
+/**
+ * 判断百度网盘资源是否失效
+ * @async
+ * @function isBaiduValid
+ * @param {Object} result - 搜索结果对象
+ * @returns {Promise<boolean>} 资源是否有效
+ */
 async function isBaiduValid(result) {
+    let url = '';
     try {
-        const url = result.url;
-        console.log("校验链接："+url);
-        // 使用公共方法调用云函数发起GET请求
-        const response = await callCloudFunction(url, 'GET', {
+        url = result.url;
+        console.log("===》百度网盘失效校验开始"+url);
+
+        // 使用云函数callCloudGetFunction发起GET请求
+        const response = await callCloudGetFunction(url, {
             'Content-Type': 'text/html'
         });
         
-        console.log("校验响应："+JSON.stringify(response));
+        console.log("===》百度网盘响应类型:" + typeof response);
+        console.log("===》百度网盘响应原始内容:" + response);
         
-        // 检查响应
-        if (response) {
-            const responseText = response.body || '';
-            console.log("校验响应体："+responseText);
-            // 检查返回的HTML中title是否为"百度网盘-链接不存在"
-            if (responseText.includes('<title>百度网盘-链接不存在</title>')) {
-                return false;
+        // 根据响应判断是否有效
+        let content = '';
+        
+        // 处理响应是HTML字符串的情况（直接返回的HTML内容）
+        if (typeof response === 'string') {
+            content = response;
+        }
+        // 处理响应是对象的情况（包含status和data属性）
+        else if (typeof response === 'object') {
+            // 检查response.body是否为字符串（云函数返回的格式）
+            if (typeof response.body === 'string') {
+                try {
+                    // 尝试解析response.body为JSON对象（云函数返回的格式）
+                    const parsedBody = JSON.parse(response.body);
+                    if (typeof parsedBody.data === 'string') {
+                        // 云函数返回的格式：{status: 200, data: "<html>...</html>", headers: {...}}
+                        content = parsedBody.data;
+                    } else {
+                        content = response.body;
+                    }
+                } catch (e) {
+                    // 如果解析失败，直接使用response.body
+                    content = response.body;
+                }
+            } 
+            // 检查response.data是否为字符串
+            else if (typeof response.data === 'string') {
+                content = response.data;
+            } 
+            else {
+                content = JSON.stringify(response);
             }
         }
         
-        return true;
+        console.log("===》百度网盘响应内容:" + content.substring(0, 500) + "...");
+        
+        // 检查内容是否包含"百度网盘-链接不存在"，使用字符串.includes()方法进行匹配
+        const isInvalid = content.includes('百度网盘-链接不存在');
+        console.log("===》百度网盘是否失效:" + isInvalid);
+        
+        if (isInvalid) {
+            console.log("百度网盘校验失败（链接不存在）"+url);
+            return false;
+        } else {
+            console.log("百度网盘校验成功"+url);
+            return true;
+        }
     } catch (error) {
-        // 发生错误时默认认为链接有效，避免误判
-        console.error('校验百度网盘链接时发生错误:', error);
+        console.error('百度网盘验证失败:', error);
+        // 发生错误时，默认返回true（认为有效）
         return true;
+    } finally {
+        console.log("===》百度网盘失效校验结束"+url);
     }
 }
 
-// 阿里云盘失效判断
+/**
+ * 判断阿里云盘资源是否失效
+ * @async
+ * @function isAliyunValid
+ * @param {Object} result - 搜索结果对象
+ * @returns {Promise<boolean>} 资源是否有效
+ */
 function isAliyunValid(result) {
     // TODO: 实现阿里云盘失效判断逻辑
     return true;
 }
 
-// 夸克网盘失效判断
+/**
+ * 判断夸克网盘资源是否失效
+ * @async
+ * @function isQuarkValid
+ * @param {Object} result - 搜索结果对象
+ * @returns {Promise<boolean>} 资源是否有效
+ */
 async function isQuarkValid(result) {
     let url = '';
     try {
@@ -411,14 +476,14 @@ async function isQuarkValid(result) {
         const headers = {
             'Content-Type': 'application/json'
         };
-        const data = {
+        const body = {
             pwd_id,
             passcode: '',
             support_visit_limit_private_share: true
         };
         
         // 调用云函数发起验证请求
-        const response = await callCloudPostFunction(targetUrl, headers, data, 'POST');
+        const response = await callCloudPostFunction(targetUrl, headers, body);
         
         // 根据响应判断是否有效
         // 成功响应: status 200, code 0
@@ -442,27 +507,50 @@ async function isQuarkValid(result) {
     }
 }
 
-// UC网盘失效判断
+/**
+ * 判断UC网盘资源是否失效
+ * @async
+ * @function isUcValid
+ * @param {Object} result - 搜索结果对象
+ * @returns {Promise<boolean>} 资源是否有效
+ */
 function isUcValid(result) {
     // TODO: 实现UC网盘失效判断逻辑
     return true;
 }
 
-// 迅雷网盘失效判断
+/**
+ * 判断迅雷网盘资源是否失效
+ * @async
+ * @function isXunleiValid
+ * @param {Object} result - 搜索结果对象
+ * @returns {Promise<boolean>} 资源是否有效
+ */
 function isXunleiValid(result) {
     // TODO: 实现迅雷网盘失效判断逻辑
     return true;
 }
 
-// 天翼网盘失效判断
+/**
+ * 判断天翼网盘资源是否失效
+ * @async
+ * @function isTianyiValid
+ * @param {Object} result - 搜索结果对象
+ * @returns {Promise<boolean>} 资源是否有效
+ */
 function isTianyiValid(result) {
     // TODO: 实现天翼网盘失效判断逻辑
     return true;
 }
 
-
-
-// 处理搜索结果：排序疑似无效链接
+/**
+ * 处理搜索结果：排序疑似无效链接
+ * @async
+ * @function processSearchResults
+ * @param {Array} results - 搜索结果数组
+ * @param {string} searchTerm - 用户搜索输入值
+ * @returns {Array} 处理后的搜索结果数组
+ */
 function processSearchResults(results, searchTerm) {
     // 移除searchTerm中的数字，例如"罚罪2"变成"罚罪"
     const searchTermWithoutNumbers = searchTerm.replace(/\d+/g, '').trim();
@@ -524,7 +612,14 @@ function processSearchResults(results, searchTerm) {
     return filteredResults;
 }
 
-// 从API获取热播内容
+/**
+ * 从API获取热播内容
+ * @async
+ * @function fetchHotContent
+ * @param {string} type - 内容类型，'tv'表示电视剧，'movie'表示电影
+ * @param {string} url - API endpoint URL
+ * @returns {Promise<Array>} 过滤后的热播内容数组
+ */
 async function fetchHotContent(type, url) {
     try {
         const apiUrl = `${url}?type=${type}`;
@@ -567,7 +662,11 @@ async function fetchHotContent(type, url) {
     }
 }
 
-// 初始化热播影视数据
+/**
+ * 初始化热播影视数据
+ * @async
+ * @function initHotSearch
+ */
 function initHotSearch() {
     // 并行获取热播剧集和电影
     const hotSearchPromises = hotSearchAPIs.map(api => {
@@ -589,7 +688,12 @@ function initHotSearch() {
     });
 }
 
-// 显示热播剧集
+/**
+ * 显示热播剧集
+ * @async
+ * @function displayHotTv
+ * @param {Array} data - 热播剧集数据数组
+ */
 function displayHotTv(data) {
     const hotTvList = document.getElementById('hotTvList');
     hotTvList.innerHTML = '';
@@ -652,7 +756,12 @@ function displayHotTv(data) {
     });
 }
 
-// 显示热播电影
+/**
+ * 显示热播电影
+ * @async
+ * @function displayHotMovie
+ * @param {Array} data - 热播电影数据数组
+ */
 function displayHotMovie(data) {
     const hotMovieList = document.getElementById('hotMovieList');
     hotMovieList.innerHTML = '';
@@ -715,7 +824,11 @@ function displayHotMovie(data) {
     });
 }
 
-// 显示加载指示器
+/**
+ * 显示加载指示器
+ * @async
+ * @function showLoadingIndicator
+ */
 function showLoadingIndicator() {
     const resultsContainer = document.getElementById('searchResultsContainer');
     const resultsContent = document.getElementById('searchResultsContent');
@@ -729,7 +842,12 @@ function showLoadingIndicator() {
     resultsContainer.style.display = 'block';
 }
 
-// 显示错误信息
+/**
+ * 显示错误信息
+ * @async
+ * @function showErrorMessage
+ * @param {string} message - 错误消息
+ */
 function showErrorMessage(message) {
     const resultsContainer = document.getElementById('searchResultsContainer');
     const resultsContent = document.getElementById('searchResultsContent');
@@ -743,7 +861,13 @@ function showErrorMessage(message) {
     resultsContainer.style.display = 'block';
 }
 
-// 显示 Toast 提示
+/**
+ * 显示 Toast 提示
+ * @async
+ * @function showToast
+ * @param {string} message - 提示消息
+ * @param {number} [duration=2000] - 显示时间（毫秒）
+ */
 function showToast(message, duration = 2000) {
     // 创建 Toast 元素
     const toast = document.createElement('div');
@@ -782,7 +906,12 @@ function showToast(message, duration = 2000) {
     }, duration);
 }
 
-// 显示汇总搜索结果
+/**
+ * 显示汇总搜索结果
+ * @async
+ * @function displayCombinedSearchResults
+ * @param {Array} results - 搜索结果数组
+ */
 function displayCombinedSearchResults(results) {
     const resultsContainer = document.getElementById('searchResultsContainer');
     const resultsContent = document.getElementById('searchResultsContent');
@@ -822,10 +951,6 @@ function displayCombinedSearchResults(results) {
             }
         });
     }
-    
-
-    
-    // 不需要apiNameMap，直接使用item.sourceName
     
     // 构建网盘类型排序映射（从mock数据中获取）
     const cloudTypeSortMap = {};
@@ -927,7 +1052,7 @@ function displayCombinedSearchResults(results) {
                     urlLink.textContent = '点击获取';
                 } else {
                     // 电脑端显示原始URL
-                    urlLink.textContent = item.url || '';
+                    urlLink.textContent = finalUrl || '';
                 }
                 
                 urlDiv.appendChild(urlLink);

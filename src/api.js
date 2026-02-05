@@ -2,8 +2,16 @@
 import { cloudTypes, httpProxyGateway } from './data.js';
 
 
-// 调用云函数发起POST请求的公共方法callCloudPostFunction
-async function callCloudPostFunction(targetUrl, headers = {}, data = {}, method = 'POST') {
+/**
+ * 调用云函数发起POST请求的公共方法
+ * @async
+ * @function callCloudPostFunction
+ * @param {string} targetUrl - 目标URL
+ * @param {Object} [headers={}] - 请求头
+ * @param {Object} [data={}] - 请求数据
+ * @returns {Promise<Object>} 响应结果
+ */
+async function callCloudPostFunction(targetUrl, headers = {}, data = {}) {
     try {
         console.log("======》调用云函数发起POST请求开始"+targetUrl);
 
@@ -16,8 +24,7 @@ async function callCloudPostFunction(targetUrl, headers = {}, data = {}, method 
         const requestBody = {
             targetUrl,
             headers,
-            data,
-            method
+            data
         };
         console.log("调用云函数发起POST请求参数"+JSON.stringify(requestBody));
         // 发送请求到云函数
@@ -48,21 +55,32 @@ async function callCloudPostFunction(targetUrl, headers = {}, data = {}, method 
     }
 }
 
-// 调用云函数发起GET请求的公共方法callCloudGetFunction
-async function callCloudGetFunction(targetUrl, headers = {}) {
-    // 获取http-get-proxy-gateway配置
-    const getGateway = httpProxyGateway['http-get-proxy-gateway'] || {};
-    const gatewayUrl = getGateway.url || 'https://1320967943-ki9xelcdq3.ap-guangzhou.tencentscf.com';
-    const appId = getGateway['X-App-Id'] || 'C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9';
-    
+/**
+ * 调用云函数发起GET请求的公共方法
+ * @async
+ * @function callCloudGetFunction
+ * @param {string} targetUrl - 目标URL
+ * @param {Object} [headers={}] - 请求头
+ * @param {Object} [query={}] - 请求数据
+ * @returns {Promise<Object>} 响应结果
+ */
+async function callCloudGetFunction(targetUrl, headers = {}, query = {}) {
     try {
+        console.log("======》调用云函数发起GET请求开始"+targetUrl);
+
+        // 获取http-get-proxy-gateway配置
+        const getGateway = httpProxyGateway['http-get-proxy-gateway'] || {};
+        const gatewayUrl = getGateway.url;
+        const appId = getGateway['X-App-Id'];
+        
         // 构建请求参数
         const requestBody = {
             targetUrl,
             headers,
-            data: {},
+            query,
             method: 'GET'
         };
+        console.log("调用云函数发起GET请求参数"+JSON.stringify(requestBody));
         
         // 发送请求到云函数
         const response = await fetch(gatewayUrl, {
@@ -74,20 +92,32 @@ async function callCloudGetFunction(targetUrl, headers = {}) {
             body: JSON.stringify(requestBody)
         });
         
-        if (!response.ok) {
-            throw new Error('云函数调用失败');
-        }
-        
+        // 即使响应状态不是200，也要尝试解析响应
         const result = await response.json();
+        console.log("调用云函数发起GET请求结果"+JSON.stringify(result));
         return result;
     } catch (error) {
         console.error('callCloudGetFunction错误:', error);
-        throw error;
+        // 发生错误时，返回一个包含错误信息的对象
+        return {
+            status: 500,
+            code: 500,
+            message: '云函数调用失败',
+            error: error.message
+        };
+    } finally {
+        console.log("======》调用云函数发起GET请求结束"+targetUrl);
     }
 }
 
 
-// 生成搜索token
+/**
+ * 生成搜索token
+ * @function generateSearchToken
+ * @param {string} keyword - 关键词
+ * @param {number} [timestamp] - 时间戳
+ * @returns {string} 生成的token
+ */
 function generateSearchToken(keyword, timestamp) {
     // 如果未提供时间戳，使用当前时间戳
     const ts = timestamp || Date.now();
@@ -104,7 +134,14 @@ function generateSearchToken(keyword, timestamp) {
     return token;
 }
 
-// 根据链接域名判断网盘类型
+/**
+ * 根据链接域名判断网盘类型
+ * @function getCloudTypeByUrl
+ * @param {string} url - 链接URL
+ * @param {string} defaultType - 默认网盘类型
+ * @param {Array} [cloudTypes=[]] - 网盘类型配置数组
+ * @returns {string} 匹配的网盘类型
+ */
 function getCloudTypeByUrl(url, defaultType, cloudTypes = []) {
     // 从cloudTypes数组中获取判断逻辑
     for (const type of cloudTypes) {
@@ -115,7 +152,15 @@ function getCloudTypeByUrl(url, defaultType, cloudTypes = []) {
     return defaultType;
 }
 
-// 搜索API 1: 聚合网盘搜索接口
+/**
+ * 搜索API 1: 聚合网盘搜索接口
+ * @async
+ * @function searchApi1
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} selectedFilter - 选择的过滤条件
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi1(searchTerm, selectedFilter, url) {
     try {
         // 构建API请求参数
@@ -174,7 +219,14 @@ async function searchApi1(searchTerm, selectedFilter, url) {
     }
 }
 
-// 搜索API 2: 聚合网盘搜索2
+/**
+ * 搜索API 2: 聚合网盘搜索2
+ * @async
+ * @function searchApi2
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi2(searchTerm, url) {
     try {
         // 构建API请求参数
@@ -238,7 +290,14 @@ async function searchApi2(searchTerm, url) {
     }
 }
 
-// 搜索API 3: 聚合网盘搜索3
+/**
+ * 搜索API 3: 聚合网盘搜索3
+ * @async
+ * @function searchApi3
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi3(searchTerm, url) {
     try {
         // 生成动态token
@@ -302,7 +361,14 @@ async function searchApi3(searchTerm, url) {
     }
 }
 
-// 搜索API 4: 聚合网盘搜索4
+/**
+ * 搜索API 4: 聚合网盘搜索4
+ * @async
+ * @function searchApi4
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi4(searchTerm, url) {
     try {
         // 生成动态token
@@ -370,7 +436,14 @@ async function searchApi4(searchTerm, url) {
     }
 }
 
-// 搜索API 99: 获取热播影视数据
+/**
+ * 搜索API 99: 获取热播影视数据
+ * @async
+ * @function searchApi99
+ * @param {string} type - 影视类型
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 热播影视数据数组
+ */
 async function searchApi99(type, url) {
     try {
         // 构建API请求URL
@@ -394,7 +467,14 @@ async function searchApi99(type, url) {
     }
 }
 
-// 搜索API 5: 聚合网盘搜索5
+/**
+ * 搜索API 5: 聚合网盘搜索5
+ * @async
+ * @function searchApi5
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi5(searchTerm, url) {
     try {
         // 构建API请求参数
@@ -458,7 +538,14 @@ async function searchApi5(searchTerm, url) {
     }
 }
 
-// 搜索API 6: 聚合网盘搜索6
+/**
+ * 搜索API 6: 聚合网盘搜索6
+ * @async
+ * @function searchApi6
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi6(searchTerm, url) {
     try {
         // 生成动态token
@@ -522,7 +609,14 @@ async function searchApi6(searchTerm, url) {
     }
 }
 
-// 搜索API 7: 聚合网盘搜索7
+/**
+ * 搜索API 7: 聚合网盘搜索7
+ * @async
+ * @function searchApi7
+ * @param {string} searchTerm - 搜索关键词
+ * @param {string} url - API URL
+ * @returns {Promise<Array>} 搜索结果数组
+ */
 async function searchApi7(searchTerm, url) {
     try {
         // 构建API请求参数
