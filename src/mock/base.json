@@ -73,5 +73,63 @@
             "url": "https://1320967945-3nb5t7hel3.ap-guangzhou.tencentscf.com",
             "X-App-Id": "C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9"
         }
+    ],
+    "onlineTV": [
+        {
+            "name": "网飞猫",
+            "url": "https://103.194.185.51:51122/",
+            "img": "https://vf.dkhtad.com/vod_pc_static_ncat/images/favicon.ico?ver=23sdfsd",
+            "description": "一起看更好的世界",
+            "status": "1"
+        },  
+        {
+            "name": "磁力熊",
+            "url": "https://www.cilixiong.org/",
+            "img": "https://www.cilixiong.org/favicon.ico",
+            "description": "纯净的1080P高分电影网站",
+            "status": "1"
+        },  
+        {
+            "name": "茶杯狐",
+            "url": "https://cupfox.love/",
+            "img": "https://picx.zhimg.com/80/v2-5393cb76a824b11d7771ecdce592c87d.png",
+            "description": "片荒剧荒就来茶杯狐",
+            "status": "1"
+        },  
+        {
+            "name": "FreeOK",
+            "url": "https://www.freeokk.pro/",
+            "img": "https://www.freeokk.pro/static/images/favicon.png",
+            "description": "追剧也很卷",
+            "status": "1"
+        },  
+        {
+            "name": "SeedHub",
+            "url": "https://www.seedhub.cc/",
+            "img": "https://sh1.pcie.pppoe.top/static/img/favicon.ico",
+            "description": "影视&动漫",
+            "status": "1"
+        },  
+        {
+            "name": "奈飞工厂",
+            "url": "https://www.netflixgc.com/",
+            "img": "https://www.netflixgc.com/upload/site/20241029-1/a3066e37a45ef286668060443b4de885.png",
+            "description": "继承了原鸭奈飞的精神",
+            "status": "1"
+        },  
+        {
+            "name": "河马剧场",
+            "url": "https://www.kuaikaw.cn/",
+            "img": "https://www.kuaikaw.cn/favicon.ico",
+            "description": "专注于提供高质量短剧的平台",
+            "status": "1"
+        },  
+        {
+            "name": "影视村",
+            "url": "http://www.yingshicun.com/",
+            "img": "http://www.yingshicun.com/favicon.ico",
+            "description": "一家专业的以短剧为主的资源平台",
+            "status": "1"
+        }
     ]
 }

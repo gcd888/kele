@@ -665,6 +665,146 @@ body.dark-mode .toggle-btn::after {
     padding: 0 10px;
 }
 
+/* 在线影视样式 */
+.online-tv-container {
+    background-color: var(--bg-secondary);
+    border: none;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.online-tv-container h2 {
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    text-align: center;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.online-tv-container h2::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: var(--accent-color);
+    margin: 10px auto 0;
+    border-radius: 2px;
+}
+
+.online-tv-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.online-tv-item {
+    background-color: var(--bg-primary);
+    border: none;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.online-tv-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.online-tv-item:hover::before {
+    left: 100%;
+}
+
+.online-tv-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px var(--shadow-color);
+    border-color: var(--accent-color);
+}
+
+.online-tv-image {
+    width: 80px;
+    height: 80px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    margin: 0 auto 12px;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-tertiary);
+    /* 添加移动端优化 */
+    -webkit-background-size: contain;
+    -moz-background-size: contain;
+    -o-background-size: contain;
+    /* 添加图片加载失败时的备用样式 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.online-tv-text {
+    text-align: center;
+    padding: 0 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.online-tv-text .title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.online-tv-text .description {
+    font-size: 13px;
+    color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+    line-height: 1.4;
+}
+
+.online-tv-text .url-link {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.online-tv-text .url-link:hover {
+    background-color: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
 /* 加载指示器和错误提示 */
 .loading-indicator {
     display: flex;

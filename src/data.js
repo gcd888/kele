@@ -4,6 +4,7 @@ let hotSearchAPIs = [];
 let cloudTypes = [];
 let notices = [];
 let httpProxyGateway = {};
+let onlineTV = [];
 
 // 初始化数据加载
 async function initData() {
@@ -50,6 +51,11 @@ async function initData() {
             notices = baseData.notices.filter(item => item.status === '1');
         }
         
+        // 处理 onlineTV 数据，只加载 status 为 1 的
+        if (baseData.onlineTV) {
+            onlineTV = baseData.onlineTV.filter(item => item.status === '1');
+        }
+        
         // 处理 httpProxyGateway 数据
         if (baseData.httpProxyGateway && Array.isArray(baseData.httpProxyGateway)) {
             // 将数组转换为对象，方便根据name获取对应的配置
@@ -64,6 +70,7 @@ async function initData() {
             hotSearchAPIs,
             cloudTypes,
             notices,
+            onlineTV,
             httpProxyGateway
         };
     } catch (error) {
@@ -72,7 +79,8 @@ async function initData() {
             cloudSearchAPIs: [],
             hotSearchAPIs: [],
             cloudTypes: [],
-            notices: []
+            notices: [],
+            onlineTV: []
         };
     }
 }
@@ -84,5 +92,6 @@ export {
     hotSearchAPIs,
     cloudTypes,
     notices,
+    onlineTV,
     httpProxyGateway
 };
