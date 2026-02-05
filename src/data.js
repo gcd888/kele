@@ -51,8 +51,12 @@ async function initData() {
         }
         
         // 处理 httpProxyGateway 数据
-        if (baseData.httpProxyGateway) {
-            httpProxyGateway = baseData.httpProxyGateway;
+        if (baseData.httpProxyGateway && Array.isArray(baseData.httpProxyGateway)) {
+            // 将数组转换为对象，方便根据name获取对应的配置
+            httpProxyGateway = {};
+            baseData.httpProxyGateway.forEach(gateway => {
+                httpProxyGateway[gateway.name] = gateway;
+            });
         }
         
         return {

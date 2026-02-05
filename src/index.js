@@ -1,6 +1,6 @@
 // 导入模块
 import { initData, cloudSearchAPIs, hotSearchAPIs, cloudTypes, notices, httpProxyGateway } from './data.js';
-import apiFunctions, { callCloudFunction } from './api.js';
+import apiFunctions, { callCloudPostFunction } from './api.js';
 
 // 将API函数设置到window对象上，以便动态调用
 for (const [key, value] of Object.entries(apiFunctions)) {
@@ -277,7 +277,7 @@ async function performSearch() {
             filteredResults = allResults.filter(result => result.cloudType === selectedFilter);
         }
 
-        // 移除结果中已经失效的资源
+        // 标记结果中已经失效的资源
         filteredResults = await markInvalidResources(filteredResults);
         
         // 过滤和排序结果
@@ -294,7 +294,7 @@ async function performSearch() {
     }
 }
 
-// 移除失效的资源链接
+// 标记失效的资源链接
 async function markInvalidResources(results) {
     const markedResults = [];
     
@@ -388,39 +388,57 @@ function isAliyunValid(result) {
 
 // 夸克网盘失效判断
 async function isQuarkValid(result) {
+    let url = '';
     try {
-        const url = result.url;
+        // 从结果中提取夸克网盘信息
+        url = result.url;
         
-        // 提取pwd_id（URL最后一段值）
-        const urlParts = url.split('/');
-        const pwd_id = urlParts[urlParts.length - 1];
+        // 解析夸克网盘链接，提取pwd_id (取URL最后一段值)
+        // 处理URL，移除查询参数和哈希值，然后取最后一段
+        const cleanUrl = url.split('?')[0].split('#')[0];
+        const urlParts = cleanUrl.split('/');
+        const pwd_id = urlParts[urlParts.length - 1] || '';
         
+        console.log("===》夸克网盘失效校验开始"+url);
+
         if (!pwd_id) {
+            console.error('无法从夸克网盘链接中提取pwd_id:', url);
             return false;
         }
         
-        // 夸克API配置
-        const quarkApiUrl = 'https://drive-h.quark.cn/1/clouddrive/share/sharepage/token?pr=ucpro&fr=pc&uc_param_str=';
-        const requestBody = JSON.stringify({
-            "pwd_id": pwd_id,
-            "passcode": "",
-            "support_visit_limit_private_share": true
-        });
-        
-        // 使用公共方法调用云函数发起POST请求
-        const response = await callCloudFunction(quarkApiUrl, 'POST', {
+        // 构建验证请求
+        const targetUrl = 'https://drive-h.quark.cn/1/clouddrive/share/sharepage/token?pr=ucpro&fr=pc&uc_param_str=';
+        const headers = {
             'Content-Type': 'application/json'
-        }, requestBody);
+        };
+        const data = {
+            pwd_id,
+            passcode: '',
+            support_visit_limit_private_share: true
+        };
         
-        // 检查响应
-        if (response && response.status === 200) {
+        // 调用云函数发起验证请求
+        const response = await callCloudPostFunction(targetUrl, headers, data, 'POST');
+        
+        // 根据响应判断是否有效
+        // 成功响应: status 200, code 0
+        // 失败响应: status 404, code 41012 (好友已取消了分享)
+        if (response.status === 200 && response.code === 0) {
+             console.log("夸克网盘校验成功"+url);
             return true;
+        } else if (response.status === 404 || response.code === 41012) {
+             console.log("夸克网盘校验失败"+url);
+            return false;
         } else {
+            // 其他错误情况，默认返回false
+            console.error('夸克网盘验证失败:', response);
             return false;
         }
     } catch (error) {
-        // 发生错误时默认认为链接有效，避免误判
-        return true;
+        console.error('isQuarkValid错误:', error);
+        return false;
+    } finally {
+        console.log("===》夸克网盘失效校验结束"+url);
     }
 }
 
@@ -444,7 +462,7 @@ function isTianyiValid(result) {
 
 
 
-// 处理搜索结果：过滤无效链接并排序
+// 处理搜索结果：排序疑似无效链接
 function processSearchResults(results, searchTerm) {
     // 移除searchTerm中的数字，例如"罚罪2"变成"罚罪"
     const searchTermWithoutNumbers = searchTerm.replace(/\d+/g, '').trim();
@@ -922,7 +940,7 @@ function displayCombinedSearchResults(results) {
                     invalidLabel.style.color = 'red';
                     invalidLabel.style.marginLeft = '8px';
                     invalidLabel.style.fontSize = '12px';
-                    invalidLabel.style.fontWeight = 'bold';
+                    invalidLabel.style.fontWeight = 'normal';
                     urlDiv.appendChild(invalidLabel);
                 }
                 leftDiv.appendChild(urlDiv);

@@ -1,58 +1,91 @@
 // 导入数据
 import { cloudTypes, httpProxyGateway } from './data.js';
 
-// 调用云函数发起请求的公共方法
-async function callCloudFunction(url, method = 'GET', headers = {}, body = null) {
+
+// 调用云函数发起POST请求的公共方法callCloudPostFunction
+async function callCloudPostFunction(targetUrl, headers = {}, data = {}, method = 'POST') {
     try {
-        console.log('调用云函数:', url, method, headers, body);
-        // 检查云函数配置
-        if (!httpProxyGateway || !httpProxyGateway.url || !httpProxyGateway['X-App-Id']) {
-            throw new Error('云函数配置不存在');
-        }
+        console.log("======》调用云函数发起POST请求开始"+targetUrl);
+
+        // 获取http-post-proxy-gateway配置
+        const postGateway = httpProxyGateway['http-post-proxy-gateway'] || {};
+        const gatewayUrl = postGateway.url;
+        const appId = postGateway['X-App-Id'];
         
-        // 构建云函数请求
-        const cloudFunctionRequest = {
-            url: url,
-            method: method,
-            headers: headers,
-            body: body
+        // 构建请求参数
+        const requestBody = {
+            targetUrl,
+            headers,
+            data,
+            method
         };
-        console.log('发起请求到云函数:', cloudFunctionRequest);
-        // 发起请求到云函数
-        const response = await fetch(httpProxyGateway.url, {
+        console.log("调用云函数发起POST请求参数"+JSON.stringify(requestBody));
+        // 发送请求到云函数
+        const response = await fetch(gatewayUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-App-Id': httpProxyGateway['X-App-Id']
+                'x-app-id': appId
             },
-            body: JSON.stringify(cloudFunctionRequest)
+            body: JSON.stringify(requestBody)
         });
         
-        // 先获取响应的文本
-        const text = await response.text();
-        console.log('云函数返回响应长度:', text.length);
-        console.log('云函数返回响应前200字符:', text.substring(0, 200));
-        
-        // 尝试将文本解析为JSON
-        try {
-            const data = JSON.parse(text);
-            console.log('成功解析为JSON响应:', data);
-            return data;
-        } catch (jsonError) {
-            // 如果解析JSON失败，直接返回文本响应
-            console.log('解析JSON失败，返回文本响应:', jsonError.message);
-            // 构建模拟的响应对象，保持与JSON响应相同的结构
-            return {
-                body: text,
-                statusCode: response.status
-            };
-        }
+        // 即使响应状态不是200，也要尝试解析响应
+        const result = await response.json();
+        console.log("调用云函数发起POST请求结果"+JSON.stringify(result));
+        return result;
     } catch (error) {
-        // 发生错误时返回null
-        console.error('调用云函数时发生错误:', error);
-        return null;
+        console.error('callCloudPostFunction错误:', error);
+        // 发生错误时，返回一个包含错误信息的对象
+        return {
+            status: 500,
+            code: 500,
+            message: '云函数调用失败',
+            error: error.message
+        };
+    } finally {
+        console.log("======》调用云函数发起POST请求结束"+targetUrl);
     }
 }
+
+// 调用云函数发起GET请求的公共方法callCloudGetFunction
+async function callCloudGetFunction(targetUrl, headers = {}) {
+    // 获取http-get-proxy-gateway配置
+    const getGateway = httpProxyGateway['http-get-proxy-gateway'] || {};
+    const gatewayUrl = getGateway.url || 'https://1320967943-ki9xelcdq3.ap-guangzhou.tencentscf.com';
+    const appId = getGateway['X-App-Id'] || 'C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9';
+    
+    try {
+        // 构建请求参数
+        const requestBody = {
+            targetUrl,
+            headers,
+            data: {},
+            method: 'GET'
+        };
+        
+        // 发送请求到云函数
+        const response = await fetch(gatewayUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-app-id': appId
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            throw new Error('云函数调用失败');
+        }
+        
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('callCloudGetFunction错误:', error);
+        throw error;
+    }
+}
+
 
 // 生成搜索token
 function generateSearchToken(keyword, timestamp) {
@@ -555,7 +588,8 @@ async function searchApi7(searchTerm, url) {
 
 // 导出方法
 const apiFunctions = {
-    callCloudFunction,
+    callCloudPostFunction,
+    callCloudGetFunction,
     generateSearchToken,
     getCloudTypeByUrl,
     searchApi1,
@@ -570,7 +604,8 @@ const apiFunctions = {
 
 export default apiFunctions;
 export {
-    callCloudFunction,
+    callCloudPostFunction,
+    callCloudGetFunction,
     generateSearchToken,
     getCloudTypeByUrl,
     searchApi1,

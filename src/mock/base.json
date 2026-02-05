@@ -13,57 +13,65 @@
         {
             "name": "全部",
             "cloudType": "all",
-			"url":"",
+            "url": "",
             "sort": "0",
             "status": "1"
         },
         {
             "name": "夸克网盘",
             "cloudType": "quark",
-			"url":"https://pan.quark.cn",
+            "url": "https://pan.quark.cn",
             "sort": "1",
             "status": "1"
         },
         {
             "name": "阿里网盘",
             "cloudType": "aliyun",
-			"url":"https://www.alipan.com",
+            "url": "https://www.alipan.com",
             "sort": "2",
             "status": "1"
         },
         {
             "name": "百度网盘",
             "cloudType": "baidu",
-			"url":"https://pan.baidu.com",
+            "url": "https://pan.baidu.com",
             "sort": "3",
             "status": "1"
         },
         {
             "name": "UC网盘",
             "cloudType": "uc",
-			"url":"https://drive.uc.cn",
+            "url": "https://drive.uc.cn",
             "sort": "4",
             "status": "1"
         },
         {
             "name": "迅雷网盘",
             "cloudType": "xunlei",
-			"url":"https://pan.xunlei.com",
+            "url": "https://pan.xunlei.com",
             "sort": "5",
             "status": "1"
         },
         {
             "name": "天翼网盘",
             "cloudType": "tianyi",
-			"url":"https://cloud.189.cn",
+            "url": "https://cloud.189.cn",
             "sort": "6",
             "status": "1"
         }
     ],
-    "httpProxyGateway":
-    {
-        "name": "http代理网关",
-        "url": "https://1320967945-hww01ozp27.ap-guangzhou.tencentscf.com",
-        "X-App-Id":"C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9"
-    }
+    "httpProxyGateway": [
+        {
+            "name": "http-post-proxy-gateway",
+            "description": "http post代理网关",
+            "url": "https://1320967945-ki9xelcdq3.ap-guangzhou.tencentscf.com",
+            "X-App-Id": "C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9"
+        },
+        {
+            "name": "http-get-proxy-gateway",
+            "description": "http pet代理网关",
+            "url": "https://1320967943-ki9xelcdq3.ap-guangzhou.tencentscf.com",
+            "X-App-Id": "C5C2IahEaBlaXuxwEOzTKD0j4qb19cr9"
+        }
+    ]
 }
