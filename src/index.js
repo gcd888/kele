@@ -331,6 +331,15 @@ async function markInvalidResources(results) {
                         isValid = baiduResult;
                     }
                     break;
+                case 'aliyun':
+                    // 调用阿里云盘校验方法
+                    const aliResult = isAliyunValid(result);
+                    if (aliResult instanceof Promise) {
+                        isValid = await aliResult;
+                    } else {
+                        isValid = aliResult;
+                    }
+                    break;
                 default:
                     // 其他网盘类型暂时默认认为有效
                     isValid = true;
@@ -435,9 +444,57 @@ async function isBaiduValid(result) {
  * @param {Object} result - 搜索结果对象
  * @returns {Promise<boolean>} 资源是否有效
  */
-function isAliyunValid(result) {
-    // TODO: 实现阿里云盘失效判断逻辑
-    return true;
+async function isAliyunValid(result) {
+    let url = '';
+    try {
+        // 从结果中提取阿里云盘信息
+        url = result.url;
+        console.log("===》阿里云盘失效校验开始" + url);
+
+        // 解析阿里云盘链接，提取share_id (取URL最后一段值)
+        // 处理URL，移除查询参数和哈希值，然后取最后一段
+        const cleanUrl = url.split('?')[0].split('#')[0];
+        const urlParts = cleanUrl.split('/');
+        const share_id = urlParts[urlParts.length - 1] || '';
+        
+        if (!share_id) {
+            console.error('无法从阿里云盘链接中提取share_id:', url);
+            return false;
+        }
+
+        // 构建验证请求
+        const targetUrl = 'https://api.aliyundrive.com/adrive/v3/share_link/get_share_by_anonymous';
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        const body = {
+            share_id
+        };
+        
+        // 调用云函数发起验证请求
+        const response = await callCloudPostFunction(targetUrl, headers, body);
+        
+        // 根据响应判断是否有效
+        // 成功响应: status 200
+        // 失败响应: status 400
+        // 其他状态码也返回false
+        if (response.status === 200) {
+            console.log("阿里云盘校验成功" + url);
+            return true;
+        } else if (response.status === 400) {
+            console.log("阿里云盘校验失败" + url);
+            return false;
+        } else {
+            // 其他状态码，默认返回false
+            console.error('阿里云盘验证失败:', response);
+            return false;
+        }
+    } catch (error) {
+        console.error('阿里云盘验证失败:', error);
+        return false;
+    } finally {
+        console.log("===》阿里云盘失效校验结束" + url);
+    }
 }
 
 /**
