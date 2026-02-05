@@ -183,6 +183,18 @@ function enhanceKeyboardNavigation() {
     });
 }
 
+/**
+ * 限制热榜内容数量
+ * 电脑端直接返回传入的filteredData
+ * @function limitHotContent
+ * @param {Array} filteredData - 过滤后的热榜数据
+ * @returns {Array} 处理后的热榜数据
+ */
+function limitHotContent(filteredData) {
+    // 电脑端展示所有传入的数据
+    return filteredData;
+}
+
 // 初始化所有增强功能
 function initAllEnhancements() {
     initPcSpecificFeatures();

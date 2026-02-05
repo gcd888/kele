@@ -22,7 +22,7 @@
             "name": "eeeob-getXiaoyu",
             "url": "http://z.eeeob.com/v/api/getXiaoyu",
             "method": "searchApi2",
-            "status": "1"
+            "status": "0"
         },
         {
             "name": "eeeob-getDyfx",
@@ -46,7 +46,7 @@
             "name": "dbpan-getXiaoyu",
             "url": "http://m.dbpan.com/v/api/getXiaoyu",
             "method": "searchApi2",
-            "status": "1"
+            "status": "0"
         },
         {
             "name": "dbpan-getDyfx",

@@ -264,6 +264,18 @@ function optimizeKeyboardNavigation() {
     });
 }
 
+/**
+ * 限制热榜内容数量
+ * 手机端展示前8个
+ * @function limitHotContent
+ * @param {Array} filteredData - 过滤后的热榜数据
+ * @returns {Array} 处理后的热榜数据
+ */
+function limitHotContent(filteredData) {
+    // 手机端展示前8个
+    return filteredData.slice(0, 8);
+}
+
 // 初始化所有增强功能
 function initAllEnhancements() {
     initPhoneSpecificFeatures();

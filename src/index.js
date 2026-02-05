@@ -630,7 +630,7 @@ async function fetchHotContent(type, url) {
         }
         
         // 筛选出area是大陆的内容，并限制数量为12个
-        const filteredData = data.data
+        let filteredData = data.data
             .filter(item => item.area === '大陆')
             .slice(0, 12);
         
@@ -649,6 +649,12 @@ async function fetchHotContent(type, url) {
                 }
             }
         });
+
+        //手机端展示8个，电脑端展示12个
+        // 调用limitHotContent方法处理数据数量
+        if (typeof limitHotContent === 'function') {
+            filteredData = limitHotContent(filteredData);
+        }
         
         return filteredData;
     } catch (error) {
