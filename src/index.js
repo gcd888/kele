@@ -649,6 +649,12 @@ async function fetchHotContent(type, url) {
                 }
             }
         });
+
+        //手机端展示8个，电脑端展示12个
+        // 调用limitHotContent方法处理数据数量
+        if (typeof limitHotContent === 'function') {
+            filteredData = limitHotContent(filteredData);
+        }
         
         return filteredData;
     } catch (error) {
