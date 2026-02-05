@@ -1,5 +1,5 @@
 // 导入模块
-import { initData, cloudSearchAPIs, hotSearchAPIs, cloudTypes, notices, httpProxyGateway } from './data.js';
+import { initData, cloudSearchAPIs, hotSearchAPIs, cloudTypes, notices, onlineTV, httpProxyGateway } from './data.js';
 import apiFunctions, { callCloudPostFunction } from './api.js';
 
 // 将API函数设置到window对象上，以便动态调用
@@ -20,6 +20,7 @@ window.addEventListener('DOMContentLoaded', async function() {
         window.cloudSearchAPIs = data.cloudSearchAPIs;
         window.hotSearchAPIs = data.hotSearchAPIs;
         window.notices = data.notices;
+        window.onlineTV = data.onlineTV;
         
         // 初始化时间显示
         updateTime();
@@ -36,6 +37,9 @@ window.addEventListener('DOMContentLoaded', async function() {
 
         // 初始化热播资源
         initHotSearch();
+        
+        // 初始化在线影视
+        initOnlineTV();
         
         // 延迟调用初始化函数，确保pc.js或phone.js已经加载完成
         setTimeout(() => {
@@ -879,6 +883,76 @@ function displayHotMovie(data) {
         });
         
         hotMovieList.appendChild(hotSearchItem);
+    });
+}
+
+/**
+ * 初始化在线影视
+ * @async
+ * @function initOnlineTV
+ */
+function initOnlineTV() {
+    const onlineTVData = window.onlineTV || [];
+    displayOnlineTV(onlineTVData);
+}
+
+/**
+ * 显示在线影视
+ * @async
+ * @function displayOnlineTV
+ * @param {Array} data - 在线影视数据数组
+ */
+function displayOnlineTV(data) {
+    const onlineTvList = document.getElementById('onlineTvList');
+    onlineTvList.innerHTML = '';
+    
+    data.forEach(item => {
+        const onlineTvItem = document.createElement('div');
+        onlineTvItem.className = 'online-tv-item';
+        
+        // 设置图片容器
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'online-tv-image';
+        
+        // 设置图片 - 添加加载错误处理
+        if (item.img) {
+            // 使用原始图片URL，不强制转换为HTTPS
+            let imageUrl = item.img;
+            
+            // 添加图片加载错误处理
+            imageContainer.style.backgroundImage = `url(${imageUrl})`;
+            
+            // 创建备用图片元素用于错误处理
+            const img = new Image();
+            img.onload = function() {
+                // 图片加载成功
+                imageContainer.style.backgroundImage = `url(${imageUrl})`;
+            };
+            img.onerror = function() {
+                // 图片加载失败，使用备用图片
+                imageContainer.style.backgroundImage = 'url(src/img/imgerror.svg)';
+            };
+            img.src = imageUrl;
+        } else {
+            // 没有图片时使用默认图片
+            imageContainer.style.backgroundImage = 'url(src/img/imgerror.svg)';
+        }
+        
+        // 设置文字容器
+        const textContainer = document.createElement('div');
+        textContainer.className = 'online-tv-text';
+        
+        textContainer.innerHTML = `
+            <div class="title">${item.name}</div>
+            <div class="description">${item.description}</div>
+            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="url-link">点击前往</a>
+        `;
+        
+        // 组装元素
+        onlineTvItem.appendChild(imageContainer);
+        onlineTvItem.appendChild(textContainer);
+        
+        onlineTvList.appendChild(onlineTvItem);
     });
 }
 
