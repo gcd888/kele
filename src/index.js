@@ -374,9 +374,6 @@ async function isBaiduValid(result) {
             'Content-Type': 'text/html'
         });
         
-        console.log("===》百度网盘响应类型:" + typeof response);
-        console.log("===》百度网盘响应原始内容:" + response);
-        
         // 根据响应判断是否有效
         let content = '';
         
@@ -410,8 +407,6 @@ async function isBaiduValid(result) {
                 content = JSON.stringify(response);
             }
         }
-        
-        console.log("===》百度网盘响应内容:" + content.substring(0, 500) + "...");
         
         // 检查内容是否包含"百度网盘-链接不存在"，使用字符串.includes()方法进行匹配
         const isInvalid = content.includes('百度网盘-链接不存在');

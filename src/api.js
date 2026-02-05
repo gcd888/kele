@@ -214,7 +214,7 @@ async function searchApi1(searchTerm, selectedFilter, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 1错误:', error);
+        console.error('搜索API 1错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -285,7 +285,7 @@ async function searchApi2(searchTerm, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 2错误:', error);
+        console.error('搜索API 2错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -356,7 +356,7 @@ async function searchApi3(searchTerm, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 3错误:', error);
+        console.error('搜索API 3错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -431,7 +431,7 @@ async function searchApi4(searchTerm, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 4错误:', error);
+        console.error('搜索API 4错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -462,7 +462,7 @@ async function searchApi99(type, url) {
         
         return data.data;
     } catch (error) {
-        console.error('搜索API 99错误:', error);
+        console.error('搜索API 99错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -533,7 +533,7 @@ async function searchApi5(searchTerm, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 5错误:', error);
+        console.error('搜索API 5错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -604,7 +604,7 @@ async function searchApi6(searchTerm, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 6错误:', error);
+        console.error('搜索API 6错误:', error, 'URL:', url);
         return [];
     }
 }
@@ -675,7 +675,7 @@ async function searchApi7(searchTerm, url) {
         
         return results;
     } catch (error) {
-        console.error('搜索API 7错误:', error);
+        console.error('搜索API 7错误:', error, 'URL:', url);
         return [];
     }
 }
