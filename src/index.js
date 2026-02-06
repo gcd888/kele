@@ -892,17 +892,7 @@ function displayHotMovie(data) {
  * @function initOnlineTV
  */
 function initOnlineTV() {
-    const onlineTVData = window.onlineTV || [];
-    displayOnlineTV(onlineTVData);
-}
-
-/**
- * 显示在线影视
- * @async
- * @function displayOnlineTV
- * @param {Array} data - 在线影视数据数组
- */
-function displayOnlineTV(data) {
+    const data = window.onlineTV || [];
     const onlineTvList = document.getElementById('onlineTvList');
     onlineTvList.innerHTML = '';
     
@@ -955,6 +945,7 @@ function displayOnlineTV(data) {
         onlineTvList.appendChild(onlineTvItem);
     });
 }
+
 
 /**
  * 显示加载指示器
