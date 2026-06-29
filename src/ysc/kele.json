@@ -1,0 +1,16 @@
+{
+	"storeHouse": [
+		{
+			"sourceName": "🏅可乐定制仓库🏅",
+			"sourceUrl": "https://github.com/gcd888/kele/blob/master/keleduo/keleduo.json"
+		},
+		{
+			"sourceName": "🏄🏻‍♂️可乐网络仓库🏄🏻‍♂️",
+			"sourceUrl": "https://github.com/gcd888/kele/blob/master/keleduo/kelelike.json"
+		},
+		{
+			"sourceName": "👨🏻‍💻️可乐本地仓库👨🏻‍💻‍‍",
+			"sourceUrl": "clan://localhost/kele/keleday.txt"
+		}
+	]
+}

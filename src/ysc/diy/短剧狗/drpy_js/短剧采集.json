@@ -1,0 +1,176 @@
+[
+    {
+        "name": "木耳短剧",
+        "url": "https://www.heimuer.tv",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "古装短剧&虐恋短剧&逆袭短剧&悬疑短剧&神豪短剧&重生短剧&复仇短剧&穿越短剧&甜宠短剧&强者短剧&萌宝短剧&其它短剧",
+        "class_url": "45&46&47&48&49&50&51&52&53&54&55&56"
+    },
+    {
+        "name": "华为短剧",
+        "url": "https://hw8.live",
+        "parse_url": "https://player.hw8.lol/player?url=",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "120"
+    },
+    {
+        "name": "无尽短剧",
+        "url": "https://api.wujinapi.me",
+        "parse_url": "",
+        "class_name": "女频恋爱&反转爽剧&脑洞悬疑&年代穿越&古装仙侠&现代都市",
+        "class_url": "54&55&56&57&58&59"
+    },
+    {
+        "name": "挺好短剧",
+        "url": "https://api.okzy.org",
+        "parse_url": "",
+        "class_name": "爽文短剧&女频恋爱&反转爽剧&古装仙侠&年代穿越&脑洞悬疑&现代都市",
+        "class_url": "54&64&65&66&67&68&69"
+    },
+    {
+        "name": "索尼短剧",
+        "url": "https://suoniapi.com",
+        "parse_url": "",
+        "class_name": "爽文短剧&女频恋爱&反转爽剧&古装仙侠&年代穿越&脑洞悬疑&现代都市",
+        "class_url": "54&64&65&66&67&68&69"
+    },
+        {
+        "name": "丫丫短剧",
+        "url": "https://yayazy2.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "爽文短剧&女频恋爱&反转爽剧&古装仙侠&年代穿越&脑洞悬疑&现代都市",
+        "class_url": "54&64&65&66&67&68&69"
+    },
+        {
+        "name": "牛牛短剧",
+        "url": "https://niuniuzy6.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "爽文短剧&女频恋爱&反转爽剧&古装仙侠&年代穿越&脑洞悬疑&现代都市",
+        "class_url": "54&64&65&66&67&68&69"
+    },
+    {
+        "name": "最大短剧",
+        "url": "http://zuidazy.co",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "爽文短剧&女频恋爱&反转爽剧&古装仙侠&年代穿越&脑洞悬疑&现代都市",
+        "class_url": "54&64&65&66&67&68&69"
+    },
+        {
+        "name": "快车短剧",
+        "url": "https://caiji.kczyapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "爽文短剧&女频恋爱&反转爽剧&古装仙侠&年代穿越&脑洞悬疑&现代都市",
+        "class_url": "54&64&65&66&67&68&69"
+    },
+    {
+        "name": "小黄短剧",
+        "url": "https://iqyi.xiaohuangrentv.com",
+        "parse_url": "",
+        "cate_exclude": "^电影$|^电视剧$|^综艺$|^动漫$",
+        "class_name": "短剧&短剧",
+        "class_url": "22"
+    },
+    {
+        "name": "快看短剧",
+        "url": "https://kuaikan-api.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "热门短剧&热门短剧",
+        "class_url": "64"
+    },
+    {
+        "name": "1080短剧",
+        "url": "https://api.1080zyku.com",
+        "parse_url": "",
+        "cate_exclude": "",
+        "api": "/inc/api_mac10.php/",
+        "class_name": "短剧&短剧",
+        "class_url": "83"
+    },
+{
+        "name": "飘零短剧",
+        "url": "https://p2100.net",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "19"
+    },
+    {
+        "name": "量子短剧",
+        "url": "http://cj.lziapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "46"
+    },
+    {
+        "name": "金鹰短剧",
+        "url": "https://jyzyapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "30"
+    },
+    {
+        "name": "虎牙短剧",
+        "url": "https://www.huyaapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "30"
+    },
+        {
+        "name": "飞速短剧1",
+        "url": "https://fszy1.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "39"
+    },
+    {
+        "name": "360短剧",
+        "url": "https://360zy.com",
+        "parse_url": "",
+        "cate_exclude": "影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "爽文短剧&爽文短剧",
+        "class_url": "46"
+    },
+    {
+        "name": "豪华短剧",
+        "url": "https://hhzyapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "38"
+    },
+    {
+        "name": "光速短剧",
+        "url": "https://api.guangsuapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "31"
+    },
+    {
+        "name": "飞速短剧",
+        "url": "https://www.feisuzyapi.com",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "39"
+    },
+    {
+        "name": "天空短剧",
+        "url": "https://tiankongzy.com/",
+        "parse_url": "",
+        "cate_exclude": "电影片|连续剧|综艺片|动漫片|电影解说|体育|演员|新闻资讯",
+        "class_name": "短剧&短剧",
+        "class_url": "44"
+    }
+]
