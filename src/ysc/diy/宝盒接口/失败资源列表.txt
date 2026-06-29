@@ -1,0 +1,5 @@
+https://s3plus.meituan.net/opapisdk/op_ticket_1_5677168484_1774853250308_PA5tmo8g_vip.jar
+https://raw.githubusercontent.com/xyq254245/xyqonlinerule/main/dr_py/libs/drpy2.min.js
+https://raw.githubusercontent.com/xyq254245/xyqonlinerule/main/dr_py/js/金牌影视.js
+https://raw.githubusercontent.com/xyq254245/xyqonlinerule/main/dr_py/js/奇珍异兽.js
+http://127.0.0.1:9978/file/TVBox/bili_cookie.txt

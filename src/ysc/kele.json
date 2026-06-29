@@ -1,16 +1,28 @@
 {
-	"storeHouse": [
-		{
-			"sourceName": "🏅可乐定制仓库🏅",
-			"sourceUrl": "https://gcd888.github.io/kele/src/ysc/diy/kelediy.json"
-		},
-		{
-			"sourceName": "🏄🏻‍♂️可乐网络仓库🏄🏻‍♂️",
-			"sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/kelenet.json"
-		},
-		{
-			"sourceName": "👨🏻‍💻️可乐本地仓库👨🏻‍💻‍‍",
-			"sourceUrl": "clan://localhost/kele/keleday.txt"
-		}
-	]
+  "storeHouse": [
+    {
+      "sourceName": "🏅可乐定制仓库🏅",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/diy/kelediy.json"
+    },
+    {
+      "sourceName": "🏄🏻‍♂️可乐网络仓库🏄🏻‍♂️",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/kelenet.json"
+    },
+    {
+      "sourceName": "🏄可乐网络仓库🏄-饭太硬",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/fantaiyin.json"
+    },
+    {
+      "sourceName": "🏄可乐网络仓库🏄-摸鱼儿",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/moyuer.json"
+    },
+    {
+      "sourceName": "🏄可乐网络仓库🏄-肥猫",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/feimao.json"
+    },
+    {
+      "sourceName": "👨🏻‍💻️可乐本地仓库👨🏻‍💻",
+      "sourceUrl": "clan://localhost/kele/kelelocal.txt"
+    }
+  ]
 }

@@ -1,0 +1,34 @@
+{
+    "SiteUrl": "https://wogg.xxooo.cf",
+    "Domains": [
+          "https://wogg.xxooo.cf",
+          "https://woggpan.888484.xyz",
+          "https://wogg.333232.xyz",
+          "http://woggpan.xxooo.cf",
+          "https://www.wogg.one"
+    ],
+    "SiteWord": "yyds",
+    "SiteName": "多多",
+    "Classes": [
+        {
+            "type_name": "4K热门电影",
+            "type_id": "1"
+        },
+        {
+            "type_name": "4K热门电视剧",
+            "type_id": "2"
+        },
+        {
+            "type_name": "热门综艺",
+            "type_id": "3"
+        },
+        {
+            "type_name": "热门动漫",
+            "type_id": "4"
+        },
+        {
+            "type_name": "豆瓣TOP榜",
+            "type_id": "20"
+        }
+    ]
+}
