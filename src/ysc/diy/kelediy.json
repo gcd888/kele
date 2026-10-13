@@ -6,31 +6,39 @@
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/饭太硬/fty.json",
-      "name": "🚀饭太硬"
+      "name": "🍚饭太硬"
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/摸鱼儿/我不是.摸鱼儿.json",
-      "name": "✈️摸鱼儿"
+      "name": "🐟摸鱼儿"
     },
     {
-      "url": "https://github.com/gcd888/kele/blob/master/diy/肥猫/feimao.json",
-      "name": "🚅肥猫"
+      "url": "https://github.com/gcd888/kele/blob/master/diy/肥猫/肥猫.json",
+      "name": "🐱肥猫"
+    },
+	{
+      "url": "https://github.com/gcd888/kele/blob/master/diy/王小二/new.王二小放牛娃.json",
+      "name": "🐄王小二"
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/影视仓/影视仓.json",
-      "name": "🚞影视仓"
+      "name": "🎬影视仓"
+    },
+	{
+      "url": "https://github.com/gcd888/kele/blob/master/diy/ok/m.json",
+      "name": "👌OK"
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/宝盒接口/宝盒接口.json",
-      "name": "🚌宝盒接口"
+      "name": "🎁宝盒接口"
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/ymshaoer/ymshaoer.json",
-      "name": "少儿频道"
+      "name": "🧒少儿频道"
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/短剧狗/duanjugou.json",
-      "name": "🎦短剧狗"
+      "name": "📺短剧狗"
     },
     {
       "url": "https://github.com/gcd888/kele/blob/master/diy/儿童堡/儿童堡.json",
