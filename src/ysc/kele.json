@@ -9,16 +9,20 @@
       "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/kelenet.json"
     },
     {
-      "sourceName": "🏄可乐网络仓库🏄-饭太硬",
+      "sourceName": "🍚可乐网络仓库🍚-饭太硬",
       "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/fantaiyin.json"
     },
     {
-      "sourceName": "🏄可乐网络仓库🏄-摸鱼儿",
-      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/moyuer.json"
-    },
-    {
-      "sourceName": "🏄可乐网络仓库🏄-肥猫",
+      "sourceName": "🐱可乐网络仓库🐱-肥猫",
       "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/feimao.json"
+    },
+	{
+      "sourceName": "🎬可乐网络仓库🎬-影视仓",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/yingshicang.json"
+    },
+	{
+      "sourceName": 🏁可乐网络仓库🏁-终极收录",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/juhe.json"
     },
     {
       "sourceName": "👨🏻‍💻️可乐本地仓库👨🏻‍💻",
