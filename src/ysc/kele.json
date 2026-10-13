@@ -21,8 +21,16 @@
       "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/yingshicang.json"
     },
 	{
-      "sourceName": 🏁可乐网络仓库🏁-终极收录",
+      "sourceName": "🏁可乐网络仓库🏁-终极收录",
       "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/juhe.json"
+    },
+	{
+      "sourceName": "🧒可乐网络仓库🧒-儿童",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/son.json"
+    },
+	{
+      "sourceName": "❌可乐网络仓库❌-暂不可用",
+      "sourceUrl": "https://gcd888.github.io/kele/src/ysc/network/detail/fuli.json"
     },
     {
       "sourceName": "👨🏻‍💻️可乐本地仓库👨🏻‍💻",
