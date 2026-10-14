@@ -30,17 +30,19 @@ export function cloudColor(cloudType: string): string {
 export function validityLabel(validity: string): string {
   if (validity === 'valid') return '有效';
   if (validity === 'invalid') return '失效';
-  return '检测中';
+  // 'checking' 仅在批量补检进行中短暂出现（真实在检测）；unknown 表示未检测（每源仅前 3 条有流内校验）
+  if (validity === 'checking') return '检测中';
+  return '未检测';
 }
 
 export function validityCls(validity: string): string {
   return 'status-badge--' + (validity === 'valid' ? 'valid' : validity === 'invalid' ? 'invalid' : 'unknown');
 }
 
-/** 豆瓣封面走后端图片代理（防防盗链） */
+/** 豆瓣封面走后端图片代理（防防盗链）；v 参数用于击穿历史上被缓存的坏响应（0字节 200 + max-age=86400） */
 export function imgProxy(url?: string): string {
   if (!url) return '';
-  return '/api/img-proxy?url=' + encodeURIComponent(url);
+  return '/api/img-proxy?v=2&url=' + encodeURIComponent(url);
 }
 
 /** 相对时间显示 */

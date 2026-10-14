@@ -7,6 +7,7 @@ import type { Env } from '../types';
 
 export interface AdminJwtPayload {
   role: 'admin';
+  sub: string;
   exp: number;
   iat: number;
 }
@@ -14,9 +15,9 @@ export interface AdminJwtPayload {
 /** JWT 有效期：12 小时 */
 const ADMIN_EXPIRY_SECONDS = 12 * 60 * 60;
 
-export async function generateAdminToken(env: Env): Promise<string> {
+export async function generateAdminToken(env: Env, username: string): Promise<string> {
   const secret = new TextEncoder().encode(env.JWT_SECRET);
-  return new SignJWT({ role: 'admin' })
+  return new SignJWT({ role: 'admin', sub: username })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(Math.floor(Date.now() / 1000) + ADMIN_EXPIRY_SECONDS)
@@ -27,7 +28,7 @@ export async function verifyAdminToken(token: string, env: Env): Promise<AdminJw
   try {
     const secret = new TextEncoder().encode(env.JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
-    if (payload.role !== 'admin') return null;
+    if (payload.role !== 'admin' || typeof payload.sub !== 'string' || !payload.sub) return null;
     return payload as unknown as AdminJwtPayload;
   } catch {
     return null;

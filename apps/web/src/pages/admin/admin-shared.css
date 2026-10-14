@@ -1,0 +1,285 @@
+/* ===== 管理后台公共样式（由 pages/admin/index.vue 全局引入，类名均为 admin 特有） ===== */
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.tabs__item {
+  font-size: 14px;
+  color: var(--muted);
+  padding: 8px 18px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.tabs__item--active {
+  color: var(--primary);
+  font-weight: 600;
+  border-bottom-color: var(--primary);
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+/* 概览统计卡 */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.stat {
+  padding: 16px;
+  text-align: center;
+}
+
+.stat__num {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat__num--ok {
+  color: var(--valid);
+}
+
+.stat__num--bad {
+  color: var(--invalid);
+}
+
+.stat__num--warn {
+  color: #d97706;
+}
+
+.stat__num--muted {
+  color: var(--muted);
+}
+
+.stat__label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.toolbar__hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.content-block {
+  margin-bottom: 28px;
+}
+
+.content-block__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 表格 */
+.table {
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.table__row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.table__row:last-child {
+  border-bottom: none;
+}
+
+.table__row--head {
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--input-bg);
+  font-size: 12px;
+}
+
+.table__empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cell-strong {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-wrap {
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  text-align: center;
+  width: fit-content;
+}
+
+.cell-badge--ok {
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.cell-badge--bad {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.cell-badge--warn {
+  color: #d97706;
+  background: rgba(217, 119, 6, 0.14);
+}
+
+.cell-badge--off {
+  color: #64748b;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.cell-bad {
+  color: var(--invalid);
+}
+
+.cell-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cell-link {
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.cell-link--disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* 表单 */
+.form {
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.form__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+}
+
+.form__span2 {
+  grid-column: span 2;
+}
+
+.form__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.form__test-msg {
+  font-size: 12px;
+  color: var(--valid);
+  word-break: break-all;
+}
+
+.form__test-msg--err {
+  color: var(--invalid);
+}
+
+.form__test-msg--muted {
+  color: var(--muted);
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.field__label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.field__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.field__textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.field__error {
+  display: block;
+  font-size: 12px;
+  color: var(--invalid);
+  margin-top: 2px;
+}
+
+/* 行内操作提示 */
+.inline-msg {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  word-break: break-all;
+  padding: 0 2px 10px;
+}

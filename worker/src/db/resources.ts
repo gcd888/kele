@@ -1,5 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import type { ResourceEntity, CloudType, ValidStatus } from '../types';
+import type { ResourceEntity, CloudType } from '../types';
+import { ValidStatus } from '../types';
 
 /**
  * 资源表数据库操作
@@ -35,9 +36,9 @@ export async function findAllResourcesByKeyword(
   freshMinutes = 120,
 ): Promise<ResourceEntity[]> {
   const results = await db.prepare(
-    `SELECT * FROM resources WHERE keyword = ? AND updated_at > DATETIME('now', '-${freshMinutes} minutes')
+    `SELECT * FROM resources WHERE keyword = ? AND updated_at > DATETIME('now', ?)
      ORDER BY is_valid DESC, heat DESC, created_at DESC LIMIT 200`
-  ).bind(keyword).all<ResourceEntity>();
+  ).bind(keyword, `-${Math.max(1, Math.floor(freshMinutes) || 120)} minutes`).all<ResourceEntity>();
   return results.results;
 }
 
@@ -55,6 +56,35 @@ export async function findPreheatedResources(db: D1Database, limit = 40): Promis
     `SELECT * FROM resources WHERE is_preheated > 0 AND is_valid = 1 ORDER BY heat DESC, created_at DESC LIMIT ?`
   ).bind(limit).all<ResourceEntity>();
   return results.results;
+}
+
+/**
+ * 查询待检资源（Cron 兜底校验用）：可检测类型 + 未过期 + 按 url 去重。
+ * 每类最多 8 条配额 + 全局 30 条封顶（最久未检优先）——防单一类型海量 PENDING 饿死其他类型
+ */
+export async function findPendingCheckResources(
+  db: D1Database,
+  limit = 30,
+): Promise<Array<{ url: string; cloud_type: string }>> {
+  const types = ['quark', 'baidu', 'aliyun', 'uc', 'xunlei'];
+  const perType = 8;
+  const now = new Date().toISOString();
+  const subqueries = types.map(
+    (t) =>
+      `SELECT url, '${t}' AS cloud_type, MAX(updated_at) AS oldest FROM resources
+       WHERE is_valid = ${ValidStatus.PENDING} AND cloud_type = '${t}' AND expire_at > '${now}'
+       GROUP BY url ORDER BY oldest ASC LIMIT ${perType}`,
+  );
+  const results = await db.prepare(
+    `SELECT url, cloud_type, oldest FROM (${subqueries.join(' UNION ALL ')})
+     ORDER BY oldest ASC LIMIT ${limit}`,
+  ).all<{ url: string; cloud_type: string }>();
+  return results.results;
+}
+
+/** 仅刷新 updated_at（unknown 结论的冷却标记，避免下轮兜底立刻重试） */
+export async function touchResourceUpdatedAtByUrl(db: D1Database, url: string): Promise<void> {
+  await db.prepare(`UPDATE resources SET updated_at = DATETIME('now') WHERE url = ?`).bind(url).run();
 }
 
 /** 按 ID 查询 */
@@ -115,11 +145,12 @@ export async function findResourceTags(db: D1Database, resourceId: number): Prom
   return results.results.map(r => r.tag);
 }
 
-/** 清理过期缓存 */
+/** 清理过期缓存（参数化绑定防拼接注入） */
 export async function cleanupExpiredResources(db: D1Database, days = 5): Promise<number> {
+  const d = Math.max(1, Math.floor(days) || 5);
   const result = await db.prepare(
-    `DELETE FROM resources WHERE is_preheated <= 1 AND expire_at < DATETIME('now', '-${days} days')`
-  ).run();
+    `DELETE FROM resources WHERE is_preheated <= 1 AND expire_at < DATETIME('now', ?)`
+  ).bind(`-${d} days`).run();
   return result.meta.changes;
 }
 

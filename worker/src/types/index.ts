@@ -124,6 +124,8 @@ export interface DoubanItemEntity {
   url: string;
   card_subtitle: string;
   raw_json: string;
+  /** 豆瓣接口返回的原始序号（近期热度榜单顺序） */
+  rank: number;
   created_at: string;
   updated_at: string;
 }
@@ -143,6 +145,8 @@ export interface DoubanItemInput {
   url: string;
   card_subtitle: string;
   raw_json: string;
+  /** 豆瓣接口返回的原始序号（近期热度榜单顺序） */
+  rank: number;
 }
 
 /** 源适配器归一化爬取结果 */

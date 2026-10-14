@@ -6,12 +6,13 @@ import { getParser, generateSearchToken } from './registry';
 import { searchXiaozi } from './scrapers/xiaozi';
 import { searchZhuiju } from './scrapers/zhuiju';
 import { searchWoog } from './scrapers/woog';
+import { searchKkv } from './scrapers/kkv';
 
 /**
  * 源适配器工厂（docs/03 §3.2 三级接入体系）
  * - request_type=declarative            → L0 声明式
  * - request_type 命中 PARSERS           → L1 内置解析器
- * - request_type=xiaozi/zhuiju          → L2 定向爬虫
+ * - request_type=xiaozi/zhuiju/woog/kkv  → L2 定向爬虫
  */
 
 /** L1 适配器：URL/请求按配置构建，响应用注册表解析器解析 */
@@ -76,6 +77,8 @@ export function buildAdapterFor(config: ApiConfigEntity): AdapterBundle | null {
       return { adapter: new ScraperAdapter(config, searchZhuiju), config };
     case 'woog':
       return { adapter: new ScraperAdapter(config, searchWoog), config };
+    case 'kkv':
+      return { adapter: new ScraperAdapter(config, searchKkv), config };
     case 'declarative':
       return { adapter: new DeclarativeAdapter(config), config };
     default:

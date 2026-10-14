@@ -29,6 +29,15 @@ function parseAnswerLines(text: string): Array<{ url: string }> {
   return out;
 }
 
+/** 从纯文本 content 提取首个非空且非链接的行作为标题（上游 title 常为空字符串，?? 不会触发回退） */
+function pickTitleFromContent(content: string): string {
+  for (const line of content.split('\n')) {
+    const t = line.trim();
+    if (t && !/^https?:\/\//i.test(t)) return t;
+  }
+  return '';
+}
+
 // ---------- 通用解析器 ----------
 
 /** 从链接前面的 HTML 片段中提取最有意义的标题（kelePro parsers.ts 迁移） */
@@ -179,7 +188,7 @@ function searchApi3Parser(body: string, sourceName: string): CrawlerResult[] {
     for (const item of arr) {
       const content = String(item?.content ?? '');
       if (!content) continue;
-      const title = String(item?.title ?? content.split('\n')[0] ?? '').trim();
+      const title = (String(item?.title ?? '').trim() || pickTitleFromContent(content)).trim();
       const coverUrl = item?.coverUrl;
       const cover = typeof coverUrl === 'string' && coverUrl ? coverUrl : undefined;
       for (const { url } of parseAnswerLines(content)) {
@@ -203,7 +212,7 @@ function searchApi4Parser(body: string, sourceName: string): CrawlerResult[] {
       for (const item of items as Array<Record<string, unknown>>) {
         const content = String(item?.content ?? '');
         if (!content) continue;
-        const title = String(item?.title ?? content.split('\n')[0] ?? '').trim();
+        const title = (String(item?.title ?? '').trim() || pickTitleFromContent(content)).trim();
         for (const { url } of parseAnswerLines(content)) {
           out.push({ title: title || url, url, cloudType: detectCloudType(url), description: content, tags: [], source: sourceName });
         }

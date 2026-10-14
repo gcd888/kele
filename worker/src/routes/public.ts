@@ -24,8 +24,22 @@ publicRoutes.get('/img-proxy', async (c) => {
     const ext = decoded.split('.').pop()?.toLowerCase() || '';
     const mimeMap: Record<string, string> = { svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp' };
     const forcedContentType = mimeMap[ext] || 'image/jpeg';
-    const resp = await fetch(decoded, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    return new Response(resp.body, { headers: { 'Content-Type': forcedContentType, 'Cache-Control': 'public, max-age=86400' } });
+    // 豆瓣图床对极简 UA 返回 418 空 body，必须携带完整浏览器头 + Referer
+    const resp = await fetch(decoded, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        Referer: 'https://movie.douban.com/',
+        Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+      },
+    });
+    // 上游异常（418/403 等）时返回 502，前端 <image> onerror 自动落占位符
+    if (!resp.ok || !resp.body) {
+      return c.body('Upstream ' + resp.status, 502);
+    }
+    const upstreamType = resp.headers.get('content-type') || '';
+    const contentType = upstreamType.startsWith('image/') ? upstreamType : forcedContentType;
+    return new Response(resp.body, { headers: { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=86400' } });
   } catch {
     return c.body('Proxy failed', 502);
   }

@@ -11,6 +11,7 @@
  *   0 3 * * *    清理
  *   0 5 * * *    热搜聚合
  *   15 * * * *   熔断探测恢复（probe）
+ *   40 * * * *   未检测资源兜底校验（validity-backfill）
  */
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -24,6 +25,7 @@ import searchRoutes, { resourceRoutes } from './routes/search';
 import { runDoubanCrawler, runAggregate, runCleanup } from './schedules';
 import { runPrefetch } from './schedules/prefetch';
 import { runProbe } from './schedules/probe';
+import { runValidityBackfill } from './schedules/validity-backfill';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -75,18 +77,21 @@ export default {
 
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     const cron = event.cron || '';
-    console.log('Cron触发:', cron, new Date().toISOString());
+    const now = new Date();
+    const hour = now.getUTCHours();
+    const minute = now.getUTCMinutes();
+    console.log('Cron触发:', cron, now.toISOString());
 
     if (cron === '0 0 * * *') {
       ctx.waitUntil(runDoubanCrawler(env.DB));
-    } else if (cron === '0 3 * * *') {
-      ctx.waitUntil(runCleanup(env.DB));
-    } else if (cron === '0 5 * * *') {
-      ctx.waitUntil(runAggregate(env.DB));
-    } else if (cron === '30 0 * * *' || cron === '30 12 * * *') {
+    } else if (cron === '30 0,12 * * *') {
       ctx.waitUntil(runPrefetch(env.DB));
-    } else if (cron === '15 * * * *') {
-      ctx.waitUntil(runProbe(env.DB));
+    } else if (cron === '0 3,5 * * *') {
+      // 合并调度：UTC 3 点清理、5 点聚合
+      ctx.waitUntil(hour === 3 ? runCleanup(env.DB) : runAggregate(env.DB));
+    } else if (cron === '15,40 * * * *') {
+      // 合并调度：每小时 15 分探测熔断源、40 分兜底补检
+      ctx.waitUntil(minute === 15 ? runProbe(env.DB) : runValidityBackfill(env.DB));
     } else {
       ctx.waitUntil(Promise.all([
         runDoubanCrawler(env.DB).catch(e => console.error(e)),

@@ -5,7 +5,7 @@
       <view class="topbar">
         <view class="back" @tap="goBack"><view class="back__arrow"></view></view>
         <text class="topbar__title">在线影视</text>
-        <view class="topbar__placeholder"></view>
+        <view class="topbar__spacer"></view>
       </view>
 
       <view v-if="loading" class="state-block">
@@ -82,7 +82,7 @@ function openSite(site: OnlineTvEntity) {
 function goBack() {
   const pages = getCurrentPages();
   if (pages.length > 1) uni.navigateBack();
-  else uni.reLaunch({ url: '/pages/index/index' });
+  else uni.reLaunch({ url: '/pages/home/index' });
 }
 
 onMounted(load);
@@ -93,48 +93,11 @@ onMounted(load);
   min-height: 100vh;
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: calc(14px + var(--safe-top)) 0 14px;
-}
-
-.back {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.back__arrow {
-  width: 9px;
-  height: 9px;
-  border-left: 2px solid var(--text);
-  border-bottom: 2px solid var(--text);
-  transform: rotate(45deg);
-  margin-left: 3px;
-}
-
-.topbar__title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.topbar__placeholder {
-  width: 34px;
-}
-
 .grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
+  animation: kele-fade-up 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 @media (min-width: 768px) {
@@ -146,6 +109,7 @@ onMounted(load);
 .site {
   padding: 14px;
   cursor: pointer;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .site__head {
@@ -193,6 +157,15 @@ onMounted(load);
 
 .site__action {
   font-size: 12px;
-  color: var(--primary);
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+@media (hover: hover) {
+  .site:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+    border-color: rgba(240, 74, 46, 0.3);
+  }
 }
 </style>

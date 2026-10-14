@@ -387,6 +387,40 @@ export async function handleSearchRest(c: Context<{ Bindings: Env }>): Promise<R
 
 // ========== 资源即时检测 / 用户报失效 ==========
 
+/**
+ * POST /api/resource/check-batch {items:[{url, cloud_type}]}
+ * 批量即时检测（搜寻/校验拆分方案 A）：独立请求独享 50 子请求预算，每批 ≤20 条，
+ * 结果写回 resources 表供缓存路径复用；unknown 一并返回，前端用于还原「未检测」态
+ */
+export async function handleValidityBatch(c: Context<{ Bindings: Env }>): Promise<Response> {
+  const body = await c.req.json<{ items?: Array<{ url?: string; cloud_type?: string }> }>().catch(() => null);
+  const items = (body?.items || [])
+    .filter((i) => i.url && /^https?:\/\//i.test(i.url))
+    .slice(0, 20);
+  if (items.length === 0) return c.json(error(1, '缺少检测项', 'INVALID_PARAM'), 400);
+
+  const checked = await Promise.allSettled(
+    items.map(async (it) => ({
+      url: it.url as string,
+      validity: await checkValidity(it.url as string, (it.cloud_type || 'other') as CloudType),
+    })),
+  );
+  const results = checked.flatMap((r) =>
+    r.status === 'fulfilled' ? [{ url: r.value.url, validity: r.value.validity }] : [],
+  );
+
+  // 有效/失效结论落库（同 url 可能对应多条关键词记录，按 url 修正）
+  for (const r of results) {
+    if (r.validity === 'unknown') continue;
+    await updateResourceValidityByUrl(
+      c.env.DB,
+      r.url,
+      r.validity === 'valid' ? VS.VALID : VS.INVALID,
+    ).catch(() => undefined);
+  }
+  return c.json(success({ results }));
+}
+
 /** GET /api/resource/check?resource_id= ：即时检测并更新 DB */
 export async function handleResourceCheck(c: Context<{ Bindings: Env }>): Promise<Response> {
   const id = parseInt(c.req.query('resource_id') || '', 10);

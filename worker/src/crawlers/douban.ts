@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { DoubanItemInput } from '../types';
-import { batchUpsertDoubanItems, clearDoubanByType } from '../db/douban';
+import { batchInsertDoubanItems, clearDoubanByType } from '../db/douban';
 
 const UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 const MAX_ITEMS = 50;
@@ -15,24 +15,10 @@ interface DoubanApiItem {
   year?: string;
 }
 
-/** 剧集/综艺 recommend 接口 */
-function buildTvRecommendUrl(sort: string, tags: string, form: string, area = '华语'): string {
-  const cats: Record<string, string> = { '类型': '' };
-  if (form) cats['形式'] = form;
-  if (area) cats['地区'] = area;
-  const selectedCats = encodeURIComponent(JSON.stringify(cats));
-  let url = `https://m.douban.com/rexxar/api/v2/tv/recommend?refresh=0&start=0&count=${MAX_ITEMS}&selected_categories=${selectedCats}&uncollect=false&score_range=0,10&tags=${encodeURIComponent(tags)}`;
-  if (sort && sort !== 'T') url += `&sort=${sort}`;
-  return url;
-}
-
-/** 电影 recommend 接口 */
-function buildMovieRecommendUrl(sort: string, tags: string): string {
-  const cats: Record<string, string> = { '地区': '华语', '类型': '' };
-  const selectedCats = encodeURIComponent(JSON.stringify(cats));
-  let url = `https://m.douban.com/rexxar/api/v2/movie/recommend?refresh=0&start=0&count=${MAX_ITEMS}&selected_categories=${selectedCats}&uncollect=false&score_range=0,10&tags=${encodeURIComponent(tags)}`;
-  if (sort && sort !== 'T') url += `&sort=${sort}`;
-  return url;
+/** 剧集/综艺 recommend 接口（近期热度 sort=U，参数与豆瓣页面严格一致：selected_categories 仅 类型/形式，tags=华语,形式） */
+function buildTvRecommendUrl(form: string): string {
+  const cats = encodeURIComponent(JSON.stringify({ '类型': '', '形式': form }));
+  return `https://m.douban.com/rexxar/api/v2/tv/recommend?refresh=0&start=0&count=${MAX_ITEMS}&selected_categories=${cats}&uncollect=false&score_range=0,10&tags=${encodeURIComponent('华语,' + form)}&sort=U`;
 }
 
 /** 电影 recent_hot 接口 */
@@ -40,19 +26,11 @@ function buildMovieRecentHotUrl(category: string, type: string): string {
   return `https://m.douban.com/rexxar/api/v2/subject/recent_hot/movie?start=0&limit=${MAX_ITEMS}&category=${encodeURIComponent(category)}&type=${encodeURIComponent(type)}`;
 }
 
+/** 三类均取「近期热度」榜单：剧集=形式电视剧、综艺=形式综艺（recommend sort=U），电影=recent_hot 热门 */
 const CRAWL_CONFIGS = [
-  { mediaType: 'tv' as const, category: '综合', url: buildTvRecommendUrl('T', '电视剧,华语,2020年代', '电视剧') + '&playable=true' },
-  { mediaType: 'tv' as const, category: '近期热度', url: buildTvRecommendUrl('U', '电视剧,华语,2020年代', '电视剧') + '&playable=true' },
-  { mediaType: 'tv' as const, category: '高分优先', url: buildTvRecommendUrl('S', '电视剧,华语,2020年代', '电视剧') + '&playable=true' },
-  { mediaType: 'tv' as const, category: '首播时间', url: buildTvRecommendUrl('R', '电视剧,华语,2020年代', '电视剧') + '&playable=true' },
-  { mediaType: 'variety' as const, category: '综合', url: buildTvRecommendUrl('T', '综艺,华语', '综艺') + '&playable=true' },
-  { mediaType: 'variety' as const, category: '近期热度', url: buildTvRecommendUrl('U', '综艺,华语', '综艺') + '&playable=true' },
-  { mediaType: 'variety' as const, category: '高分优先', url: buildTvRecommendUrl('S', '综艺,华语', '综艺') + '&playable=true' },
-  { mediaType: 'variety' as const, category: '首播时间', url: buildTvRecommendUrl('R', '综艺,华语', '综艺') + '&playable=true' },
-  { mediaType: 'movie' as const, category: '综合', url: buildMovieRecommendUrl('T', '华语,2010年代') + '&playable=true' },
+  { mediaType: 'tv' as const, category: '近期热度', url: buildTvRecommendUrl('电视剧') },
+  { mediaType: 'variety' as const, category: '近期热度', url: buildTvRecommendUrl('综艺') },
   { mediaType: 'movie' as const, category: '近期热度', url: buildMovieRecentHotUrl('热门', '华语') },
-  { mediaType: 'movie' as const, category: '高分优先', url: buildMovieRecentHotUrl('豆瓣高分', '华语') },
-  { mediaType: 'movie' as const, category: '首播时间', url: buildMovieRecentHotUrl('最新', '华语') },
 ];
 
 function parseSubtitle(subtitle: string): { year: string; area: string; genres: string } {
@@ -75,39 +53,46 @@ async function crawlOne(url: string, label: string): Promise<DoubanApiItem[]> {
   } catch (e) { console.error(`豆瓣爬虫 ${label} 失败:`, e); return []; }
 }
 
-/** 全量拉取豆瓣热播并落库（Cron 专用） */
+/** 全量拉取豆瓣热播并落库（Cron 专用）：按类型先抓全+内存去重，再先删后插；某类型全部抓取失败时保留旧数据不清空 */
 export async function crawlDoubanAndSave(db: D1Database): Promise<{ tv: number; movie: number; variety: number }> {
-  await clearDoubanByType(db, 'tv');
-  await clearDoubanByType(db, 'movie');
-  await clearDoubanByType(db, 'variety');
-
   const stats = { tv: 0, movie: 0, variety: 0 };
 
-  for (const config of CRAWL_CONFIGS) {
-    const raw = await crawlOne(config.url, `${config.mediaType}/${config.category}`);
-    if (raw.length === 0) continue;
+  for (const mediaType of ['tv', 'variety', 'movie'] as const) {
+    const configs = CRAWL_CONFIGS.filter(c => c.mediaType === mediaType);
+    const seen = new Set<string>();
+    const items: DoubanItemInput[] = [];
 
-    const batchItems: DoubanItemInput[] = raw.map(item => {
-      const { year, area, genres } = parseSubtitle(item.card_subtitle || '');
-      return {
-        douban_id: item.id,
-        title: item.title,
-        media_type: config.mediaType,
-        category: config.category,
-        rating_value: item.rating?.value ?? 0,
-        rating_count: item.rating?.count ?? 0,
-        year: item.year || year,
-        area,
-        genres,
-        cover_url: (item.pic?.normal || item.pic?.large || '').replace(/\.webp$/, '.jpg'),
-        url: `https://movie.douban.com/subject/${item.id}/`,
-        card_subtitle: item.card_subtitle || '',
-        raw_json: JSON.stringify(item),
-      };
-    });
+    for (const config of configs) {
+      const raw = await crawlOne(config.url, `${config.mediaType}/${config.category}`);
+      raw.forEach((item, idx) => {
+        // 同一条目重复出现时只保留首次（保留其在榜单中的原始序号）
+        if (seen.has(item.id)) return;
+        seen.add(item.id);
 
-    await batchUpsertDoubanItems(db, batchItems);
-    stats[config.mediaType] += batchItems.length;
+        const { year, area, genres } = parseSubtitle(item.card_subtitle || '');
+        items.push({
+          douban_id: item.id,
+          title: item.title,
+          media_type: config.mediaType,
+          category: config.category,
+          rating_value: item.rating?.value ?? 0,
+          rating_count: item.rating?.count ?? 0,
+          year: item.year || year,
+          area,
+          genres,
+          cover_url: (item.pic?.normal || item.pic?.large || '').replace(/\.webp$/, '.jpg'),
+          url: `https://movie.douban.com/subject/${item.id}/`,
+          card_subtitle: item.card_subtitle || '',
+          raw_json: JSON.stringify(item),
+          rank: idx + 1,
+        });
+      });
+    }
+
+    if (items.length === 0) continue;
+    await clearDoubanByType(db, mediaType);
+    await batchInsertDoubanItems(db, items);
+    stats[mediaType] = items.length;
   }
 
   return stats;

@@ -5,7 +5,7 @@
       <view class="topbar">
         <view class="back" @tap="goBack"><view class="back__arrow"></view></view>
         <text class="topbar__title">免责声明</text>
-        <view class="topbar__placeholder"></view>
+        <view class="topbar__spacer"></view>
       </view>
 
       <view class="card about">
@@ -39,7 +39,7 @@
 function goBack() {
   const pages = getCurrentPages();
   if (pages.length > 1) uni.navigateBack();
-  else uni.reLaunch({ url: '/pages/index/index' });
+  else uni.reLaunch({ url: '/pages/home/index' });
 }
 </script>
 
@@ -48,53 +48,16 @@ function goBack() {
   min-height: 100vh;
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: calc(14px + var(--safe-top)) 0 14px;
-}
-
-.back {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.back__arrow {
-  width: 9px;
-  height: 9px;
-  border-left: 2px solid var(--text);
-  border-bottom: 2px solid var(--text);
-  transform: rotate(45deg);
-  margin-left: 3px;
-}
-
-.topbar__title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.topbar__placeholder {
-  width: 34px;
-}
-
 .about {
-  padding: 20px;
+  padding: 22px;
   margin-bottom: 16px;
+  animation: kele-fade-up 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 .about__h1 {
   display: block;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 19px;
+  font-weight: 800;
   color: var(--text);
   margin-bottom: 14px;
 }
@@ -124,8 +87,8 @@ function goBack() {
 
 .about__mail {
   font-size: 15px;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 700;
+  color: var(--primary-text);
 }
 
 .about__foot {

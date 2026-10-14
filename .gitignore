@@ -7,3 +7,5 @@ unpackage/
 .DS_Store
 .npm-cache/
 .idea/
+demo/
+tmp-hongguo-test/

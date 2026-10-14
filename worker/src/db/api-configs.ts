@@ -33,13 +33,14 @@ export async function insertSource(db: D1Database, s: Partial<ApiConfigEntity>):
   ).first<ApiConfigEntity>();
 }
 
-/** 更新源（允许部分字段） */
+/** 更新源（允许部分字段；列名走白名单，防 PUT body 任意键注入 SQL） */
+const SOURCE_UPDATABLE = new Set(['name', 'url', 'method', 'request_type', 'headers', 'body_template', 'result_paths', 'field_map', 'source_type', 'timeout_ms', 'status', 'priority', 'enabled', 'disabled_until']);
+
 export async function updateSource(db: D1Database, id: number, s: Partial<ApiConfigEntity>): Promise<void> {
-  const skip = new Set(['id', 'created_at', 'fail_count', 'last_ok_at', 'last_latency_ms']);
   const fields: string[] = [];
   const values: unknown[] = [];
   for (const [key, value] of Object.entries(s)) {
-    if (!skip.has(key) && value !== undefined) {
+    if (SOURCE_UPDATABLE.has(key) && value !== undefined) {
       fields.push(`${key} = ?`);
       values.push(value);
     }

@@ -58,12 +58,12 @@ const placeholder = computed(() => (props.name || '资源').trim().charAt(0) || 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(139, 92, 246, 0.18));
+  background: linear-gradient(135deg, rgba(240, 74, 46, 0.16), rgba(20, 184, 166, 0.16));
 }
 
 .cover__ph-text {
   font-size: 26px;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 800;
+  color: var(--primary-text);
 }
 </style>

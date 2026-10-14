@@ -1,5 +1,6 @@
 import type { CloudType, ValidStatus } from '../types';
 import { ValidStatus as VS } from '../types';
+import { createHash } from 'node:crypto';
 
 /**
  * 失效检测器插件（docs/03 §3.7）
@@ -88,7 +89,7 @@ async function checkAliyun(url: string): Promise<Validity> {
   }
 }
 
-/** UC：sharepage/v2/detail，"分享地址已过期"失效；歧义态返回 unknown */
+/** UC：sharepage/v2/detail，200 有效；404/取消分享/文件不存在等失效；其余歧义态返回 unknown */
 async function checkUc(url: string): Promise<Validity> {
   const { signal, done } = checkSignal();
   try {
@@ -114,7 +115,8 @@ async function checkUc(url: string): Promise<Validity> {
       signal,
     });
     const data = (await resp.json().catch(() => ({}))) as { status?: number; message?: string };
-    if ((resp.status === 404 || data.status === 404) && data.message?.includes('分享地址已过期')) return 'invalid';
+    // 失效形态：HTTP 404「文件不存在/分享地址已过期」、HTTP 200+status 404「好友已取消了分享」等
+    if (resp.status === 404 || data.status === 404) return 'invalid';
     if (resp.status === 200 && data.status === 200) return 'valid';
     return 'unknown';
   } catch {
@@ -129,7 +131,143 @@ export const VALIDITY_CHECKERS: Partial<Record<CloudType, ValidityChecker>> = {
   baidu: checkBaidu,
   aliyun: checkAliyun,
   uc: checkUc,
+  xunlei: checkXunlei,
 };
+
+// ===== 迅雷：验证码令牌服务端铸造（源自开源 alist Thunder 驱动的签名算法）+ share API 判定 =====
+
+const XL_CLIENT_ID = 'Xp6vsxz_7IYVw2BB';
+const XL_CLIENT_VERSION = '8.31.0.9726';
+const XL_PACKAGE_NAME = 'com.xunlei.downloadprovider';
+const XL_USER_AGENT = 'ANDROID-com.xunlei.downloadprovider/8.31.0.9726 netWorkType/5G appid/40';
+const XL_ALGORITHMS = [
+  '9uJNVj/wLmdwKrJaVj/omlQ',
+  'Oz64Lp0GigmChHMf/6TNfxx7O9PyopcczMsnf',
+  'Eb+L7Ce+Ej48u',
+  'jKY0',
+  'ASr0zCl6v8W4aidjPK5KHd1Lq3t+vBFf41dqv5+fnOd',
+  'wQlozdg6r1qxh0eRmt3QgNXOvSZO6q/GXK',
+  'gmirk+ciAvIgA/cxUUCema47jr/YToixTT+Q6O',
+  '5IiCoM9B1/788ntB',
+  'P07JH0h6qoM6TSUAK2aL9T5s2QBVeY9JWvalf',
+  '+oK0AN',
+];
+/** 令牌实际有效期 300s，提前 60s 刷新 */
+const XL_TOKEN_TTL_MS = 240_000;
+
+const xlState = { deviceId: '', token: '', mintedAt: 0 };
+
+function xlMd5(s: string): string {
+  return createHash('md5').update(s).digest('hex');
+}
+
+/** captcha_sign：身份五元组拼接后逐个叠加 MD5(盐) */
+function xlCaptchaSign(deviceId: string, timestamp: string): string {
+  let str = XL_CLIENT_ID + XL_CLIENT_VERSION + XL_PACKAGE_NAME + deviceId + timestamp;
+  for (const alg of XL_ALGORITHMS) str = xlMd5(str + alg);
+  return '1.' + str;
+}
+
+/** 向 captcha/init 铸造令牌；失败返回 null */
+async function mintXlToken(deviceId: string): Promise<string | null> {
+  const { signal, done } = checkSignal();
+  try {
+    const timestamp = Date.now().toString();
+    const resp = await fetch('https://xluser-ssl.xunlei.com/v1/shield/captcha/init', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8', 'User-Agent': XL_USER_AGENT },
+      body: JSON.stringify({
+        client_id: XL_CLIENT_ID,
+        action: 'get:/drive/v1/share',
+        device_id: deviceId,
+        meta: {
+          username: '',
+          phone_number: '',
+          email: '',
+          package_name: XL_PACKAGE_NAME,
+          client_version: XL_CLIENT_VERSION,
+          captcha_sign: xlCaptchaSign(deviceId, timestamp),
+          timestamp,
+          user_id: '0',
+        },
+      }),
+      signal,
+    });
+    const data = (await resp.json().catch(() => ({}))) as { captcha_token?: string };
+    return resp.status === 200 && data.captcha_token ? data.captcha_token : null;
+  } catch {
+    return null;
+  } finally {
+    done();
+  }
+}
+
+/** isolate 级令牌缓存：同一 isolate 内多条例子请求共享一枚令牌 */
+async function getXlToken(): Promise<{ token: string; deviceId: string } | null> {
+  const now = Date.now();
+  if (xlState.token && now - xlState.mintedAt < XL_TOKEN_TTL_MS) {
+    return { token: xlState.token, deviceId: xlState.deviceId };
+  }
+  if (!xlState.deviceId) xlState.deviceId = crypto.randomUUID().replace(/-/g, '');
+  const token = await mintXlToken(xlState.deviceId);
+  if (!token) return null;
+  xlState.token = token;
+  xlState.mintedAt = now;
+  return { token, deviceId: xlState.deviceId };
+}
+
+type XlAttempt = 'valid' | 'invalid' | 'unknown' | 'retry';
+
+async function xlAttempt(url: string, token: string, deviceId: string): Promise<XlAttempt> {
+  const { signal, done } = checkSignal();
+  try {
+    const u = new URL(url);
+    const shareId = extractLastPathSegment(u.pathname);
+    const passCode = u.searchParams.get('pwd') || '';
+    const resp = await fetch(
+      `https://api-pan.xunlei.com/drive/v1/share?share_id=${encodeURIComponent(shareId)}&pass_code=${encodeURIComponent(passCode)}&limit=1&scene=NORMAL`,
+      {
+        headers: {
+          'x-client-id': XL_CLIENT_ID,
+          'x-device-id': deviceId,
+          'x-captcha-token': token,
+          'User-Agent': XL_USER_AGENT,
+        },
+        signal,
+      },
+    );
+    if (resp.status === 200) {
+      const data = (await resp.json().catch(() => ({}))) as { share_status?: string };
+      return data.share_status === 'OK' ? 'valid' : 'invalid';
+    }
+    // 400 无法区分「假 share_id」与「令牌失效」，统一交由上层刷令牌重试一次
+    if (resp.status === 400) return 'retry';
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  } finally {
+    done();
+  }
+}
+
+/**
+ * 迅雷链接有效性：200+OK 有效 / EXPIRED、PASS_CODE_ERROR 等失效 / 假 ID 400 失效；
+ * 铸令牌失败或网络异常返回 unknown（不落库）
+ */
+async function checkXunlei(url: string): Promise<Validity> {
+  const clean = url.split('#')[0];
+  if (!extractLastPathSegment(clean.split('?')[0])) return 'invalid';
+  const first = await getXlToken();
+  if (!first) return 'unknown';
+  const r1 = await xlAttempt(clean, first.token, first.deviceId);
+  if (r1 !== 'retry') return r1;
+  // 令牌可能已过期：强制重铸后再试一次，仍 400 判失效
+  xlState.token = '';
+  const second = await getXlToken();
+  if (!second) return 'unknown';
+  const r2 = await xlAttempt(clean, second.token, second.deviceId);
+  return r2 === 'retry' ? 'invalid' : r2;
+}
 
 /** 校验单条链接；无检测器的类型返回 'unknown' */
 export async function checkValidity(url: string, cloudType: CloudType): Promise<Validity> {

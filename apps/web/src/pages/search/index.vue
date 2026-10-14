@@ -31,7 +31,7 @@
             <text
               v-for="h in history"
               :key="h"
-              class="history__chip"
+              class="chip history__chip"
               @tap="reSearch(h)"
             >{{ h }}</text>
           </view>
@@ -44,18 +44,35 @@
         <text
           v-for="f in filters"
           :key="f.value"
-          class="filter-chip"
-          :class="{ 'filter-chip--active': filter === f.value }"
+          class="chip"
+          :class="{ 'chip--active': filter === f.value }"
           @tap="filter = f.value"
-        >{{ f.label }}</text>
+        >{{ f.label }}<text v-if="filterCounts[f.value]" class="chip__num">{{ filterCounts[f.value] }}</text></text>
       </view>
 
-      <!-- 进度 / 汇总行 -->
-      <view class="meta-line" v-if="status === 'loading' || status === 'done'">
+      <!-- 聚合进度：源状态 chips + 进度条 -->
+      <view v-if="status === 'loading' && sourceList.length" class="agg fade-up">
+        <view class="agg__bar">
+          <view class="agg__bar-fill" :style="{ width: progressPct + '%' }"></view>
+        </view>
+        <view class="agg__sources">
+          <view
+            v-for="s in sourceList"
+            :key="s.id"
+            class="agg__source"
+            :class="'agg__source--' + s.status"
+          >
+            <view class="agg__dot"></view>
+            <text class="agg__name">{{ s.name }}</text>
+            <text v-if="s.status === 'ok'" class="agg__count">{{ s.count }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 汇总行 -->
+      <view class="meta-line" v-if="status === 'done'">
         <text class="meta-line__text">
-          {{ status === 'loading'
-            ? '正在聚合搜索' + (sourceTotal ? '，已完成 ' + sourceDoneCount + '/' + sourceTotal + ' 个源' : '...')
-            : (cached ? '缓存结果' : '聚合完成') + '，耗时 ' + tookSec + 's' }}
+          {{ (cached ? '缓存结果' : '聚合完成') + ' · ' + totalCount + ' 条结果 · 耗时 ' + tookSec + 's' }}
         </text>
         <text v-if="cached && stale" class="meta-line__stale">（陈旧缓存）</text>
       </view>
@@ -81,14 +98,17 @@
 
       <!-- ===== 双桶结果区 ===== -->
       <template v-else>
-        <!-- 有效区（前） -->
+        <!-- 结果区（未检测条目与有效条目同桶，标题与计数如实标注） -->
         <view v-if="filteredValid.length" class="bucket">
           <view class="bucket__head">
             <view class="bucket__dot bucket__dot--valid"></view>
-            <text class="bucket__title">有效结果</text>
+            <text class="bucket__title">搜索结果</text>
             <text class="bucket__count">{{ filteredValid.length }}</text>
+            <text v-if="validUnknownCount" class="bucket__split">有效 {{ validCheckedCount }} · 未检测 {{ validUnknownCount }}</text>
           </view>
-          <ResultCard v-for="it in filteredValid" :key="it.url" :item="it" />
+          <view class="results-grid">
+            <ResultCard v-for="it in filteredValid" :key="it.url" :item="it" />
+          </view>
         </view>
 
         <!-- 失效区（沉底） -->
@@ -98,7 +118,9 @@
             <text class="bucket__title">失效结果</text>
             <text class="bucket__count">{{ filteredInvalid.length }}</text>
           </view>
-          <ResultCard v-for="it in filteredInvalid" :key="it.url" :item="it" />
+          <view class="results-grid results-grid--dim">
+            <ResultCard v-for="it in filteredInvalid" :key="it.url" :item="it" />
+          </view>
         </view>
       </template>
     </view>
@@ -108,13 +130,20 @@
 <script setup lang="ts">
 import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { computed, ref } from 'vue';
-import { searchStream, type SearchStreamHandle } from '../../api/search';
+import { checkBatch, searchStream, type SearchStreamHandle } from '../../api/search';
 import ResultCard from '../../components/ResultCard.vue';
 import type { DonePayload, StreamMeta, ValidityResult } from '../../types';
 import type { SearchItemView } from '../../utils/cloud';
 import { addHistory, clearHistory, getHistory, removeHistory } from '../../utils/storage';
 
 type Status = 'idle' | 'loading' | 'done' | 'error';
+
+interface SourceState {
+  id: number;
+  name: string;
+  status: 'loading' | 'ok' | 'error';
+  count?: number;
+}
 
 const inputKw = ref('');
 const kw = ref('');
@@ -124,8 +153,7 @@ const meta = ref<StreamMeta | null>(null);
 const cached = ref(false);
 const stale = ref(false);
 const tookMs = ref(0);
-const sourceTotal = ref(0);
-const sourceDoneCount = ref(0);
+const sourceList = ref<SourceState[]>([]);
 const filter = ref('all');
 const history = ref<string[]>([]);
 
@@ -145,10 +173,31 @@ const filters = [
 ];
 
 const tookSec = computed(() => (tookMs.value / 1000).toFixed(1));
+const totalCount = computed(() => validList.value.length + invalidList.value.length);
+
+const progressPct = computed(() => {
+  if (!sourceList.value.length) return 0;
+  const done = sourceList.value.filter((s) => s.status !== 'loading').length;
+  return Math.round((done / sourceList.value.length) * 100);
+});
+
+/** 各网盘类型计数（含全部） */
+const filterCounts = computed(() => {
+  const m: Record<string, number> = {};
+  for (const it of [...validList.value, ...invalidList.value]) {
+    m[it.cloud_type] = (m[it.cloud_type] || 0) + 1;
+  }
+  m.all = validList.value.length + invalidList.value.length;
+  return m;
+});
 
 /** 前端网盘类型过滤 */
 const filteredValid = computed(() => applyFilter(validList.value));
 const filteredInvalid = computed(() => applyFilter(invalidList.value));
+
+/** 结果桶内已检测有效 / 未检测计数（未检测 = 流式搜索未覆盖校验或该网盘类型无检测器） */
+const validCheckedCount = computed(() => filteredValid.value.filter((i) => i.validity === 'valid').length);
+const validUnknownCount = computed(() => filteredValid.value.length - validCheckedCount.value);
 
 function applyFilter(list: SearchItemView[]): SearchItemView[] {
   if (filter.value === 'all') return list;
@@ -164,14 +213,14 @@ function startSearch(q: string) {
 
   handle?.abort();
   handle = null;
+  backfillAborted = true; // 中止上一轮补检循环
   validList.value = [];
   invalidList.value = [];
   meta.value = null;
   cached.value = false;
   stale.value = false;
   tookMs.value = 0;
-  sourceTotal.value = 0;
-  sourceDoneCount.value = 0;
+  sourceList.value = [];
   errMsg.value = '';
   status.value = 'loading';
 
@@ -180,7 +229,9 @@ function startSearch(q: string) {
     {
       onMeta(m) {
         meta.value = m;
-        sourceTotal.value = m.cached ? 0 : m.sources.length;
+        sourceList.value = m.cached
+          ? []
+          : m.sources.map((s) => ({ id: s.id, name: s.name, status: 'loading' as const }));
       },
       onSourceResult(_sourceId, items) {
         for (const raw of items) {
@@ -215,14 +266,20 @@ function startSearch(q: string) {
           }
         }
       },
-      onSourceDone() {
-        sourceDoneCount.value += 1;
+      onSourceDone(payload) {
+        const s = sourceList.value.find((x) => x.id === payload.sourceId);
+        if (s) {
+          s.status = payload.ok ? 'ok' : 'error';
+          s.count = payload.count;
+        }
       },
       onDone(p: DonePayload) {
         status.value = 'done';
         tookMs.value = p.tookMs || tookMs.value;
         cached.value = p.cached;
         stale.value = p.stale;
+        // 搜寻/校验拆分：流结束后前端分批补检未检测条目（卡片实时未检测→有效/失效）
+        backfillValidity();
       },
       onError(message: string) {
         uni.showToast({ title: message || '部分来源异常', icon: 'none', duration: 2000 });
@@ -247,21 +304,65 @@ function reSearch(kwArg?: string) {
   startSearch(q);
 }
 
+// ===== 批量补检（搜寻/校验拆分：done 后前端分批调用 /api/resource/check-batch）=====
+const CHECKABLE_CLOUDS = new Set(['quark', 'baidu', 'aliyun', 'uc', 'xunlei']);
+const CHECK_BATCH_SIZE = 20;
+let backfillAborted = false;
+/** 本轮已尝试补检的 URL：unknown 结论（上游歧义/超时）不重试，防止无限循环 */
+let attemptedUrls = new Set<string>();
+
+/** 流式校验结论应用：invalid 移入失效区 / valid 转绿 / unknown 还原未检测 */
+function applyValidity(results: Array<{ url: string; validity: string }>) {
+  for (const r of results) {
+    const idx = validList.value.findIndex((v) => v.url === r.url);
+    if (idx < 0) continue;
+    if (r.validity === 'invalid') {
+      const [item] = validList.value.splice(idx, 1);
+      item.validity = 'invalid';
+      invalidList.value.push(item);
+    } else {
+      validList.value[idx].validity = r.validity === 'valid' ? 'valid' : 'unknown';
+    }
+  }
+}
+
+async function backfillValidity() {
+  backfillAborted = false;
+  attemptedUrls = new Set();
+  while (!backfillAborted) {
+    const batch = validList.value
+      .filter((i) => i.validity === 'unknown' && CHECKABLE_CLOUDS.has(i.cloud_type) && !attemptedUrls.has(i.url))
+      .slice(0, CHECK_BATCH_SIZE);
+    if (batch.length === 0) break;
+    // 标记「检测中」（此刻真实在检测），结论回来后由 applyValidity 更新或还原
+    for (const it of batch) {
+      it.validity = 'checking';
+      attemptedUrls.add(it.url);
+    }
+    try {
+      const results = await checkBatch(batch.map((i) => ({ url: i.url, cloud_type: i.cloud_type })));
+      if (backfillAborted) return;
+      applyValidity(results);
+      // 结论缺失（上游异常被服务端丢弃）的条目还原为未检测，且不再重试
+      for (const it of batch) if (it.validity === 'checking') it.validity = 'unknown';
+    } catch {
+      // 批量检测失败：还原本批为未检测并终止本轮
+      for (const it of batch) if (it.validity === 'checking') it.validity = 'unknown';
+      break;
+    }
+  }
+}
+
 function onClearHistory() {
   clearHistory();
   history.value = [];
   uni.showToast({ title: '已清空搜索历史', icon: 'none' });
 }
 
-function removeOneHistory(kw: string) {
-  removeHistory(kw);
-  history.value = getHistory();
-}
-
 function goBack() {
   const pages = getCurrentPages();
   if (pages.length > 1) uni.navigateBack();
-  else uni.reLaunch({ url: '/pages/index/index' });
+  else uni.reLaunch({ url: '/pages/home/index' });
 }
 
 onLoad((options) => {
@@ -272,6 +373,7 @@ onLoad((options) => {
 });
 
 onUnload(() => {
+  backfillAborted = true;
   handle?.abort();
   handle = null;
 });
@@ -282,45 +384,21 @@ onUnload(() => {
   min-height: 100vh;
 }
 
-/* 顶栏 */
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: calc(14px + var(--safe-top)) 0 14px;
-}
-
-.back {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.back__arrow {
-  width: 9px;
-  height: 9px;
-  border-left: 2px solid var(--text);
-  border-bottom: 2px solid var(--text);
-  transform: rotate(45deg);
-  margin-left: 3px;
-}
-
+/* 顶栏搜索框 */
 .search-box {
   flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
   padding: 9px 12px;
+  transition: border-color 0.15s ease-out;
+}
+
+.search-box:focus-within {
+  border-color: var(--primary);
 }
 
 .search-box__icon {
@@ -351,7 +429,6 @@ onUnload(() => {
   background: transparent;
 }
 
-/* CSS 关闭叉 */
 .search-box__clear {
   position: relative;
   flex-shrink: 0;
@@ -382,6 +459,7 @@ onUnload(() => {
 
 .search-btn {
   flex-shrink: 0;
+  border-radius: 14px;
 }
 
 /* 历史 */
@@ -409,13 +487,8 @@ onUnload(() => {
 }
 
 .history__chip {
-  font-size: 12px;
-  color: var(--text);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 999px;
   padding: 3px 12px;
-  cursor: pointer;
+  font-size: 12px;
 }
 
 .history__clear {
@@ -433,23 +506,81 @@ onUnload(() => {
   margin-bottom: 14px;
 }
 
-.filter-chip {
-  font-size: 13px;
+/* 聚合进度 */
+.agg {
+  margin-bottom: 14px;
+}
+
+.agg__bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--input-bg);
+  overflow: hidden;
+}
+
+.agg__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--grad-primary);
+  transition: width 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.agg__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.agg__source {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
   color: var(--muted);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 5px 16px;
-  cursor: pointer;
+  padding: 3px 10px;
 }
 
-.filter-chip--active {
-  color: #fff;
+.agg__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--checking);
+}
+
+.agg__source--loading .agg__dot {
   background: var(--primary);
-  border-color: var(--primary);
+  animation: kele-pulse 1.2s ease-in-out infinite;
 }
 
-/* 进度行 */
+.agg__source--ok {
+  color: var(--text);
+  border-color: rgba(20, 181, 103, 0.4);
+}
+
+.agg__source--ok .agg__dot {
+  background: var(--valid);
+}
+
+.agg__source--error {
+  color: var(--invalid);
+  border-color: rgba(217, 45, 32, 0.4);
+}
+
+.agg__source--error .agg__dot {
+  background: var(--invalid);
+}
+
+.agg__count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--valid);
+}
+
+/* 汇总行 */
 .meta-line {
   display: flex;
   align-items: center;
@@ -459,6 +590,7 @@ onUnload(() => {
 .meta-line__text {
   font-size: 13px;
   color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .meta-line__stale {
@@ -468,7 +600,7 @@ onUnload(() => {
 
 /* 双桶分组 */
 .bucket {
-  margin-bottom: 22px;
+  margin-bottom: 24px;
 }
 
 .bucket__head {
@@ -494,17 +626,44 @@ onUnload(() => {
 
 .bucket__title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 800;
   color: var(--text);
 }
 
 .bucket__count {
   font-size: 12px;
+  font-weight: 700;
   color: var(--muted);
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 0 8px;
+  padding: 0 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bucket__split {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 结果网格：移动单列 / 桌面双列 */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.results-grid--dim {
+  opacity: 0.72;
+}
+
+@media (min-width: 768px) {
+  .results-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 }
 
 .state-block__btn {

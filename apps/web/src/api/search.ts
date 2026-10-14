@@ -13,7 +13,25 @@
  * 15s 无任何事件视为连接异常 → onInterrupt。
  */
 import type { DonePayload, Resource, SourceDonePayload, StreamMeta, ValidityResult } from '../types';
-import { API_BASE } from './client';
+import { request, API_BASE } from './client';
+
+/** 批量校验单条结论（含 unknown，用于还原「未检测」态） */
+export interface BatchValidityResult {
+  url: string;
+  validity: 'valid' | 'invalid' | 'unknown';
+}
+
+/**
+ * 批量校验未检测条目（搜寻/校验拆分方案 A）：
+ * 独立请求独享子请求预算，每批 ≤20 条；结论同时落库，缓存路径自动受益
+ */
+export async function checkBatch(items: Array<{ url: string; cloud_type: string }>): Promise<BatchValidityResult[]> {
+  const data = await request<{ results: BatchValidityResult[] }>('/resource/check-batch', {
+    method: 'POST',
+    data: { items },
+  });
+  return (data && data.results) || [];
+}
 
 export interface SearchHandlers {
   onMeta?: (meta: StreamMeta) => void;

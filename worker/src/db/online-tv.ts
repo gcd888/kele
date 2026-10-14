@@ -18,12 +18,14 @@ export async function insertOnlineTv(db: D1Database, s: { name: string; url: str
     .bind(s.name, s.url, s.img || '', s.description || '', s.sort ?? 0).first<OnlineTvEntity>();
 }
 
+/** 更新站点（列名走白名单，防 PUT body 任意键注入 SQL） */
+const TV_UPDATABLE = new Set(['name', 'url', 'img', 'description', 'sort', 'status']);
+
 export async function updateOnlineTv(db: D1Database, id: number, s: Partial<OnlineTvEntity>): Promise<void> {
-  const skip = new Set(['id']);
   const fields: string[] = [];
   const values: unknown[] = [];
   for (const [key, value] of Object.entries(s)) {
-    if (!skip.has(key) && value !== undefined) {
+    if (TV_UPDATABLE.has(key) && value !== undefined) {
       fields.push(`${key} = ?`);
       values.push(value);
     }

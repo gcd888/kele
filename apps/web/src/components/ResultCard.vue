@@ -94,8 +94,27 @@ function goDetail() {
 
 <style scoped>
 .rc {
-  padding: 12px 14px;
-  margin-bottom: 10px;
+  padding: 13px 15px;
+  margin-bottom: 0;
+  animation: rc-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+}
+
+@keyframes rc-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rc {
+    animation: none;
+  }
 }
 
 .rc__head {
@@ -106,18 +125,19 @@ function goDetail() {
 
 .rc__badge {
   flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 2px 9px;
+  border-radius: 8px;
   font-size: 12px;
   line-height: 18px;
-  font-weight: 600;
+  font-weight: 700;
   margin-top: 1px;
 }
 
 .rc__title {
   flex: 1;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.4;
   color: var(--text);
   word-break: break-all;
   display: -webkit-box;
@@ -140,19 +160,19 @@ function goDetail() {
 
 .rc__tag {
   font-size: 11px;
-  color: var(--primary);
+  font-weight: 500;
+  color: var(--primary-text);
   background: var(--primary-weak);
-  border-radius: 4px;
-  padding: 1px 6px;
+  border-radius: 6px;
+  padding: 1px 7px;
 }
 
 .rc__note {
-  display: block;
+  display: -webkit-box;
   margin-top: 8px;
   font-size: 13px;
   color: var(--muted);
   word-break: break-all;
-  display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -167,12 +187,26 @@ function goDetail() {
   color: var(--muted);
 }
 
+.rc__passcode {
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 .rc__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
+  padding-top: 11px;
+  border-top: 1px dashed var(--border);
+}
+
+@media (hover: hover) {
+  .rc:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+    border-color: rgba(240, 74, 46, 0.3);
+  }
 }
 </style>

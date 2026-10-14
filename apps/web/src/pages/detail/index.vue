@@ -5,7 +5,7 @@
       <view class="topbar">
         <view class="back" @tap="goBack"><view class="back__arrow"></view></view>
         <text class="topbar__title">资源详情</text>
-        <view class="topbar__placeholder"></view>
+        <view class="topbar__spacer"></view>
       </view>
 
       <view class="card detail">
@@ -25,7 +25,7 @@
           </view>
           <view class="detail__row" v-if="passcode">
             <text class="detail__label">提取码</text>
-            <text class="detail__value">{{ passcode }}</text>
+            <text class="detail__value detail__value--code">{{ passcode }}</text>
           </view>
           <view class="detail__row" v-if="source">
             <text class="detail__label">来源</text>
@@ -44,11 +44,15 @@
         </view>
 
         <view class="detail__actions">
-          <view class="btn btn--primary" @tap="copyLink">复制链接</view>
+          <view class="btn btn--primary detail__main-btn" @tap="copyLink">复制链接</view>
           <view v-if="passcode" class="btn" @tap="copyCode">复制提取码</view>
           <view class="btn" @tap="openLink">打开网盘链接</view>
-          <view class="btn" :class="{ 'btn--disabled': favLoading }" @tap="toggleFav">
-            {{ faved ? '已收藏' : '收藏' }}
+          <view
+            class="btn detail__fav"
+            :class="{ 'detail__fav--on': faved, 'btn--disabled': favLoading }"
+            @tap="toggleFav"
+          >
+            {{ faved ? '★ 已收藏' : '☆ 收藏' }}
           </view>
         </view>
 
@@ -138,7 +142,7 @@ function toggleFav() {
 function goBack() {
   const pages = getCurrentPages();
   if (pages.length > 1) uni.navigateBack();
-  else uni.reLaunch({ url: '/pages/index/index' });
+  else uni.reLaunch({ url: '/pages/home/index' });
 }
 
 onLoad((options) => {
@@ -161,66 +165,30 @@ onLoad((options) => {
   min-height: 100vh;
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: calc(14px + var(--safe-top)) 0 14px;
-}
-
-.back {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.back__arrow {
-  width: 9px;
-  height: 9px;
-  border-left: 2px solid var(--text);
-  border-bottom: 2px solid var(--text);
-  transform: rotate(45deg);
-  margin-left: 3px;
-}
-
-.topbar__title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.topbar__placeholder {
-  width: 34px;
-}
-
 .detail {
   padding: 20px;
+  animation: kele-fade-up 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 .detail__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .detail__badge {
-  padding: 3px 10px;
-  border-radius: 6px;
+  padding: 3px 11px;
+  border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .detail__title {
   display: block;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.4;
   color: var(--text);
   word-break: break-all;
   margin-bottom: 16px;
@@ -229,10 +197,10 @@ onLoad((options) => {
 .detail__rows {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  gap: 13px;
+  padding: 15px 0;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
 }
 
 .detail__row {
@@ -258,8 +226,15 @@ onLoad((options) => {
 }
 
 .detail__value--url {
-  color: var(--primary);
+  color: var(--primary-text);
   cursor: pointer;
+  font-weight: 500;
+}
+
+.detail__value--code {
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
 }
 
 .detail__tags {
@@ -270,10 +245,11 @@ onLoad((options) => {
 
 .detail__tag {
   font-size: 12px;
-  color: var(--primary);
+  font-weight: 500;
+  color: var(--primary-text);
   background: var(--primary-weak);
-  border-radius: 4px;
-  padding: 1px 8px;
+  border-radius: 6px;
+  padding: 1px 9px;
 }
 
 .detail__actions {
@@ -281,6 +257,17 @@ onLoad((options) => {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 18px;
+}
+
+.detail__main-btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+.detail__fav--on {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.08);
 }
 
 .detail__tip {

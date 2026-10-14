@@ -87,13 +87,34 @@ export interface ApiConfigEntity {
 
 /** 管理端概览统计 */
 export interface AdminStats {
-  resources: number;
+  resources: { total: number; valid: number; preheated: number };
   sources: {
     total: number;
     active: number;
     circuitBroken: number;
     manualDisabled: number;
   };
+  validity: { valid: number; invalid: number; pending: number };
+  pendingByType: Record<string, number>;
+  todaySearches: number;
+  doubanItems: number;
+}
+
+/** 定时任务静态清单项 */
+export interface CronTask {
+  key: string;
+  name: string;
+  description: string;
+  cron: string;
+}
+
+/** 源测试连通结果 */
+export interface SourceTestResult {
+  ok: boolean;
+  count: number;
+  latencyMs: number;
+  error?: string;
+  sample?: string[];
 }
 
 /** SSE 事件载荷 */

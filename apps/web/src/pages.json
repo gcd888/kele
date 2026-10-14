@@ -1,7 +1,7 @@
 {
   "pages": [
     {
-      "path": "pages/index/index",
+      "path": "pages/home/index",
       "style": {
         "navigationBarTitleText": "可乐"
       }
@@ -51,13 +51,13 @@
   ],
   // #ifdef MP-WEIXIN
   "tabBar": {
-    "color": "#8a8f99",
-    "selectedColor": "#2563eb",
+    "color": "#9a887b",
+    "selectedColor": "#f04a2e",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
       {
-        "pagePath": "pages/index/index",
+        "pagePath": "pages/home/index",
         "text": "首页"
       },
       {
@@ -75,7 +75,7 @@
     "navigationStyle": "custom",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "可乐",
-    "navigationBarBackgroundColor": "#f5f6f8",
-    "backgroundColor": "#f5f6f8"
+    "navigationBarBackgroundColor": "#faf6f1",
+    "backgroundColor": "#faf6f1"
   }
 }

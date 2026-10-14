@@ -45,8 +45,11 @@ export async function findTopKeywordsForPrefetch(db: D1Database, limit = 10): Pr
   return results.results.map(r => r.keyword);
 }
 
-/** 清理 30 天前日志 */
+/** 清理 30 天前日志（days 仅允许正整数，参数化绑定防拼接注入） */
 export async function cleanupOldSearchLogs(db: D1Database, days = 30): Promise<number> {
-  const result = await db.prepare(`DELETE FROM search_logs WHERE created_at < DATETIME('now', '-${days} days')`).run();
+  const d = Math.max(1, Math.floor(days) || 30);
+  const result = await db.prepare(`DELETE FROM search_logs WHERE created_at < DATETIME('now', ?)`)
+    .bind(`-${d} days`)
+    .run();
   return result.meta.changes;
 }
