@@ -1,0 +1,23 @@
+{
+  "name": "kele-worker",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "db:init:local": "wrangler d1 execute kele-db --local --file=migrations/0001_init.sql",
+    "db:init:remote": "wrangler d1 execute kele-db --remote --file=migrations/0001_init.sql",
+    "db:seed:local": "wrangler d1 execute kele-db --local --file=seed.sql",
+    "db:seed:remote": "wrangler d1 execute kele-db --remote --file=seed.sql"
+  },
+  "dependencies": {
+    "hono": "^4.7.0",
+    "jose": "^5.9.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261006.1",
+    "typescript": "^5.7.0",
+    "wrangler": "^4.0.0"
+  }
+}

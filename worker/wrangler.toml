@@ -1,0 +1,30 @@
+name = "kele-worker"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 静态资源：uni-app H5 构建产物
+assets = { directory = "../apps/web/dist/build/h5", binding = "ASSETS", not_found_handling = "none" }
+
+# D1 数据库绑定
+[[d1_databases]]
+binding = "DB"
+database_name = "kele-db"
+database_id = "REPLACE_WITH_YOUR_D1_ID"
+
+# 定时任务
+# 0 0 * * *   — 每天0点：豆瓣爬虫
+# 30 0 * * *  — 每天0:30：热搜词预热
+# 30 12 * * * — 每天12:30：热搜词预热
+# 0 3 * * *   — 每天3点：清理过期缓存
+# 0 5 * * *   — 每天5点：聚合热搜
+# 15 * * * *  — 每小时：熔断源探测恢复
+[triggers]
+crons = ["0 0 * * *", "30 0 * * *", "30 12 * * *", "0 3 * * *", "0 5 * * *", "15 * * * *"]
+
+[vars]
+CORS_ALLOWED_ORIGINS = ""
+RATE_LIMIT_PER_MINUTE = "20"
+
+# 敏感变量通过 wrangler secret 设置：
+# JWT_SECRET, ADMIN_PASSWORD

@@ -1,4 +1,9 @@
-/.idea/
-.npm-cache
-.trae
-demo
+node_modules/
+dist/
+unpackage/
+.dev.vars
+.wrangler/
+*.local
+.DS_Store
+.npm-cache/
+.idea/
