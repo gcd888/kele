@@ -16,7 +16,7 @@
 			"key": "hongguo_duanju",
 			"name": "🍅红果短剧",
 			"type": 3,
-			"api": "https://gcd888.github.io/kele/src/ysc/diy/红果/hongguo.js",
+			"api": "https://gcd888.github.io/kele/src/ysc/diy/hongguo-tv/hongguo.js",
 			"searchable": 1,
 			"quickSearch": 1,
 			"filterable": 1,
