@@ -66,17 +66,6 @@
 			"quickSearch": 0,
 			"filterable": 1,
 			"order_num": 5
-		},
-		{
-			"key": "hanxiaoquan",
-			"name": "🍥韩小圈",
-			"type": 3,
-			"api": "csp_HanXiaoQuan",
-			"jar": "http://我不是.摸鱼儿.com/by/jar/PizazzGY.php",
-			"searchable": 1,
-			"quickSearch": 1,
-			"filterable": 1,
-			"order_num": 6
 		}
 	],
 	"parses": [
