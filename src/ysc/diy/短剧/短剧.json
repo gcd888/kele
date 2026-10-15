@@ -66,6 +66,18 @@
 			"quickSearch": 0,
 			"filterable": 1,
 			"order_num": 5
+		},
+		{
+			"key": "fishhxq",
+			"name": "💃韩圈影视",
+			"type": 3,
+			"api": "csp_FishHxq",
+			"jar": "https://qiniu.gongxueyun.com/upload/5556851/2026-10-13/noknow/439065876_1_1791894280503.jar;md5;e521e2cc4db0d7de7c8c001d51a0bfd3",
+			"ext": "AfEuiKVYhFJoZfX14qKZ6B/GuVuuG1J+2u0TrTgQMlT+T6fw+zkIdP0NTr6BT3Oa5aQs8EIbxPwjpG7UH/U75WM=",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"order_num": 6
 		}
 	],
 	"parses": [
