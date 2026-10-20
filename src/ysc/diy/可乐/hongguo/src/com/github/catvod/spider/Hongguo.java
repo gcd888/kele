@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -608,11 +610,22 @@ public class Hongguo extends Spider {
             fileLog("stream reject vid 格式异常: " + vid);
             throw new RuntimeException("vid 格式异常: " + vid);
         }
-        synchronized (streamCache) {
-            StreamInfo hit = streamCache.get(vid);
-            if (hit != null) return hit;
+        // 按 vid 去重：预热线程与用户点击并发取同一集时只发一次请求，等待方直接命中缓存
+        Object lock;
+        synchronized (streamLocks) {
+            lock = streamLocks.get(vid);
+            if (lock == null) {
+                lock = new Object();
+                streamLocks.put(vid, lock);
+            }
         }
-        fileLog("stream begin vid=" + vid + " (缓存未命中，开始取流)");
+        synchronized (lock) {
+            synchronized (streamCache) {
+                Long at = streamCacheAt.get(vid);
+                StreamInfo hit = streamCache.get(vid);
+                if (hit != null && at != null && System.currentTimeMillis() - at < STREAM_TTL) return hit;
+            }
+            fileLog("stream begin vid=" + vid + " (缓存未命中，开始取流)");
 
         // 蓝本 preload payload（精简 biz_param + mixed_video_id_map）
         JSONObject biz = new JSONObject();
@@ -656,8 +669,8 @@ public class Hongguo extends Spider {
         // 与蓝本一致的请求 + 数据未就绪自动等待：
         // PC 实验实锤：preload 空响应 = 该 vid 数据未生成/已被消费（成功响应带 expire_time，约 28~54 分钟有效），
         // 不是风控拒绝；就绪后任意新指纹首请求都能拿到。
-        // 策略：6 次尝试、每次轮换新指纹、退避 1.5/3/5/8/12 秒（总等待约 30 秒，稳出数据就绪窗口）
-        int[] waits = {1500, 3000, 5000, 8000, 12000};
+        // 策略：5 次尝试、每次轮换新指纹、退避 1.5/3/5/8 秒（总等待约 18 秒）；正常由预热提前备好数据，秒回
+        int[] waits = {1500, 3000, 5000, 8000};
         String respText = "";
         for (int attempt = 0; attempt <= waits.length; attempt++) {
             if (attempt > 0) {
@@ -808,9 +821,14 @@ public class Hongguo extends Spider {
         StreamInfo result = new StreamInfo(url, streamKey, quality);
         synchronized (streamCache) {
             streamCache.put(vid, result);
+            streamCacheAt.put(vid, System.currentTimeMillis());
         }
         return result;
+        }
     }
+
+    /** 按 vid 的取流去重锁。 */
+    private final Map<String, Object> streamLocks = new HashMap<String, Object>();
 
     /** spade 解密：SHA512(seed)+常量 → AES-128-CBC（蓝本 MediaCrypto.decryptUrl）。 */
     private static final String SPADE_CONST =
@@ -1141,9 +1159,60 @@ public class Hongguo extends Spider {
             Collections.synchronizedMap(new LinkedHashMap<String, StreamInfo>(8, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<String, StreamInfo> eldest) {
-                    return size() > 4;
+                    return size() > 8;
                 }
             });
+
+    /** 取流缓存写入时间（毫秒）：服务端播放数据 expire_time 约 28~54 分钟，超 30 分钟视为失效重取。 */
+    private final Map<String, Long> streamCacheAt = new java.util.concurrent.ConcurrentHashMap<String, Long>();
+    private static final long STREAM_TTL = 30L * 60 * 1000;
+
+    /** 后台预热线程池：详情页打开即预热前几集（蓝本 maybePrefetch 思路），数据就绪后点播秒回。 */
+    private static final java.util.concurrent.ExecutorService PRIMER =
+            Executors.newSingleThreadExecutor(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "hongguo-primer");
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
+    private static final Map<String, Long> primedAt = new java.util.concurrent.ConcurrentHashMap<String, Long>();
+
+    /** 后台预热指定分集（最多前 3 个未预热过的），每个间隔 1.5 秒，失败不重试不阻塞。 */
+    private void primeEpisodes(List<String> vids, final String tag) {
+        if (vids == null || vids.isEmpty()) return;
+        final long now = System.currentTimeMillis();
+        final List<String> todo = new ArrayList<String>();
+        for (String v : vids) {
+            if (v == null || !v.matches("[0-9]{1,30}")) continue;
+            Long at = primedAt.get(v);
+            if (at != null && now - at < 10 * 60 * 1000L) continue;
+            todo.add(v);
+            if (todo.size() >= 3) break;
+        }
+        if (todo.isEmpty()) return;
+        PRIMER.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (String v : todo) {
+                    primedAt.put(v, System.currentTimeMillis());
+                    try {
+                        StreamInfo si = stream(v);
+                        fileLog("预热 OK " + tag + " vid=" + v + " quality=" + si.quality);
+                    } catch (Throwable t) {
+                        primedAt.remove(v);
+                        fileLog("预热失败 " + tag + " vid=" + v + " : " + t.getMessage());
+                    }
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException ie) {
+                        return;
+                    }
+                }
+            }
+        });
+    }
 
     private final Map<String, Prepared> preparedCache =
             Collections.synchronizedMap(new LinkedHashMap<String, Prepared>(4, 0.75f, true) {
@@ -1304,6 +1373,8 @@ public class Hongguo extends Spider {
             list.put(v);
             root.put("list", list);
             Log.e(TAG, "detailContent id=" + id + " vids=" + vids.size());
+            // 详情页打开即后台预热前 3 集（蓝本 maybePrefetch 思路）：用户浏览详情的几秒内数据就绪，点播秒回
+            primeEpisodes(vids, "detail:" + id);
             return root.toString();
         } catch (Exception e) {
             Log.e(TAG, "detailContent FAIL id=" + ids + " : " + e.getMessage());
