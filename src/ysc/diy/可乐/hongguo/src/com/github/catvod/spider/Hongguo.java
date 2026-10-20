@@ -1240,8 +1240,14 @@ public class Hongguo extends Spider {
             v.put("type_name", "短剧");
             v.put("vod_play_from", "红果短剧");
             v.put("vod_play_url", play.toString());
+            // 壳侧 AbsJson.toAbsXml() 只解析 MacCMS 格式 {"list":[...]}，顶层裸 vod 对象会 NPE
+            JSONObject root = new JSONObject();
+            root.put("code", 1);
+            JSONArray list = new JSONArray();
+            list.put(v);
+            root.put("list", list);
             Log.e(TAG, "detailContent id=" + id + " vids=" + vids.size());
-            return v.toString();
+            return root.toString();
         } catch (Exception e) {
             Log.e(TAG, "detailContent FAIL id=" + ids + " : " + e.getMessage());
             return "";
