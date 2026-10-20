@@ -653,46 +653,46 @@ public class Hongguo extends Spider {
         values.put("dpi", "520");
         values.put("ac", "wifi");
 
-        // 与蓝本一致的请求 + 两级自动恢复：
-        // 第 1 级：同指纹重试 3 次（每次刷新 _rticket/khronos/gorgon）
-        // 第 2 级：重试耗尽 → 轮换指纹再来 3 次（等效蓝本用户"重启 App 再点一次"）
+        // 与蓝本一致的请求 + 数据未就绪自动等待：
+        // PC 实验实锤：preload 空响应 = 该 vid 数据未生成/已被消费（成功响应带 expire_time，约 28~54 分钟有效），
+        // 不是风控拒绝；就绪后任意新指纹首请求都能拿到。
+        // 策略：6 次尝试、每次轮换新指纹、退避 1.5/3/5/8/12 秒（总等待约 30 秒，稳出数据就绪窗口）
+        int[] waits = {1500, 3000, 5000, 8000, 12000};
         String respText = "";
-        for (int round = 0; round < 2 && respText.isEmpty(); round++) {
-            if (round > 0) rotateFingerprint();
-            values.put("device_id", deviceId);
-            values.put("iid", installId);
-            for (int attempt = 1; attempt <= 3; attempt++) {
-                long now = System.currentTimeMillis();
-                int ts = (int) (now / 1000);
-                String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
-                    put("_rticket", String.valueOf(now));
-                }});
-                LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-                headers.put("User-Agent", VIDEO_UA);
-                headers.put("Accept", "application/json");
-                headers.put("x-xs-from-web", "0");
-                headers.put("sdk-version", "2");
-                headers.put("x-khronos", String.valueOf(ts));
-                headers.put("x-gorgon", legacyGorgon(query, body, ts));
-                headers.put("x-ss-req-ticket", String.valueOf(now));
-                headers.put("Content-Type", "application/json; charset=UTF-8");
-                headers.put("x-ss-stub", md5HexUpper(body));
-                respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
-                if (!respText.isEmpty()) break;
-                if (attempt < 3) {
-                    fileLog("preload 空响应（风控软拒），重试 " + attempt + "/3");
-                    try {
-                        Thread.sleep(attempt * 600L);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
+        for (int attempt = 0; attempt <= waits.length; attempt++) {
+            if (attempt > 0) {
+                fileLog("preload 空响应（数据未就绪），等待 " + (waits[attempt - 1] / 1000) + "s 后换指纹重试 " + attempt + "/" + waits.length);
+                try {
+                    Thread.sleep(waits[attempt - 1]);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
+            rotateFingerprint();
+            values.put("device_id", deviceId);
+            values.put("iid", installId);
+            long now = System.currentTimeMillis();
+            int ts = (int) (now / 1000);
+            String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
+                put("_rticket", String.valueOf(now));
+            }});
+            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+            headers.put("User-Agent", VIDEO_UA);
+            headers.put("Accept", "application/json");
+            headers.put("x-xs-from-web", "0");
+            headers.put("sdk-version", "2");
+            headers.put("x-khronos", String.valueOf(ts));
+            headers.put("x-gorgon", legacyGorgon(query, body, ts));
+            headers.put("x-ss-req-ticket", String.valueOf(now));
+            headers.put("Content-Type", "application/json; charset=UTF-8");
+            headers.put("x-ss-stub", md5HexUpper(body));
+            respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
+            if (!respText.isEmpty()) break;
         }
         fileLog("preload http done respLen=" + respText.length()
                 + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
-        if (respText.isEmpty()) throw new RuntimeException("preload 重试+换指纹后仍空响应（风控持续软拒，请稍后重试）");
+        if (respText.isEmpty()) throw new RuntimeException("preload 数据未就绪（已重试约 30 秒），请稍后重新播放");
         JSONObject resp;
         try {
             resp = new JSONObject(respText);
