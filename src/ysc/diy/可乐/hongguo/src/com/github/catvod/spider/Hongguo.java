@@ -601,8 +601,6 @@ public class Hongguo extends Spider {
             if (hit != null) return hit;
         }
         fileLog("stream begin vid=" + vid + " (缓存未命中，开始取流)");
-        long now = System.currentTimeMillis();
-        int ts = (int) (now / 1000);
 
         // 蓝本 preload payload（精简 biz_param + mixed_video_id_map）
         JSONObject biz = new JSONObject();
@@ -644,25 +642,41 @@ public class Hongguo extends Spider {
         values.put("ac", "wifi");
         values.put("device_id", DEVICE_ID);
         values.put("iid", INSTALL_ID);
-        String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
-            put("_rticket", String.valueOf(now));
-        }});
 
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put("User-Agent", VIDEO_UA);
-        headers.put("Accept", "application/json");
-        headers.put("x-xs-from-web", "0");
-        headers.put("sdk-version", "2");
-        headers.put("x-khronos", String.valueOf(ts));
-        headers.put("x-gorgon", legacyGorgon(query, body, ts));
-        headers.put("x-ss-req-ticket", String.valueOf(now));
-        headers.put("Content-Type", "application/json; charset=UTF-8");
-        headers.put("x-ss-stub", md5HexUpper(body));
-
-        String respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
+        // preload 风控对同一指纹偶发软拒（200 空体，同一请求隔几分钟重试即可放行），
+        // 自动重试 3 次，每次刷新 _rticket/khronos/gorgon 时间戳
+        String respText = "";
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            long now = System.currentTimeMillis();
+            int ts = (int) (now / 1000);
+            String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
+                put("_rticket", String.valueOf(now));
+            }});
+            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+            headers.put("User-Agent", VIDEO_UA);
+            headers.put("Accept", "application/json");
+            headers.put("x-xs-from-web", "0");
+            headers.put("sdk-version", "2");
+            headers.put("x-khronos", String.valueOf(ts));
+            headers.put("x-gorgon", legacyGorgon(query, body, ts));
+            headers.put("x-ss-req-ticket", String.valueOf(now));
+            headers.put("Content-Type", "application/json; charset=UTF-8");
+            headers.put("x-ss-stub", md5HexUpper(body));
+            respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
+            if (!respText.isEmpty()) break;
+            if (attempt < 3) {
+                fileLog("preload 空响应（风控软拒），重试 " + attempt + "/3");
+                try {
+                    Thread.sleep(attempt * 600L);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
         fileLog("preload http done respLen=" + respText.length()
                 + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
-        if (respText.isEmpty()) throw new RuntimeException("preload 200 空响应（需走 fallback）");
+        if (respText.isEmpty()) throw new RuntimeException("preload 重试 3 次仍空响应（风控软拒，请稍后重试）");
         JSONObject resp;
         try {
             resp = new JSONObject(respText);
