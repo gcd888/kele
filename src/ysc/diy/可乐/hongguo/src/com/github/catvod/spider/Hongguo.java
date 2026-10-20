@@ -586,6 +586,16 @@ public class Hongguo extends Spider {
     private static final String INSTALL_ID = String.valueOf(1000000000000000000L + (long) (RNG.nextDouble() * 8000000000000000000L));
 
     private StreamInfo stream(String vid) {
+        // 兼容旧配置里 proxy://do=play&...&vid=xxx 形式的分集 id：服务端只认纯数字 vid
+        if (vid != null && vid.contains("vid=")) {
+            vid = vid.substring(vid.indexOf("vid=") + 4);
+            int amp = vid.indexOf('&');
+            if (amp >= 0) vid = vid.substring(0, amp);
+        }
+        if (vid == null || !vid.matches("[0-9]{1,30}")) {
+            fileLog("stream reject vid 格式异常: " + vid);
+            throw new RuntimeException("vid 格式异常: " + vid);
+        }
         synchronized (streamCache) {
             StreamInfo hit = streamCache.get(vid);
             if (hit != null) return hit;
@@ -1239,11 +1249,11 @@ public class Hongguo extends Spider {
                     sd.optString("series_cover", ""), sd.optString("series_intro", ""), badge, "");
 
             StringBuilder play = new StringBuilder();
-            String siteKeySafe = siteKey == null || siteKey.isEmpty() ? "hongguo" : siteKey;
             for (int i = 0; i < vids.size(); i++) {
                 if (i > 0) play.append('#');
-                play.append("第").append(String.format("%02d", i + 1)).append("集$")
-                        .append("proxy://do=play&siteKey=").append(siteKeySafe).append("&vid=").append(vids.get(i));
+                // 分集 id 必须是纯数字 vid：壳会把 vod_play_url 里的 id 原样传给 playerContent，
+                // proxy:// 形式会让 stream() 拿完整 URL 去请求 preload 被风控软拒（200 空体）
+                play.append("第").append(String.format("%02d", i + 1)).append("集$").append(vids.get(i));
             }
 
             JSONObject v = new JSONObject();
