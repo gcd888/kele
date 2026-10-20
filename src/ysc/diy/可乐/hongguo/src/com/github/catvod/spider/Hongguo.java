@@ -650,6 +650,8 @@ public class Hongguo extends Spider {
         headers.put("x-ss-stub", md5HexUpper(body));
 
         String respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
+        fileLog("preload http done respLen=" + respText.length()
+                + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
         if (respText.isEmpty()) throw new RuntimeException("preload 200 空响应（需走 fallback）");
         JSONObject resp;
         try {
@@ -709,6 +711,8 @@ public class Hongguo extends Spider {
         if (info == null) throw new RuntimeException("fallback video_info.data missing");
         JSONObject videoList = info.optJSONObject("video_list");
         if (videoList == null || videoList.length() == 0) throw new RuntimeException("fallback video_list missing");
+        fileLog("fallback done qualities=" + videoList.length()
+                + " key_seed=" + (info.optString("key_seed", "").isEmpty() ? "无" : "有"));
 
         // 选清晰度：排除 bytevc2/bvc2，按数值降序取第一个 <=1080，否则取最低档
         List<JSONObject> candidates = new ArrayList<>();
@@ -758,6 +762,7 @@ public class Hongguo extends Spider {
         byte[] streamKey = spade.isEmpty() ? null : deriveKey(spade);
         Log.e(TAG, "stream ok vid=" + vid + " quality=" + quality
                 + " encrypted=" + (streamKey != null) + " url=" + url.substring(0, Math.min(80, url.length())));
+        fileLog("stream ok vid=" + vid + " quality=" + quality + " encrypted=" + (streamKey != null));
 
         StreamInfo result = new StreamInfo(url, streamKey, quality);
         synchronized (streamCache) {
@@ -1282,6 +1287,7 @@ public class Hongguo extends Spider {
             return result.toString();
         } catch (Exception e) {
             Log.e(TAG, "playerContent FAIL id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms : " + e.getMessage());
+            fileLog("playerContent FAIL id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms : " + e);
             return "";
         }
     }
@@ -1331,6 +1337,7 @@ public class Hongguo extends Spider {
             return new Object[]{206, "video/mp4", new ByteArrayInputStream(decrypted), headers};
         } catch (Exception e) {
             Log.e(TAG, "proxy FAIL vid=" + params.get("vid") + " : " + e.getMessage());
+            fileLog("proxy FAIL vid=" + params.get("vid") + " : " + e);
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Content-Length", "0");
             return new Object[]{502, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
