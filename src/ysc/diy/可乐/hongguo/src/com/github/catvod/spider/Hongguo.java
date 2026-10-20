@@ -690,9 +690,10 @@ public class Hongguo extends Spider {
             throw new RuntimeException("video_model missing");
         }
 
-        // fallback_api：主响应的 video_model 通常是空体，真实数据在 fallback 返回里
+        // fallback_api 在 video_model 内部（蓝本 ContentRepository：model.opt("fallback_api")），
+        // 真实分片数据在 fallback 返回的 video_info.data.video_list 里
         String fallbackUrl = null;
-        Object fb = entry.opt("fallback_api");
+        Object fb = videoModel.opt("fallback_api");
         if (fb instanceof JSONObject) fallbackUrl = ((JSONObject) fb).optString("fallback_api", "");
         else if (fb instanceof JSONArray) fallbackUrl = ((JSONArray) fb).optString(0, "");
         else if (fb instanceof String) {
