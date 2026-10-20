@@ -7,13 +7,13 @@
 			"name": "🤡红果短剧",
 			"type": 3,
 			"api": "csp_Hongguo",
-			"jar": "./hongguo/hongguo-spider.jar;md5;18240ad7257bdc26305a70231f133839",
+			"jar": "./hongguo/hongguo-spider.jar;md5;b92e59afcffcfc215a8e65dc76a66841",
 			"searchable": 1,
 			"quickSearch": 0,
 			"filterable": 0,
 			"changeable": 1,
 			"playerType": 2,
-			"timeout": 15,
+			"timeout": 45,
 			"style": "drama"
 		}
 	],

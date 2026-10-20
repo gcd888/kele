@@ -48,6 +48,16 @@ import javax.crypto.spec.SecretKeySpec;
 public class Hongguo extends Spider {
 
     private static final String TAG = "echo-drama-jar";
+
+    /** 把 jar 内部排查日志桥接到壳的 LogWriter（落 guoju_log.txt，导出可见；反射失败时仅 logcat）。 */
+    private static void fileLog(String msg) {
+        Log.e(TAG, msg);
+        try {
+            Class<?> lw = Class.forName("com.github.tvbox.osc.util.LogWriter");
+            lw.getMethod("i", String.class).invoke(null, "echo-drama jar: " + msg);
+        } catch (Throwable ignored) {
+        }
+    }
     private static final String SITE = "https://hongguoduanju.com";
     private static final String PRELOAD_URL =
             "https://api5-normal-sinfonlineb.fqnovel.com/novel/player/multi_video_model/preload/v1/";
@@ -580,6 +590,7 @@ public class Hongguo extends Spider {
             StreamInfo hit = streamCache.get(vid);
             if (hit != null) return hit;
         }
+        fileLog("stream begin vid=" + vid + " (缓存未命中，开始取流)");
         long now = System.currentTimeMillis();
         int ts = (int) (now / 1000);
 
@@ -1256,6 +1267,7 @@ public class Hongguo extends Spider {
 
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
+        long t0 = System.currentTimeMillis();
         try {
             StreamInfo si = stream(id);
             JSONObject result = new JSONObject();
@@ -1266,9 +1278,10 @@ public class Hongguo extends Spider {
             result.put("url", "proxy://do=play&siteKey="
                     + (siteKey == null || siteKey.isEmpty() ? "hongguo" : siteKey)
                     + "&vid=" + id);
+            Log.e(TAG, "playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms quality=" + si.quality);
             return result.toString();
         } catch (Exception e) {
-            Log.e(TAG, "playerContent FAIL id=" + id + " : " + e.getMessage());
+            Log.e(TAG, "playerContent FAIL id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms : " + e.getMessage());
             return "";
         }
     }
