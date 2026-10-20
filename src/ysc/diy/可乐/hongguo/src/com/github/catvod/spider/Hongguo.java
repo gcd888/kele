@@ -582,8 +582,20 @@ public class Hongguo extends Spider {
 
     // 进程内复用设备标识（蓝本 streamDeviceId/streamInstallId 各生成一次后复用）
     private static final Random RNG = new Random();
-    private static final String DEVICE_ID = String.valueOf(1000000000000000000L + (long) (RNG.nextDouble() * 8000000000000000000L));
-    private static final String INSTALL_ID = String.valueOf(1000000000000000000L + (long) (RNG.nextDouble() * 8000000000000000000L));
+
+    /** 取流指纹：[1e18, 9e18) 随机生成、进程内复用（蓝本 onedrama 6905554 同款口径）；被风控持续软拒时可轮换。 */
+    private static String deviceId = newFingerprint();
+    private static String installId = newFingerprint();
+
+    private static String newFingerprint() {
+        return String.valueOf(1000000000000000000L + (long) (RNG.nextDouble() * 8000000000000000000L));
+    }
+
+    private static void rotateFingerprint() {
+        deviceId = newFingerprint();
+        installId = newFingerprint();
+        fileLog("指纹轮换 device_id=" + deviceId.substring(0, 6) + "... iid=" + installId.substring(0, 6) + "...");
+    }
 
     private StreamInfo stream(String vid) {
         // 兼容旧配置里 proxy://do=play&...&vid=xxx 形式的分集 id：服务端只认纯数字 vid
@@ -640,43 +652,47 @@ public class Hongguo extends Spider {
         values.put("resolution", "1280*2772");
         values.put("dpi", "520");
         values.put("ac", "wifi");
-        values.put("device_id", DEVICE_ID);
-        values.put("iid", INSTALL_ID);
 
-        // preload 风控对同一指纹偶发软拒（200 空体，同一请求隔几分钟重试即可放行），
-        // 自动重试 3 次，每次刷新 _rticket/khronos/gorgon 时间戳
+        // 与蓝本一致的请求 + 两级自动恢复：
+        // 第 1 级：同指纹重试 3 次（每次刷新 _rticket/khronos/gorgon）
+        // 第 2 级：重试耗尽 → 轮换指纹再来 3 次（等效蓝本用户"重启 App 再点一次"）
         String respText = "";
-        for (int attempt = 1; attempt <= 3; attempt++) {
-            long now = System.currentTimeMillis();
-            int ts = (int) (now / 1000);
-            String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
-                put("_rticket", String.valueOf(now));
-            }});
-            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-            headers.put("User-Agent", VIDEO_UA);
-            headers.put("Accept", "application/json");
-            headers.put("x-xs-from-web", "0");
-            headers.put("sdk-version", "2");
-            headers.put("x-khronos", String.valueOf(ts));
-            headers.put("x-gorgon", legacyGorgon(query, body, ts));
-            headers.put("x-ss-req-ticket", String.valueOf(now));
-            headers.put("Content-Type", "application/json; charset=UTF-8");
-            headers.put("x-ss-stub", md5HexUpper(body));
-            respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
-            if (!respText.isEmpty()) break;
-            if (attempt < 3) {
-                fileLog("preload 空响应（风控软拒），重试 " + attempt + "/3");
-                try {
-                    Thread.sleep(attempt * 600L);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    break;
+        for (int round = 0; round < 2 && respText.isEmpty(); round++) {
+            if (round > 0) rotateFingerprint();
+            values.put("device_id", deviceId);
+            values.put("iid", installId);
+            for (int attempt = 1; attempt <= 3; attempt++) {
+                long now = System.currentTimeMillis();
+                int ts = (int) (now / 1000);
+                String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
+                    put("_rticket", String.valueOf(now));
+                }});
+                LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+                headers.put("User-Agent", VIDEO_UA);
+                headers.put("Accept", "application/json");
+                headers.put("x-xs-from-web", "0");
+                headers.put("sdk-version", "2");
+                headers.put("x-khronos", String.valueOf(ts));
+                headers.put("x-gorgon", legacyGorgon(query, body, ts));
+                headers.put("x-ss-req-ticket", String.valueOf(now));
+                headers.put("Content-Type", "application/json; charset=UTF-8");
+                headers.put("x-ss-stub", md5HexUpper(body));
+                respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
+                if (!respText.isEmpty()) break;
+                if (attempt < 3) {
+                    fileLog("preload 空响应（风控软拒），重试 " + attempt + "/3");
+                    try {
+                        Thread.sleep(attempt * 600L);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
             }
         }
         fileLog("preload http done respLen=" + respText.length()
                 + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
-        if (respText.isEmpty()) throw new RuntimeException("preload 重试 3 次仍空响应（风控软拒，请稍后重试）");
+        if (respText.isEmpty()) throw new RuntimeException("preload 重试+换指纹后仍空响应（风控持续软拒，请稍后重试）");
         JSONObject resp;
         try {
             resp = new JSONObject(respText);
