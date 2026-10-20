@@ -402,15 +402,23 @@ public class Hongguo extends Spider {
         return new Page(items, page, 100);
     }
 
-    /** 漫剧榜：数据在 <script data-fn-name="r|mergeLoaderData" data-fn-args="..."> 属性里（蓝本 ComicRank.parse）。 */
+    /** 漫剧榜：数据在 <script data-fn-name="r|mergeLoaderData" data-fn-args="..."> 属性里（蓝本 ComicRank.parse）。
+     *  注意：r 标签里 name 与 args 之间可能隔着 data-script-src 等属性，必须按整标签分别提取两个属性。 */
     private Page rankPage(int page) {
         String html = text(SITE + "/rank/hot-comic-drama?page=" + page);
-        Pattern p = Pattern.compile("data-fn-name=([\"'])([^\"']*)\\1\\s+data-fn-args=([\"'])(.*?)\\3", Pattern.DOTALL);
-        Matcher m = p.matcher(html);
-        while (m.find()) {
-            String name = m.group(2);
+        Pattern tagP = Pattern.compile("<script[^>]*>", Pattern.DOTALL);
+        Pattern nameP = Pattern.compile("data-fn-name=([\"'])([^\"']*)\\1");
+        Pattern argsP = Pattern.compile("data-fn-args=([\"'])(.*?)\\1(?=[\\s>])", Pattern.DOTALL);
+        Matcher tm = tagP.matcher(html);
+        while (tm.find()) {
+            String tag = tm.group(0);
+            if (!tag.contains("data-fn-name") || !tag.contains("data-fn-args")) continue;
+            Matcher nm = nameP.matcher(tag);
+            Matcher am = argsP.matcher(tag);
+            if (!nm.find() || !am.find()) continue;
+            String name = nm.group(2);
             if (!"r".equals(name) && !"mergeLoaderData".equals(name)) continue;
-            String argsRaw = htmlDecode(m.group(4)).trim();
+            String argsRaw = htmlDecode(am.group(2)).trim();
             JSONArray args;
             try {
                 Object parsed = new JSONTokener(argsRaw).nextValue();
@@ -428,9 +436,11 @@ public class Hongguo extends Spider {
                 if (arr != null) {
                     for (int i = 0; i < arr.length(); i++) {
                         JSONObject e = arr.optJSONObject(i);
-                        if (e != null && "content".equals(e.optString("key"))
-                                && "p".equals(e.optString("routerDataFnName"))) {
-                            raw = e.optJSONArray("routerDataFnArgs") == null ? null : e.optJSONArray("routerDataFnArgs").opt(0);
+                        if (e != null && "content".equals(e.optString("key"))) {
+                            // routerDataFnName "p" 时 payload 内联在 routerDataFnArgs[0]；"s" 时是引用，落空后走 _ROUTER_DATA 兜底
+                            if ("p".equals(e.optString("routerDataFnName")) && e.optJSONArray("routerDataFnArgs") != null) {
+                                raw = e.optJSONArray("routerDataFnArgs").opt(0);
+                            }
                             break;
                         }
                     }
@@ -449,9 +459,8 @@ public class Hongguo extends Spider {
             JSONArray rl = payload.optJSONArray("rankList");
             if (rl == null) throw new RuntimeException("漫剧榜单格式已变化");
             JSONObject pag = payload.optJSONObject("pagination");
-            if (pag == null) throw new RuntimeException("漫剧分页信息缺失");
-            int totalPages = pag.optInt("totalPages", 0);
-            if (totalPages < 1 || pag.optInt("pageNum", page) != page) throw new RuntimeException("漫剧分页信息异常");
+            int totalPages = pag == null ? 100 : pag.optInt("totalPages", 100);
+            if (totalPages < 1) totalPages = 100;
 
             List<Series> items = new ArrayList<>();
             for (int i = 0; i < rl.length(); i++) {
@@ -485,22 +494,18 @@ public class Hongguo extends Spider {
         return encodeValue(v);
     }
 
-    /** 详情页 → 分集 vid 列表。 */
-    private Series detail(String id) {
-        JSONObject data = router(SITE + "/detail?series_id=" + id);
+    /** 详情页 → 分集 vid 列表（单次抓取；detail_page key 缺失时扫描 loaderData 兜底）。 */
+    private static JSONObject seriesDetailOf(JSONObject data) {
         JSONObject dp = data.optJSONObject("detail_page");
-        if (dp == null) throw new RuntimeException("detail page missing");
-        JSONObject sd = dp.optJSONObject("seriesDetail");
-        if (sd == null) throw new RuntimeException("seriesDetail missing");
-        int count = sd.optInt("series_episode_cnt", 0);
-        if (count == 0) {
-            JSONObject info = sd.optJSONObject("series_episode_info");
-            if (info != null) count = info.optInt("episode_cnt", 0);
+        if (dp != null && dp.optJSONObject("seriesDetail") != null) return dp.optJSONObject("seriesDetail");
+        Iterator<String> it = data.keys();
+        while (it.hasNext()) {
+            JSONObject cand = data.optJSONObject(it.next());
+            if (cand == null) continue;
+            JSONObject sd = cand.optJSONObject("seriesDetail");
+            if (sd != null) return sd;
         }
-        String badge = sd.optString("episode_right_text", "");
-        if (badge.isEmpty() && count > 0) badge = "全 " + count + " 集";
-        return new Series(id, sd.optString("series_title", ""), sd.optString("series_cover", ""),
-                sd.optString("series_intro", ""), badge, "");
+        return null;
     }
 
     private static List<String> vidsOf(JSONObject seriesDetail) {
@@ -1193,12 +1198,29 @@ public class Hongguo extends Spider {
     public String detailContent(List<String> ids) {
         try {
             String id = ids.get(0);
-            Series s = detail(id);
+            // 单次抓取：详情元数据与分集 vid 同源（此前抓两次，弱网下易触发壳 30s 超时）
             JSONObject data = router(SITE + "/detail?series_id=" + id);
-            JSONObject dp = data.optJSONObject("detail_page");
-            JSONObject sd = dp == null ? null : dp.optJSONObject("seriesDetail");
-            List<String> vids = sd == null ? new ArrayList<String>() : vidsOf(sd);
+            JSONObject sd = seriesDetailOf(data);
+            if (sd == null) throw new RuntimeException("seriesDetail missing (loaderData keys: " + keysOf(data) + ")");
+            List<String> vids = vidsOf(sd);
+            if (vids.isEmpty() && sd.optJSONArray("episodeVids") != null) {
+                JSONArray ev = sd.optJSONArray("episodeVids");
+                for (int i = 0; i < ev.length(); i++) {
+                    String v = ev.optString(i, "");
+                    if (!v.isEmpty()) vids.add(v);
+                }
+            }
             if (vids.isEmpty()) throw new RuntimeException("vid_list missing");
+
+            int count = sd.optInt("episode_cnt", sd.optInt("series_episode_cnt", 0));
+            if (count == 0) {
+                JSONObject info = sd.optJSONObject("series_episode_info");
+                if (info != null) count = info.optInt("episode_cnt", 0);
+            }
+            String badge = sd.optString("episode_right_text", "");
+            if (badge.isEmpty() && count > 0) badge = "全 " + count + " 集";
+            Series s = new Series(id, sd.optString("series_title", sd.optString("series_name", "")),
+                    sd.optString("series_cover", ""), sd.optString("series_intro", ""), badge, "");
 
             StringBuilder play = new StringBuilder();
             String siteKeySafe = siteKey == null || siteKey.isEmpty() ? "hongguo" : siteKey;
