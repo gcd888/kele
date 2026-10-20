@@ -1391,7 +1391,9 @@ public class Hongguo extends Spider {
             result.put("parse", 0);
             result.put("playUrl", "");
             result.put("header", new JSONObject());
-            result.put("flag", si.quality);
+            // flag 必须回显入参（= detail 的 vod_play_from）：壳的 stale 校验比较 result.flag 与当前播放片源名，
+            // 填清晰度会被当作过期结果静默丢弃 → 永远转圈
+            result.put("flag", flag == null || flag.isEmpty() ? "红果短剧" : flag);
             result.put("url", "proxy://do=play&siteKey="
                     + (siteKey == null || siteKey.isEmpty() ? "hongguo" : siteKey)
                     + "&vid=" + id);
