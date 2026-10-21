@@ -366,7 +366,19 @@ public class Hongguo extends Spider {
     /** 官网分类页（热播）。 */
     private Page home(int page) {
         String url = SITE + "/category?tab=1&sort_type=1" + (page > 1 ? "&page=" + page : "");
-        JSONObject section = router(url);
+        return parseCategoryPage(router(url), page);
+    }
+
+    /** 影视类型分类页（真人剧/漫剧/AI剧）：/category/{type}[/{slug}]?page=N，slug=路径式筛选（官网实测路由）。 */
+    private Page typeCategoryPage(String type, String slug, int page) {
+        StringBuilder url = new StringBuilder(SITE).append("/category/").append(type);
+        if (!slug.isEmpty()) url.append('/').append(slug);
+        if (page > 1) url.append("?page=").append(page);
+        return parseCategoryPage(router(url.toString()), page);
+    }
+
+    /** 分类页 loaderData 公共解析：key 兼容 category_page / category_$，列表取 recommendList（卡片兼容裸字段/video_data 包裹）。 */
+    private Page parseCategoryPage(JSONObject section, int page) {
         JSONObject s = section.optJSONObject("category_page");
         if (s == null) s = section.optJSONObject("category_$");
         if (s == null) throw new RuntimeException("category page missing (loaderData keys: " + keysOf(section) + ")");
@@ -1266,14 +1278,51 @@ public class Hongguo extends Spider {
         }
     }
 
+    /** 影视类型分类（官网 /category/{type}）：type_id + 类型名 + 类型内筛选（名称|slug，官网 selectorList 实测固化）。 */
+    private static final String[][] TYPE_FILTERS = {
+            {"real-drama", "真人剧",
+                    "爱情|romance", "年代|period", "逆袭|comeback", "传奇|legend", "成长|growth", "家庭|family",
+                    "家族|clan", "萌宝|cute-kids", "悬疑|suspense", "惊悚|thriller", "恐怖|horror", "志怪|supernatural",
+                    "古装|costume", "玄幻|fantasy", "奇幻|wonder", "都市|urban", "青春|youth", "喜剧|comedy",
+                    "科幻|sci-fi", "灾难|disaster", "动作冒险|action-adventure", "战争|war", "综艺|variety", "剧情|drama"},
+            {"comic-drama", "漫剧",
+                    "脑洞|creative", "玄幻|fantasy", "剧情|drama", "末世|apocalypse", "豪门|wealthy-family",
+                    "奇幻|wonder", "科幻|sci-fi", "冒险|adventure"},
+            {"ai-drama", "AI剧",
+                    "脑洞|creative", "玄幻|fantasy", "剧情|drama", "末世|apocalypse", "豪门|wealthy-family",
+                    "奇幻|wonder", "科幻|sci-fi", "冒险|adventure"},
+    };
+
+    /** 是否为影视类型分类（真人剧/漫剧/AI剧）。 */
+    private static boolean isTypeCategory(String tid) {
+        for (String[] def : TYPE_FILTERS) if (def[0].equals(tid)) return true;
+        return false;
+    }
+
     @Override
     public String homeContent(boolean filter) {
         try {
             JSONObject result = new JSONObject();
             JSONArray classes = new JSONArray();
             classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热播短剧"));
+            classes.put(new JSONObject().put("type_id", "real-drama").put("type_name", "真人剧"));
+            classes.put(new JSONObject().put("type_id", "comic-drama").put("type_name", "漫剧"));
+            classes.put(new JSONObject().put("type_id", "ai-drama").put("type_name", "AI剧"));
             classes.put(new JSONObject().put("type_id", "rank").put("type_name", "漫剧榜"));
             result.put("class", classes);
+            // 类型内筛选组（key=cate）：值=官网筛选 slug，categoryContent 拼 /category/{type}/{slug} 路径式筛选
+            JSONObject filters = new JSONObject();
+            for (String[] def : TYPE_FILTERS) {
+                JSONArray values = new JSONArray();
+                values.put(new JSONObject().put("n", "全部").put("v", ""));
+                for (int i = 2; i < def.length; i++) {
+                    int bar = def[i].indexOf('|');
+                    values.put(new JSONObject().put("n", def[i].substring(0, bar)).put("v", def[i].substring(bar + 1)));
+                }
+                filters.put(def[0], new JSONArray().put(new JSONObject()
+                        .put("key", "cate").put("name", "分类").put("value", values)));
+            }
+            result.put("filters", filters);
             return result.toString();
         } catch (Exception e) {
             Log.e(TAG, "homeContent error: " + e.getMessage());
@@ -1289,7 +1338,15 @@ public class Hongguo extends Spider {
         } catch (Exception ignore) {
         }
         try {
-            Page p = "rank".equals(tid) ? rankPage(page) : home(page);
+            Page p;
+            if ("rank".equals(tid)) {
+                p = rankPage(page);
+            } else if (isTypeCategory(tid)) {
+                String slug = extend == null ? "" : extend.get("cate");
+                p = typeCategoryPage(tid, slug == null ? "" : slug.trim(), page);
+            } else {
+                p = home(page);
+            }
             Log.e(TAG, "categoryContent tid=" + tid + " page=" + page + " items=" + p.items.size() + " more=" + p.hasMore);
             return pageData(p.items, page, p.lastPage, p.hasMore);
         } catch (Exception e) {
