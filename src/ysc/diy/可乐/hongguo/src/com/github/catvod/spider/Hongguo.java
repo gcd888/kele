@@ -1356,6 +1356,19 @@ public class Hongguo extends Spider {
     }
 
     @Override
+    public String homeVideoContent() {
+        // 站点推荐模式「推荐」货架数据源（与点播源同构）：官网热播分类页第一页
+        try {
+            Page p = home(1);
+            Log.e(TAG, "homeVideoContent items=" + p.items.size());
+            return pageData(p.items, 1, 1, false);
+        } catch (Exception e) {
+            Log.e(TAG, "homeVideoContent FAIL : " + e.getMessage());
+            return "";
+        }
+    }
+
+    @Override
     public String searchContent(String key, boolean quick, String pg) {
         int page = 1;
         try {
