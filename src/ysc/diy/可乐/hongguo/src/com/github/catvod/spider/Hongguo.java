@@ -405,25 +405,39 @@ public class Hongguo extends Spider {
         return sb.toString();
     }
 
-    /** 官网搜索（v1 无签名路径；loaderData key 因关键词而异，遍历兜底）。 */
+    /** 官网搜索（2026-10 官网改版：搜索页改为纯 CSR，SSR _ROUTER_DATA 不再输出，旧 SSR 解析必失效）。
+     *  改走官网前端同款 JSON 接口：GET /api/search/result?aid=8662&query=<kw>&pageNum=<page>
+     *  实测无需 msToken/a_bogus 签名（普通 UA 即可）；返回 searchList[].video_data 与分类页卡片同构，复用 cards()。
+     *  接口有频控（连续请求返回 {"code":"upstream_unavailable"}），无数据时退避重试一次。 */
     private Page searchPage(String keyword, int page) {
-        String url = SITE + "/search/" + enc(keyword) + "?page=" + page;
-        JSONObject data = router(url);
-        JSONObject s = data.optJSONObject("search_(" + keyword + ")/page");
-        if (s == null) s = data.optJSONObject("search_page");
-        if (s == null) {
-            Iterator<String> it = data.keys();
-            while (it.hasNext()) {
-                String key = it.next();
-                if (key.contains("search")) {
-                    JSONObject cand = data.optJSONObject(key);
-                    if (cand != null && cand.has("searchList")) { s = cand; break; }
+        String url = SITE + "/api/search/result?aid=8662&query=" + enc(keyword)
+                + (page > 1 ? "&pageNum=" + page : "");
+        JSONObject json = null;
+        for (int attempt = 0; attempt < 2; attempt++) {
+            if (attempt > 0) {
+                try {
+                    Thread.sleep(600);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
+            try {
+                JSONObject cand = new JSONObject(text(url));
+                if (cand.has("searchList")) {
+                    json = cand;
+                    break;
+                }
+                Log.e(TAG, "search api attempt#" + attempt + " no searchList: "
+                        + cand.optString("code", "?") + " " + cand.optString("message", ""));
+            } catch (Exception e) {
+                Log.e(TAG, "search api attempt#" + attempt + " FAIL : " + e.getMessage());
+            }
         }
-        if (s == null) throw new RuntimeException("search page missing (loaderData keys: " + keysOf(data) + ")");
-        List<Series> items = cards(s.optJSONArray("searchList"));
-        return new Page(items, page, 100);
+        if (json == null) throw new RuntimeException("search api unavailable (2 attempts)");
+        List<Series> items = cards(json.optJSONArray("searchList"));
+        int last = Math.max(1, Math.min(100, json.optInt("totalPages", 1)));
+        return new Page(items, page, last);
     }
 
     /** 漫剧榜：数据在 <script data-fn-name="r|mergeLoaderData" data-fn-args="..."> 属性里（蓝本 ComicRank.parse）。
