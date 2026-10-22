@@ -51,12 +51,30 @@ public class Hongguo extends Spider {
 
     private static final String TAG = "echo-drama-jar";
 
-    /** 把 jar 内部排查日志桥接到壳的 LogWriter（落 guoju_log.txt，导出可见；反射失败时仅 logcat）。 */
+    /** 把 jar 内部排查日志桥接到壳的 LogWriter（落 guoju_log.txt，导出可见）；
+     *  反射失败时兜底直写 App 外部 files 目录 hongguo_spider.log（与 guoju_log.txt 同目录），双通道确保落盘。
+     *  注意：壳包名是 com.github.gcd888.guoju（勿回退 tvbox 旧包名，旧包名反射必失败=日志静默丢失）。 */
     private static void fileLog(String msg) {
         Log.e(TAG, msg);
         try {
-            Class<?> lw = Class.forName("com.github.tvbox.osc.util.LogWriter");
+            Class<?> lw = Class.forName("com.github.gcd888.guoju.util.LogWriter");
             lw.getMethod("i", String.class).invoke(null, "echo-drama jar: " + msg);
+            return;
+        } catch (Throwable ignored) {
+        }
+        try {
+            if (mContext == null) return;
+            java.io.File dir = mContext.getExternalFilesDir(null);
+            if (dir == null) return;
+            java.io.File f = new java.io.File(dir, "hongguo_spider.log");
+            boolean rotate = f.exists() && f.length() > 512 * 1024;
+            java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(f, !rotate));
+            bw.write(new java.text.SimpleDateFormat("MM-dd HH:mm:ss.SSS", java.util.Locale.US)
+                    .format(new java.util.Date()));
+            bw.write(' ');
+            bw.write(msg);
+            bw.write('\n');
+            bw.close();
         } catch (Throwable ignored) {
         }
     }
@@ -158,6 +176,7 @@ public class Hongguo extends Spider {
     // ============================ HTTP ============================
 
     private static String text(String url, String method, byte[] body, Map<String, String> headers) {
+        long t0 = System.currentTimeMillis();
         HttpURLConnection conn = null;
         try {
             conn = (HttpURLConnection) new URL(url).openConnection();
@@ -188,11 +207,13 @@ public class Hongguo extends Spider {
                 in.close();
             }
             String result = new String(out.toByteArray(), StandardCharsets.UTF_8);
-            Log.e(TAG, "http " + method + " " + url.substring(0, Math.min(120, url.length()))
-                    + " -> " + code + " len=" + result.length());
+            fileLog("http " + method + " " + url.substring(0, Math.min(150, url.length()))
+                    + " -> " + code + " len=" + result.length()
+                    + " cost=" + (System.currentTimeMillis() - t0) + "ms");
             return result;
         } catch (Exception e) {
-            Log.e(TAG, "http FAIL " + method + " " + url.substring(0, Math.min(120, url.length()))
+            fileLog("http FAIL " + method + " " + url.substring(0, Math.min(150, url.length()))
+                    + " cost=" + (System.currentTimeMillis() - t0) + "ms"
                     + " : " + e.getClass().getSimpleName() + " " + e.getMessage());
             throw new RuntimeException(e.getMessage(), e);
         } finally {
@@ -249,7 +270,13 @@ public class Hongguo extends Spider {
     /** 从 SSR 页面里取出内嵌 _ROUTER_DATA JSON（大括号/方括号配对扫描）。 */
     private static JSONObject extractRouter(String html) {
         int index = html.indexOf("_ROUTER_DATA");
-        if (index < 0) throw new RuntimeException("router data missing");
+        if (index < 0) {
+            // 2026-10 官网搜索页改 CSR 后搜索路径不再输出 _ROUTER_DATA；详情/分类页若也出现此错=官网又改版
+            fileLog("extractRouter FAIL _ROUTER_DATA 不存在 htmlLen=" + (html == null ? -1 : html.length())
+                    + " head=[" + (html == null ? "" : html.substring(0, Math.min(200, html.length())))
+                    .replace('\n', ' ') + "]");
+            throw new RuntimeException("router data missing");
+        }
         int at = html.indexOf('{', index);
         if (at < 0) throw new RuntimeException("router data missing");
         boolean inString = false;
@@ -334,7 +361,10 @@ public class Hongguo extends Spider {
 
     private static List<Series> cards(JSONArray rows) {
         List<Series> out = new ArrayList<>();
-        if (rows == null) return out;
+        if (rows == null) {
+            fileLog("cards 输入 rows=null（接口/页面无列表数据）");
+            return out;
+        }
         for (int i = 0; i < rows.length(); i++) {
             JSONObject item = rows.optJSONObject(i);
             if (item == null) continue;
@@ -359,6 +389,10 @@ public class Hongguo extends Spider {
             boolean dup = false;
             for (Series d : distinct) if (d.id.equals(s.id)) { dup = true; break; }
             if (!dup) distinct.add(s);
+        }
+        if (out.size() != distinct.size() || distinct.isEmpty()) {
+            fileLog("cards rows=" + rows.length() + " valid=" + out.size() + " distinct=" + distinct.size()
+                    + (distinct.isEmpty() ? "（全部条目无效：series_id/名称缺失或字段结构变化）" : "（含去重丢弃）"));
         }
         return distinct;
     }
@@ -428,15 +462,22 @@ public class Hongguo extends Spider {
                     json = cand;
                     break;
                 }
-                Log.e(TAG, "search api attempt#" + attempt + " no searchList: "
-                        + cand.optString("code", "?") + " " + cand.optString("message", ""));
+                fileLog("searchPage attempt#" + attempt + " 无 searchList 字段 code=" + cand.optString("code", "?")
+                        + " message=" + cand.optString("message", "")
+                        + " bodyHead=[" + cand.toString().substring(0, Math.min(200, cand.toString().length())) + "]");
             } catch (Exception e) {
-                Log.e(TAG, "search api attempt#" + attempt + " FAIL : " + e.getMessage());
+                fileLog("searchPage attempt#" + attempt + " FAIL : " + e.getClass().getSimpleName() + ": " + e.getMessage()
+                        + " url=" + url);
             }
         }
-        if (json == null) throw new RuntimeException("search api unavailable (2 attempts)");
+        if (json == null) {
+            fileLog("searchPage FAIL 2 次尝试均失败 url=" + url + "（官网接口不可用/频控，返回空结果）");
+            throw new RuntimeException("search api unavailable (2 attempts)");
+        }
         List<Series> items = cards(json.optJSONArray("searchList"));
         int last = Math.max(1, Math.min(100, json.optInt("totalPages", 1)));
+        fileLog("searchPage ok kw=[" + keyword + "] page=" + page + " items=" + items.size()
+                + " totalPages=" + last + " totalCount=" + json.optInt("totalCount", -1) + " hasMore=" + json.optBoolean("hasMore"));
         return new Page(items, page, last);
     }
 
@@ -1339,7 +1380,7 @@ public class Hongguo extends Spider {
             result.put("filters", filters);
             return result.toString();
         } catch (Exception e) {
-            Log.e(TAG, "homeContent error: " + e.getMessage());
+            fileLog("homeContent FAIL : " + e.getClass().getSimpleName() + ": " + e.getMessage());
             return "";
         }
     }
@@ -1353,6 +1394,7 @@ public class Hongguo extends Spider {
         }
         try {
             Page p;
+            fileLog("categoryContent enter tid=" + tid + " pg=" + pg + " extend=" + (extend == null ? "{}" : extend.toString()));
             if ("rank".equals(tid)) {
                 p = rankPage(page);
             } else if (isTypeCategory(tid)) {
@@ -1361,10 +1403,10 @@ public class Hongguo extends Spider {
             } else {
                 p = home(page);
             }
-            Log.e(TAG, "categoryContent tid=" + tid + " page=" + page + " items=" + p.items.size() + " more=" + p.hasMore);
+            fileLog("categoryContent done tid=" + tid + " page=" + page + " items=" + p.items.size() + " more=" + p.hasMore);
             return pageData(p.items, page, p.lastPage, p.hasMore);
         } catch (Exception e) {
-            Log.e(TAG, "categoryContent FAIL tid=" + tid + " page=" + page + " : " + e.getMessage());
+            fileLog("categoryContent FAIL tid=" + tid + " page=" + page + " : " + e.getClass().getSimpleName() + ": " + e.getMessage());
             return pageData(new ArrayList<Series>(), page, page, false);
         }
     }
@@ -1374,40 +1416,49 @@ public class Hongguo extends Spider {
         // 站点推荐模式「推荐」货架数据源（与点播源同构）：官网热播分类页第一页
         try {
             Page p = home(1);
-            Log.e(TAG, "homeVideoContent items=" + p.items.size());
+            fileLog("homeVideoContent done items=" + p.items.size());
             return pageData(p.items, 1, 1, false);
         } catch (Exception e) {
-            Log.e(TAG, "homeVideoContent FAIL : " + e.getMessage());
+            fileLog("homeVideoContent FAIL : " + e.getClass().getSimpleName() + ": " + e.getMessage());
             return "";
         }
     }
 
     @Override
     public String searchContent(String key, boolean quick, String pg) {
+        long t0 = System.currentTimeMillis();
         int page = 1;
         try {
             page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
         } catch (Exception ignore) {
         }
         String keyword = key == null ? "" : key.trim();
+        fileLog("searchContent enter kw=[" + keyword + "] page=" + page + " quick=" + quick);
         if (keyword.isEmpty() || keyword.length() > 80) {
-            Log.e(TAG, "searchContent skip empty/long keyword");
+            fileLog("searchContent skip empty/long keyword");
             return pageData(new ArrayList<Series>(), page, page, false);
         }
         try {
             Page p = searchPage(keyword, page);
-            Log.e(TAG, "searchContent kw=" + keyword + " page=" + page + " items=" + p.items.size());
-            return pageData(p.items, page, p.lastPage, p.hasMore);
+            String out = pageData(p.items, page, p.lastPage, p.hasMore);
+            fileLog("searchContent done kw=[" + keyword + "] page=" + page
+                    + " items=" + p.items.size() + " lastPage=" + p.lastPage + " more=" + p.hasMore
+                    + " outLen=" + out.length() + " cost=" + (System.currentTimeMillis() - t0) + "ms");
+            return out;
         } catch (Exception e) {
-            Log.e(TAG, "searchContent FAIL kw=" + keyword + " : " + e.getMessage());
+            fileLog("searchContent FAIL kw=[" + keyword + "] page=" + page
+                    + " : " + e.getClass().getSimpleName() + ": " + e.getMessage()
+                    + " (返回空列表，壳侧将显示该源无结果)");
             return pageData(new ArrayList<Series>(), page, page, false);
         }
     }
 
     @Override
     public String detailContent(List<String> ids) {
+        long t0 = System.currentTimeMillis();
         try {
             String id = ids.get(0);
+            fileLog("detailContent enter id=" + id);
             // 单次抓取：详情元数据与分集 vid 同源（此前抓两次，弱网下易触发壳 30s 超时）
             JSONObject data = router(SITE + "/detail?series_id=" + id);
             JSONObject sd = seriesDetailOf(data);
@@ -1457,11 +1508,13 @@ public class Hongguo extends Spider {
             list.put(v);
             root.put("list", list);
             Log.e(TAG, "detailContent id=" + id + " vids=" + vids.size());
+            fileLog("detailContent done id=" + id + " name=" + s.name + " vids=" + vids.size()
+                    + " outLen=" + root.length() + " cost=" + (System.currentTimeMillis() - t0) + "ms");
             // 详情页打开即后台预热前 3 集（蓝本 maybePrefetch 思路）：用户浏览详情的几秒内数据就绪，点播秒回
             primeEpisodes(vids, "detail:" + id);
             return root.toString();
         } catch (Exception e) {
-            Log.e(TAG, "detailContent FAIL id=" + ids + " : " + e.getMessage());
+            fileLog("detailContent FAIL ids=" + ids + " : " + e.getClass().getSimpleName() + ": " + e.getMessage());
             return "";
         }
     }

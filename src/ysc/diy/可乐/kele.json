@@ -7,7 +7,7 @@
 			"name": "🤡红果短剧",
 			"type": 3,
 			"api": "csp_Hongguo",
-			"jar": "./hongguo/hongguo-spider.jar;md5;f1e398ce38fb86f1a69783c6baa75f7e",
+			"jar": "./hongguo/hongguo-spider.jar;md5;3d55b1d1d36fa8b74b5cda7124f298f8",
 			"searchable": 1,
 			"quickSearch": 0,
 			"filterable": 1,
