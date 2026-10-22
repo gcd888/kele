@@ -1424,6 +1424,12 @@ public class Hongguo extends Spider {
         }
     }
 
+    /** 壳侧 SourceViewModel 只调 2 参版本（不重写会落到基类默认实现直接返回空串=搜索永远无结果），委托给 3 参。 */
+    @Override
+    public String searchContent(String key, boolean quick) {
+        return searchContent(key, quick, "1");
+    }
+
     @Override
     public String searchContent(String key, boolean quick, String pg) {
         long t0 = System.currentTimeMillis();
