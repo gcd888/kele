@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
@@ -79,12 +80,19 @@ public class Hongguo extends Spider {
         }
     }
     private static final String SITE = "https://hongguoduanju.com";
-    private static final String PRELOAD_URL =
-            "https://api5-normal-sinfonlineb.fqnovel.com/novel/player/multi_video_model/preload/v1/";
+    // 2026-10-23 风控升级后取流链路（对齐 tsukiyo/hongguoTV 实测可用实现，桌面已验证）：
+    // 旧 preload/v1 + legacyGorgon 0x401c 已被服务端软拒（200 空体，按设备放行）；
+    // 新链路 multi_video_model/v1 免签名头，只需播放专用 UA + 稳定设备参数（3+18 位、进程内固定）
+    private static final String V1_URL =
+            "https://api5-normal-sinfonlineb.fqnovel.com/novel/player/multi_video_model/v1/";
     private static final String VIDEO_UA =
             "com.phoenix.read/73532 (Linux; U; Android 16; zh_CN; 25053RT47C; " +
             "Build/BP2A.250605.031.A3; Cronet/TTNetVersion:04657795 2026-01-23 " +
             "QuicVersion:c67e9834 2025-09-08)";
+    /** 播放接口专用 UA（v1 端点配合此 UA 免签名放行，与搜索页 UA 区分） */
+    private static final String PLAYER_UA =
+            "com.phoenix.read/71532 (Linux; U; Android 9; SM-N9860; " +
+            "Build/PQ3A.190705.10241111;tt-ok/3.12.13.20)";
     private static final int SEG_SIZE = 1048576;       // 1MB 分段
     private static final int HEADER_HINT = 8388608;    // moov 头部兜底抓取 8MB
 
@@ -127,36 +135,6 @@ public class Hongguo extends Spider {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String md5HexUpper(byte[] data) {
-        return hexUpper(digest("MD5", data));
-    }
-
-    private static String hexUpper(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) sb.append(String.format("%02X", b & 255));
-        return sb.toString();
-    }
-
-    // ============================ 签名：legacyGorgon（蓝本 Signer.signSimple 同款） ============================
-
-    private static String legacyGorgon(String query, byte[] body, int ts) {
-        byte[] input = concat(
-                concat(Arrays.copyOf(digest("MD5", query.getBytes(StandardCharsets.UTF_8)), 4),
-                        Arrays.copyOf(digest("MD5", body), 4)),
-                concat(concat(new byte[4], new byte[]{0, 6, 11, 28}),
-                        new byte[]{(byte) (ts >>> 24), (byte) (ts >>> 16), (byte) (ts >>> 8), (byte) ts}));
-        byte[] key = hexOf("44b9b9d9a4aef9fca493aa757ca3c2c4a496938f");
-        byte[] out = new byte[input.length];
-        for (int i = 0; i < out.length; i++) out[i] = (byte) (u(input[i]) ^ u(key[i]));
-        for (int i = 0; i < out.length; i++) {
-            int value = ((u(out[i]) >>> 4) | (u(out[i]) << 4)) & 255;
-            int next = u(out[(i + 1) % out.length]);
-            int reversed = Integer.reverse((next ^ value) & 255) >>> 24;
-            out[i] = (byte) ((reversed ^ 20) ^ 0xFF);
-        }
-        return hexOf(concat(hexOf("8404401c0000"), out));
     }
 
     private static String encodeValue(String v) {
@@ -652,18 +630,18 @@ public class Hongguo extends Spider {
     // 进程内复用设备标识（蓝本 streamDeviceId/streamInstallId 各生成一次后复用）
     private static final Random RNG = new Random();
 
-    /** 取流指纹：[1e18, 9e18) 随机生成、进程内复用（蓝本 onedrama 6905554 同款口径）；被风控持续软拒时可轮换。 */
-    private static String deviceId = newFingerprint();
-    private static String installId = newFingerprint();
+    /**
+     * 播放设备号：'3' + 18 位随机数字，进程内固定（蓝本 ContentRepository.newPlayerDeviceId 同款口径）。
+     * 2026-10-23 风控升级后不再轮换：服务端按设备放行，稳定身份比随机轮换更可靠。
+     */
+    private static String deviceId = newPlayerDeviceId();
+    private static String installId = newPlayerDeviceId();
+    private static final String playerCdid = UUID.randomUUID().toString();
 
-    private static String newFingerprint() {
-        return String.valueOf(1000000000000000000L + (long) (RNG.nextDouble() * 8000000000000000000L));
-    }
-
-    private static void rotateFingerprint() {
-        deviceId = newFingerprint();
-        installId = newFingerprint();
-        fileLog("指纹轮换 device_id=" + deviceId.substring(0, 6) + "... iid=" + installId.substring(0, 6) + "...");
+    private static String newPlayerDeviceId() {
+        StringBuilder sb = new StringBuilder("3");
+        for (int i = 0; i < 18; i++) sb.append(RNG.nextInt(10));
+        return sb.toString();
     }
 
     private StreamInfo stream(String vid) {
@@ -713,14 +691,17 @@ public class Hongguo extends Spider {
         }
         byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
 
+        // v1 端点参数集（对齐蓝本 VendorConstants.device + 覆盖项，桌面实测 200/code=0）：
+        // 版本回落 7.1.3.32(71332)、设备号 3+18 位进程内固定、cdid 随机 UUID、免签名头
         LinkedHashMap<String, String> values = new LinkedHashMap<>();
+        values.put("iid", installId);
+        values.put("device_id", deviceId);
+        values.put("ac", "wifi");
+        values.put("channel", "update_64");
         values.put("aid", "8662");
         values.put("app_name", "novelread");
-        values.put("version_code", "73532");
-        values.put("version_name", "7.3.5.32");
-        values.put("manifest_version_code", "73532");
-        values.put("update_version_code", "73532");
-        values.put("channel", "update_64");
+        values.put("version_code", "71332");
+        values.put("version_name", "7.1.3.32");
         values.put("device_platform", "android");
         values.put("os", "android");
         values.put("ssmix", "a");
@@ -729,62 +710,39 @@ public class Hongguo extends Spider {
         values.put("language", "zh");
         values.put("os_api", "36");
         values.put("os_version", "16");
+        values.put("manifest_version_code", "71332");
         values.put("resolution", "1280*2772");
         values.put("dpi", "520");
-        values.put("ac", "wifi");
-
-        // 与蓝本一致的请求 + 数据未就绪自动等待：
-        // PC 实验实锤：preload 空响应 = 该 vid 数据未生成/已被消费（成功响应带 expire_time，约 28~54 分钟有效），
-        // 不是风控拒绝；就绪后任意新指纹首请求都能拿到。
-        // 策略：5 次尝试、每次轮换新指纹、退避 1.5/3/5/8 秒（总等待约 18 秒）；正常由预热提前备好数据，秒回
-        int[] waits = {1500, 3000, 5000, 8000};
-        String respText = "";
-        for (int attempt = 0; attempt <= waits.length; attempt++) {
-            if (attempt > 0) {
-                fileLog("preload 空响应（数据未就绪），等待 " + (waits[attempt - 1] / 1000) + "s 后换指纹重试 " + attempt + "/" + waits.length);
-                try {
-                    Thread.sleep(waits[attempt - 1]);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-            rotateFingerprint();
-            values.put("device_id", deviceId);
-            values.put("iid", installId);
-            long now = System.currentTimeMillis();
-            int ts = (int) (now / 1000);
-            String query = encodeQuery(new LinkedHashMap<String, String>(values) {{
-                put("_rticket", String.valueOf(now));
-            }});
-            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-            headers.put("User-Agent", VIDEO_UA);
-            headers.put("Accept", "application/json");
-            headers.put("x-xs-from-web", "0");
-            headers.put("sdk-version", "2");
-            headers.put("x-khronos", String.valueOf(ts));
-            headers.put("x-gorgon", legacyGorgon(query, body, ts));
-            headers.put("x-ss-req-ticket", String.valueOf(now));
-            headers.put("Content-Type", "application/json; charset=UTF-8");
-            headers.put("x-ss-stub", md5HexUpper(body));
-            respText = text(PRELOAD_URL + "?" + query, "POST", body, headers).trim();
-            if (!respText.isEmpty()) break;
-        }
-        fileLog("preload http done respLen=" + respText.length()
+        values.put("update_version_code", "71332");
+        values.put("host_abi", "arm64-v8a");
+        values.put("dragon_device_type", "phone");
+        values.put("pv_player", "71332");
+        values.put("compliance_status", "0");
+        values.put("need_personal_recommend", "1");
+        values.put("player_so_load", "1");
+        values.put("is_android_pad_screen", "0");
+        values.put("cdid", playerCdid);
+        values.put("_rticket", String.valueOf(System.currentTimeMillis()));
+        String query = encodeQuery(values);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put("User-Agent", PLAYER_UA);
+        headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+        String respText = text(V1_URL + "?" + query, "POST", body, headers).trim();
+        fileLog("v1 http done respLen=" + respText.length()
                 + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
-        if (respText.isEmpty()) throw new RuntimeException("preload 数据未就绪（已重试约 30 秒），请稍后重新播放");
+        if (respText.isEmpty()) throw new RuntimeException("播放接口返回空响应，请稍后重试");
         JSONObject resp;
         try {
             resp = new JSONObject(respText);
         } catch (Exception e) {
-            throw new RuntimeException("preload 非 JSON 响应: " + respText.substring(0, Math.min(120, respText.length())));
+            throw new RuntimeException("播放接口非 JSON 响应: " + respText.substring(0, Math.min(120, respText.length())));
         }
         String code = resp.optString("Code", resp.optString("code", ""));
-        if (!"0".equals(code)) throw new RuntimeException("preload code=" + code);
+        if (!"0".equals(code)) throw new RuntimeException("播放接口 code=" + code);
         JSONObject data = resp.optJSONObject("data");
-        if (data == null) throw new RuntimeException("preload data missing");
+        if (data == null) throw new RuntimeException("播放信息 data missing");
         JSONObject entry = data.optJSONObject(vid);
-        if (entry == null) throw new RuntimeException("preload entry missing: " + vid);
+        if (entry == null) throw new RuntimeException("播放信息 entry missing: " + vid);
 
         JSONObject videoModel;
         Object vm = entry.opt("video_model");
