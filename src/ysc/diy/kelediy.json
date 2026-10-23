@@ -1,8 +1,8 @@
 {
   "urls": [
-    {
-      "url": "https://gcd888.github.io/kele/src/ysc/diy/可乐/kele.json",
-      "name": "👶🏻可乐"
+	{
+      "url": "https://gcd888.github.io/kele/src/ysc/diy/果果短剧/果果短剧.json",
+      "name": "🍎果果短剧"
     },
     {
       "url": "https://gcd888.github.io/kele/src/ysc/diy/饭太硬/fty.json",
@@ -40,10 +40,7 @@
       "url": "https://gcd888.github.io/kele/src/ysc/diy/短剧狗/duanjugou.json",
       "name": "📺短剧狗"
     },
-    {
-      "url": "https://gcd888.github.io/kele/src/ysc/diy/短剧/短剧.json",
-      "name": "🤡短剧"
-    },
+    
     {
       "url": "https://gcd888.github.io/kele/src/ysc/diy/儿童堡/儿童堡.json",
       "name": "👦🏻儿童堡"

@@ -1,5 +1,5 @@
-# Build hongguo spider jar: javac (stub + android.jar) -> d8 --dex -> zip (hongguo-spider.jar)
-# Output: hongguo\hongguo-spider.jar (classes.dex) + MD5 (for kele.json dramas.jar)
+﻿# Build hongguo spider jar: javac (stub + android.jar) -> d8 --dex -> zip (hongguo-spider.jar)
+# Output: ..\..\ysc\diy\果果短剧\lib\hongguo-spider.jar (classes.dex) + MD5 (for 果果短剧.json dramas.jar)
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -67,7 +67,9 @@ if (-not (Test-Path $dexPath)) { throw "classes.dex not generated" }
 
 # 5. zip (MANIFEST.MF + classes.dex, forward-slash entries)
 Add-Type -AssemblyName System.IO.Compression
-$jarPath = Join-Path $root "hongguo-spider.jar"
+$outRepoDir = Join-Path (Join-Path $root "..\..\ysc\diy\果果短剧") "lib"
+if (-not (Test-Path $outRepoDir)) { New-Item -ItemType Directory -Path $outRepoDir -Force | Out-Null }
+$jarPath = Join-Path $outRepoDir "hongguo-spider.jar"
 if (Test-Path $jarPath) { Remove-Item $jarPath -Force }
 $fs = [System.IO.File]::Create($jarPath)
 try {
@@ -92,4 +94,4 @@ $size = (Get-Item $jarPath).Length
 Write-Host ""
 Write-Host "BUILD OK: $jarPath ($size bytes)"
 Write-Host "MD5: $md5"
-Write-Host "kele.json ref: ./hongguo/hongguo-spider.jar;md5;$md5"
+Write-Host "果果短剧.json ref: ./lib/hongguo-spider.jar;md5;$md5"

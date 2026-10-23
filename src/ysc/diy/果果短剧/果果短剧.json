@@ -1,0 +1,18 @@
+{
+	"dramas": [
+		{
+			"key": "hongguo",
+			"name": "🤡红果短剧",
+			"type": 3,
+			"api": "csp_Hongguo",
+			"jar": "./lib/hongguo-spider.jar;md5;5378501588e2a9a3f7bd60103d29ad74",
+			"searchable": 1,
+			"quickSearch": 0,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		}
+	]
+}

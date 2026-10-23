@@ -22,7 +22,7 @@
       "content": "",
       "footer": ""
     },
-    "bofangyeguanggaotishi": "推荐解锁全天免广特权@观看激励视频，解锁当天APP无广体验",
+    "bofangyeguanggaotishi": "",
     "xiazaixiancheng": 4,
     "xiazaishuliang": 4,
     "aiurl": "",
@@ -30,7 +30,7 @@
       ""
     ],
     "csjad": "0",
-    "adyujiazai": 1,
+    "adyujiazai": 0,
     "withoutads": 2,
     "withoutadsshijian": 600,
     "uaprefix": "baiyunvideo-",
@@ -198,56 +198,20 @@
       "playViewInterval": 0,
       "created_at": "0001-01-01T00:00:00Z",
       "updated_at": "0001-01-01T00:00:00Z",
-      "tuiguangmiantian": 5,
-      "tuiguangmiaoshu": "每成功邀请1人，送5天免广告\n累计邀请3人，额外送5天免广告\n累计邀请10人，额外送30天免广告\n累计邀请30人，送永久免广告特权",
-      "tuiguangGuizeTitle": "邀新有礼｜双方享免广告福利！",
-      "tuiguangGuizeContent": "邀请好友下载 APP，好友（新用户）24 小时内填写你的邀请码，邀请成功！\n你：获得免广告会员5天  多邀多得 !\n好友（新用户）：直接领取 3 天免广告权益",
-      "jili": [
-        {
-          "tishi": "第一个广告",
-          "shijian": 3600
-        },
-        {
-          "tishi": "第二个广告",
-          "shijian": 3600
-        },
-        {
-          "tishi": "第三个广告",
-          "shijian": 3600
-        },
-        {
-          "tishi": "第四个广告",
-          "shijian": 7200
-        },
-        {
-          "tishi": "第五个广告",
-          "shijian": 7200
-        }
-      ],
+      "tuiguangmiantian": 0,
+      "tuiguangmiaoshu": "",
+      "tuiguangGuizeTitle": "",
+      "tuiguangGuizeContent": "",
+      "jili": [],
       "jilixiazaici": 3,
       "jilizuixiaojiange": 8,
       "xiazaizuixiaojiange": 8
     }
   ],
   "huancun": 863000,
-  "tishi": "版本更新 | 新增弹幕功能\n每日签到+看广告领金币 兑换免费会员\n快来更新体验吧！",
+  "tishi": "",
   "qiangzhi": 1,
-  "qudao": [
-    {
-      "qudaoming": "baidutuiguang",
-      "banben": "2.8.0",
-      "qiangzhi": 1,
-      "apk": "https://p5-ad.adukwai.com/bs2/ad-app/YWQtYXBwOmFkX2RzcF9hcHA6NTU0OTkwMTA5NjpNRVJDSEFOVDpbQkA2NDZkN2E2OToyMzQ1NjMwMzM1MDA5Ng%3D%3D.apk",
-      "yanchijiancha": "0"
-    },
-    {
-      "qudaoming": "fenxiang",
-      "banben": "2.8.0",
-      "qiangzhi": 1,
-      "apk": "https://p1-ad.adukwai.com/bs2/ad-app/YWQtYXBwOmFkX2RzcF9hcHA6MjU4NzI3NzQxODpNRVJDSEFOVDpbQkAyODA4OTIyYzoyMzQ1NDYxMzczNzQxOA%3D%3D.apk",
-      "yanchijiancha": "0"
-    }
-  ],
+  "qudao": [],
   "color": {
     "morenzhuti": 0,
     "homeHeadColor": [
