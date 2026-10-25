@@ -309,6 +309,7 @@ public class QSYG extends Spider {
         final String cover;
         final int duration;     // 秒
         String mvid = "";       // netease mvid / qq vid（MV 可选展示）
+        boolean hasK = true;    // 歌单队列条目下发：true=可K歌（有逐词歌词且可播），列表态按元数据推断
 
         Song(String platform, String id, String name, String artist, String album, String cover, int duration) {
             this.platform = platform;
@@ -388,21 +389,12 @@ public class QSYG extends Spider {
             Song song = new Song("netease", id, name, artist.toString(),
                     album == null ? "" : album.optString("name", ""), cover, duration);
             song.mvid = String.valueOf(s.optLong("mvid", s.optLong("mv", 0)));
+            // hasK 元数据推断：privilege.st=-200（无版权）/ fee=1（VIP 试听）→ 不可 K歌（角标不显示）
+            JSONObject priv = s.optJSONObject("privilege");
+            if (priv != null && (priv.optInt("st", 0) == -200 || priv.optInt("fee", 0) == 1)) {
+                song.hasK = false;
+            }
             out.add(song);
-        }
-        return out;
-    }
-
-    /** 网易云热榜目录。 */
-    private static List<JSONObject> neToplists() throws Exception {
-        JSONObject resp = postJson("https://music.163.com/api/toplist", neHeaders(), "");
-        JSONArray list = resp.optJSONArray("list");
-        List<JSONObject> out = new ArrayList<>();
-        if (list == null) return out;
-        for (int i = 0; i < list.length(); i++) {
-            JSONObject t = list.optJSONObject(i);
-            if (t == null || t.optLong("id", 0) <= 0) continue;
-            out.add(t);
         }
         return out;
     }
@@ -413,6 +405,72 @@ public class QSYG extends Spider {
         JSONObject result = resp.optJSONObject("result");
         if (result == null) return new ArrayList<>();
         return neParseSongs(result.optJSONArray("tracks"));
+    }
+
+    /** 网易云歌单分类目录（/api/playlist/catlist 的 sub 名称；接口失败回退内置常用分类）。 */
+    private static List<String> neCatlist() {
+        try {
+            JSONObject resp = getJson("https://music.163.com/api/playlist/catlist", neHeaders());
+            JSONArray sub = resp.optJSONArray("sub");
+            List<String> out = new ArrayList<>();
+            if (sub != null) {
+                for (int i = 0; i < sub.length(); i++) {
+                    JSONObject c = sub.optJSONObject(i);
+                    if (c == null) continue;
+                    String name = c.optString("name", "").trim();
+                    if (!name.isEmpty() && !out.contains(name)) out.add(name);
+                }
+            }
+            if (!out.isEmpty()) return out;
+        } catch (Exception e) {
+            fileLog("neCatlist FAIL: " + e);
+        }
+        return java.util.Arrays.asList("华语", "流行", "摇滚", "民谣", "电子", "说唱", "古风",
+                "轻音乐", "爵士", "ACG", "R&B/Soul", "欧美", "日语", "韩语", "粤语", "早晨", "夜晚", "学习");
+    }
+
+    /** 网易云歌单列表（/api/playlist/list，cat 筛选 + 30/页分页，order=hot）。 */
+    private static List<JSONObject> nePlaylists(String cat, int page) throws Exception {
+        String url = "https://music.163.com/api/playlist/list?limit=30&order=hot&total=true"
+                + "&offset=" + ((page - 1) * 30)
+                + ("全部".equals(cat) || cat.isEmpty() ? "" : "&cat=" + enc(cat));
+        JSONObject resp = getJson(url, neHeaders());
+        JSONArray arr = resp.optJSONArray("playlists");
+        List<JSONObject> out = new ArrayList<>();
+        if (arr == null) return out;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject p = arr.optJSONObject(i);
+            if (p == null || p.optLong("id", 0) <= 0) continue;
+            out.add(p);
+        }
+        return out;
+    }
+
+    /** 网易云精品歌单（/api/playlist/highquality/list）。 */
+    private static List<JSONObject> neHighquality(int limit) throws Exception {
+        JSONObject resp = getJson("https://music.163.com/api/playlist/highquality/list?limit=" + limit, neHeaders());
+        JSONArray arr = resp.optJSONArray("playlists");
+        List<JSONObject> out = new ArrayList<>();
+        if (arr == null) return out;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject p = arr.optJSONObject(i);
+            if (p == null || p.optLong("id", 0) <= 0) continue;
+            out.add(p);
+        }
+        return out;
+    }
+
+    /** 网易云歌单元数据（/api/playlist/detail 的 name/coverImgUrl，失败返回空串数组）。 */
+    private static String[] nePlaylistMeta(String playlistId) {
+        try {
+            JSONObject resp = getJson("https://music.163.com/api/playlist/detail?id=" + enc(playlistId), neHeaders());
+            JSONObject result = resp.optJSONObject("result");
+            if (result == null) return new String[]{"", ""};
+            return new String[]{result.optString("name", ""), result.optString("coverImgUrl", "")};
+        } catch (Exception e) {
+            fileLog("nePlaylistMeta FAIL id=" + playlistId + " : " + e);
+            return new String[]{"", ""};
+        }
     }
 
     /** 网易云取流（weapi song/enhance/player/url，br=320000）。 */
@@ -453,12 +511,6 @@ public class QSYG extends Spider {
 
     private static Map<String, String> qqJsonHeaders() {
         return headers("Referer", QQ_REFERER, "Content-Type", "application/json");
-    }
-
-    /** QQ musicu.fcg 网关 GET 形式（format=json&data=urlencode(payload)）。 */
-    private static JSONObject qqFcgGet(JSONObject payload) throws Exception {
-        return getJson("https://u.y.qq.com/cgi-bin/musicu.fcg?format=json&data=" + enc(payload.toString()),
-                headers("Referer", QQ_REFERER));
     }
 
     /** QQ musicu.fcg 网关 POST 形式。 */
@@ -521,39 +573,6 @@ public class QSYG extends Spider {
             if (!mvStr.isEmpty()) song.mvid = mvStr;
         }
         return song;
-    }
-
-    /** QQ 热榜目录（musicToplist.ToplistInfoServer/GetAll，跳过 MV 榜 recType=10010）。 */
-    private static List<JSONObject> qqToplists() throws Exception {
-        JSONObject payload = new JSONObject()
-                .put("comm", qqComm())
-                .put("topList", new JSONObject()
-                        .put("module", "musicToplist.ToplistInfoServer")
-                        .put("method", "GetAll")
-                        .put("param", new JSONObject()));
-        JSONObject resp = qqFcgGet(payload);
-        JSONObject topList = resp.optJSONObject("topList");
-        if (topList == null || topList.optInt("code", -1) != 0) return new ArrayList<>();
-        JSONObject data = topList.optJSONObject("data");
-        if (data == null) return new ArrayList<>();
-        JSONArray groups = data.optJSONArray("group");
-        List<JSONObject> out = new ArrayList<>();
-        if (groups == null) return out;
-        for (int i = 0; i < groups.length(); i++) {
-            JSONObject group = groups.optJSONObject(i);
-            if (group == null) continue;
-            JSONArray items = group.optJSONArray("toplist");
-            if (items == null) continue;
-            for (int j = 0; j < items.length(); j++) {
-                JSONObject t = items.optJSONObject(j);
-                if (t == null || t.optInt("topId", 0) <= 0) continue;
-                if (t.optInt("recType", 0) == 10010) continue; // MV 榜
-                String title = t.optString("title", "").trim();
-                if (title.isEmpty()) continue;
-                out.add(t);
-            }
-        }
-        return out;
     }
 
     /** QQ 榜单歌曲（fcg_v8_toplist_cp）。 */
@@ -720,25 +739,6 @@ public class QSYG extends Spider {
         return headers("User-Agent", KG_UA, "Referer", KG_REFERER);
     }
 
-    /** 酷狗热榜目录（mobilecdn rank/list）。 */
-    private static List<JSONObject> kgToplists() throws Exception {
-        String url = "https://mobilecdn.kugou.com/api/v3/rank/list?version=9108&plat=0&showtype=2" +
-                "&parentid=0&apiver=2&area_code=1&withsong=1&page=1&pagesize=100";
-        JSONObject resp = getJson(url, kgHeaders());
-        if (resp.optInt("status", -1) != 1) return new ArrayList<>();
-        JSONObject data = resp.optJSONObject("data");
-        JSONArray info = data == null ? null : data.optJSONArray("info");
-        List<JSONObject> out = new ArrayList<>();
-        if (info == null) return out;
-        for (int i = 0; i < info.length(); i++) {
-            JSONObject t = info.optJSONObject(i);
-            if (t == null || t.optInt("rankid", 0) <= 0) continue;
-            if (t.optString("rankname", "").trim().isEmpty()) continue;
-            out.add(t);
-        }
-        return out;
-    }
-
     /** 酷狗歌曲条目解析（rank/song、special/song、search 三种结构统一）。 */
     private static Song kgParseSong(JSONObject s) {
         String hash = firstNonEmpty(s.optString("hash", ""), s.optString("FileHash", ""),
@@ -842,14 +842,6 @@ public class QSYG extends Spider {
 
     private static final String SODA_APP_UA = "com.luna.music/100198030 (Linux; U; Android 15; zh_CN_#Hans; ABR-AL80; Build/V417IR;tt-ok/3.12.13.19)";
     private static final String SODA_WEB_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
-
-    /** 汽水官方榜单内置定义（PC 端无榜单目录接口）。 */
-    private static final String[][] SODA_CHARTS = {
-            {"7036274230471712007", "热歌榜", "汽水音乐内每周热度最高的50首歌，每周四更新"},
-            {"7060812597884869927", "新歌榜", "近期发行的热度最高的50首新歌，每周四更新"},
-            {"7061475546400005410", "欧美榜", "汽水音乐内每周热度最高的50首外文歌曲，每周四更新"},
-            {"7415959718721494311", "音乐人歌曲榜", "抖音音乐人开放平台上传歌曲，综合每周站内热度进行排序展示"},
-    };
 
     /** 汽水歌曲条目解析（track 结构统一）。 */
     private static Song sodaParseTrack(JSONObject track) {
@@ -1074,11 +1066,32 @@ public class QSYG extends Spider {
         }
         String content = lyricObj == null ? "" : lyricObj.optString("content", "");
         if (content.isEmpty()) return new String[]{"", ""};
-        // 含 "(ms,dur,0)" 逐词标注则视为逐词歌词，否则按 LRC
-        if (content.contains("(") && content.matches("(?s).*\\[\\d+,\\d+\\].*") && content.contains(",0)")) {
-            return new String[]{"", content};
+        // 含 "<ms,dur,0>" 逐词标注则视为逐词歌词（汽水尖括号词标签），否则按 LRC
+        if (content.contains("<") && content.matches("(?s).*\\[\\d+,\\d+\\].*") && content.contains(",0>")) {
+            return new String[]{sodaWordLyricToLrc(content), content};
         }
         return new String[]{content, ""};
+    }
+
+    /**
+     * soda 逐词歌词 → 整行 LRC（听歌页滚动展示用；klyric 通道保留逐词原文给 K 歌跟唱）。
+     * 行头 [startMs,durMs]，词标签 <off,dur,0>字 → 去标签留文本，时间转 [mm:ss.cs]。
+     */
+    private static String sodaWordLyricToLrc(String content) {
+        java.util.regex.Matcher hm = java.util.regex.Pattern.compile("^\\s*\\[(\\d+),(\\d+)\\]").matcher("");
+        StringBuilder sb = new StringBuilder();
+        for (String raw : content.split("\n")) {
+            String line = raw.trim();
+            if (line.isEmpty()) continue;
+            if (!hm.reset(line).find()) continue;
+            long ms = Long.parseLong(hm.group(1));
+            String text = line.substring(hm.end()).replaceAll("<\\d+,\\d+,\\d+>", "").trim();
+            if (text.isEmpty()) continue;
+            long cs = ms / 10; // 厘秒
+            sb.append(String.format("[%02d:%02d.%02d]", cs / 6000, (cs / 100) % 60, cs % 100))
+                    .append(text).append('\n');
+        }
+        return sb.toString();
     }
 
     /** 深度遍历 JSON 结构找第一个播放地址（video_model 多层嵌套字符串兼容）。 */
@@ -1132,18 +1145,39 @@ public class QSYG extends Spider {
 
     @Override
     public String homeContent(boolean filter) {
+        // 一期平台节奏（PRD FR-L-12）：仅网易云歌单分类（单 tab）+ 热歌榜（站点推荐模式追加，
+        // 果剧推荐模式由壳侧过滤避免双 tab 同内容）；QQ/酷狗/汽水二期由 jar 扩展，壳侧无结构变化
         try {
             JSONObject result = new JSONObject();
             JSONArray classes = new JSONArray();
-            classes.put(new JSONObject().put("type_id", "netease").put("type_name", "网易云"));
-            classes.put(new JSONObject().put("type_id", "qq").put("type_name", "QQ音乐"));
-            classes.put(new JSONObject().put("type_id", "kugou").put("type_name", "酷狗"));
-            classes.put(new JSONObject().put("type_id", "soda").put("type_name", "汽水"));
+            classes.put(new JSONObject().put("type_id", "netease").put("type_name", "网易云歌单"));
+            classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热歌榜"));
             result.put("class", classes);
+            if (filter) {
+                // filters = 歌单分类目录（筛选行数据源，壳侧不写死）；接口失败回退内置常用分类
+                JSONArray cats = new JSONArray();
+                cats.put(new JSONObject().put("n", "全部").put("v", ""));
+                for (String c : neCatlist()) {
+                    cats.put(new JSONObject().put("n", c).put("v", c));
+                }
+                JSONObject filters = new JSONObject();
+                filters.put("netease", new JSONArray().put(new JSONObject()
+                        .put("key", "cat").put("name", "分类").put("value", cats)));
+                result.put("filters", filters);
+            }
             return result.toString();
         } catch (Exception e) {
             fileLog("homeContent FAIL: " + e);
-            return "";
+            try {
+                JSONObject result = new JSONObject();
+                JSONArray classes = new JSONArray();
+                classes.put(new JSONObject().put("type_id", "netease").put("type_name", "网易云歌单"));
+                classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热歌榜"));
+                result.put("class", classes);
+                return result.toString();
+            } catch (Exception ignored) {
+                return "";
+            }
         }
     }
 
@@ -1151,72 +1185,49 @@ public class QSYG extends Spider {
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         String platform = tid == null ? "" : tid.trim();
         try {
-            fileLog("categoryContent enter tid=" + platform);
-            List<JSONObject> toplists;
-            switch (platform) {
-                case "netease":
-                    toplists = neToplists();
-                    break;
-                case "qq":
-                    toplists = qqToplists();
-                    break;
-                case "kugou":
-                    toplists = kgToplists();
-                    break;
-                case "soda":
-                    toplists = new ArrayList<>();
-                    for (String[] c : SODA_CHARTS) {
-                        toplists.add(new JSONObject()
-                                .put("id", c[0]).put("name", c[0].equals(c[0]) ? c[1] : c[1]).put("desc", c[2]));
-                    }
-                    break;
-                default:
-                    toplists = new ArrayList<>();
+            // 热歌榜（站点推荐模式追加 tab）：网易云热歌榜歌曲（2 段 uid，点击直达播放页）
+            if ("hot".equals(platform)) {
+                List<Song> songs = nePlaylistSongs("3778678");
+                return songsToPageData(songs, "网易云热歌榜");
             }
-            List<JSONObject> items = toplists;
+            if (!"netease".equals(platform)) {
+                return pageDataEmpty(1); // QQ/酷狗/汽水歌单分类二期开放（FR-L-12）
+            }
+            fileLog("categoryContent enter tid=" + platform + " pg=" + pg + " extend=" + extend);
+            String cat = extend != null && extend.get("cat") != null && !extend.get("cat").trim().isEmpty()
+                    ? extend.get("cat").trim() : "全部";
+            int page = 1;
+            try {
+                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+            } catch (Exception ignored) {
+            }
+            List<JSONObject> pls = nePlaylists(cat, page);
             JSONObject result = new JSONObject();
             JSONArray list = new JSONArray();
             int i = 0;
-            for (JSONObject t : items) {
-                String id, name, cover, remarks;
-                if ("soda".equals(platform)) {
-                    id = t.optString("id", "");
-                    name = t.optString("name", "");
-                    cover = "";
-                    remarks = t.optString("desc", "");
-                } else if ("netease".equals(platform)) {
-                    id = String.valueOf(t.optLong("id", 0));
-                    name = t.optString("name", "");
-                    cover = t.optString("coverImgUrl", "");
-                    remarks = t.optString("updateFrequency", "");
-                } else if ("qq".equals(platform)) {
-                    id = String.valueOf(t.optInt("topId", 0));
-                    name = t.optString("title", "");
-                    cover = firstNonEmpty(t.optString("frontPicUrl", ""), t.optString("headPicUrl", ""), t.optString("mbFrontPicUrl", ""));
-                    if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
-                    remarks = t.optString("updateTips", "");
-                } else {
-                    id = String.valueOf(t.optInt("rankid", 0));
-                    name = t.optString("rankname", "");
-                    cover = t.optString("imgurl", "").replace("{size}", "240");
-                    remarks = t.optString("update_frequency", "");
-                }
-                if (id.isEmpty() || name.isEmpty()) continue;
+            for (JSONObject p : pls) {
+                String id = String.valueOf(p.optLong("id", 0));
+                String name = p.optString("name", "").trim();
+                if (id.isEmpty() || "0".equals(id) || name.isEmpty()) continue;
                 JSONObject v = new JSONObject();
-                v.put("vod_id", platform + "_toplist_" + id);
+                v.put("vod_id", "netease_playlist_" + id);
                 v.put("vod_name", name);
+                String cover = p.optString("coverImgUrl", "");
+                if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
                 v.put("vod_pic", cover);
-                v.put("vod_remarks", remarks);
-                v.put("vod_content", remarks);
+                v.put("vod_remarks", p.optInt("trackCount", 0) + "首");
+                v.put("vod_actor", platformName(platform));
+                v.put("vod_content", p.optString("description", p.optString("copywriter", "")));
                 list.put(v);
                 i++;
             }
+            boolean more = pls.size() >= 30;
             result.put("list", list);
-            result.put("page", 1);
-            result.put("pagecount", 1);
-            result.put("limit", 100);
-            result.put("total", i);
-            fileLog("categoryContent done tid=" + platform + " items=" + i);
+            result.put("page", page);
+            result.put("pagecount", more ? page + 1 : page);
+            result.put("limit", 30);
+            result.put("total", more ? -1 : i);
+            fileLog("categoryContent done tid=" + platform + " cat=" + cat + " pg=" + page + " items=" + i);
             return result.toString();
         } catch (Exception e) {
             fileLog("categoryContent FAIL tid=" + platform + " : " + e);
@@ -1226,10 +1237,32 @@ public class QSYG extends Spider {
 
     @Override
     public String homeVideoContent() {
-        // 站点推荐模式数据源：网易云热歌榜（公开稳定）
+        // 站点推荐模式数据源（v2.3 歌单化）：精品歌单列表（封面+曲目数+3段 id），Hero 轮播同源
         try {
-            List<Song> songs = nePlaylistSongs("3778678");
-            return songsToPageData(songs, "网易云热歌榜");
+            List<JSONObject> pls = neHighquality(20);
+            JSONObject result = new JSONObject();
+            JSONArray list = new JSONArray();
+            for (JSONObject p : pls) {
+                String id = String.valueOf(p.optLong("id", 0));
+                String name = p.optString("name", "").trim();
+                if (id.isEmpty() || "0".equals(id) || name.isEmpty()) continue;
+                JSONObject v = new JSONObject();
+                v.put("vod_id", "netease_playlist_" + id);
+                v.put("vod_name", name);
+                String cover = p.optString("coverImgUrl", "");
+                if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
+                v.put("vod_pic", cover);
+                v.put("vod_remarks", p.optInt("trackCount", 0) + "首");
+                v.put("vod_actor", platformName("netease"));
+                v.put("vod_content", p.optString("description", p.optString("copywriter", "")));
+                list.put(v);
+            }
+            result.put("list", list);
+            result.put("page", 1);
+            result.put("pagecount", 1);
+            result.put("limit", 20);
+            result.put("total", list.length());
+            return result.toString();
         } catch (Exception e) {
             fileLog("homeVideoContent FAIL: " + e);
             return "";
@@ -1327,11 +1360,16 @@ public class QSYG extends Spider {
         long t0 = System.currentTimeMillis();
         String id = ids.get(0);
         String[] parts = id.split("_", 3);
+        if (parts.length == 2) {
+            // 2 段 uid：单曲详情（收藏单曲/详情态），单条播放队列
+            return singleDetail(id, t0);
+        }
         if (parts.length != 3) {
             fileLog("detailContent invalid id=" + id);
             return "";
         }
         String platform = parts[0], kind = parts[1], realId = parts[2];
+        String listCoverFallback = ""; // 歌单封面（playlist kind 时由歌单元数据下发，优先于首曲专辑封面）
         try {
             fileLog("detailContent enter id=" + id);
             List<Song> songs;
@@ -1358,6 +1396,12 @@ public class QSYG extends Spider {
                         songs = new ArrayList<>();
                 }
             } else if ("playlist".equals(kind)) {
+                String listName = "", listCover = "";
+                if ("netease".equals(platform)) {
+                    String[] meta = nePlaylistMeta(realId); // 真实歌单名/封面（详情页头部展示）
+                    listName = meta[0];
+                    listCover = meta[1];
+                }
                 switch (platform) {
                     case "netease":
                         songs = nePlaylistSongs(realId);
@@ -1374,7 +1418,8 @@ public class QSYG extends Spider {
                     default:
                         songs = new ArrayList<>();
                 }
-                title = platformName(platform) + " · 歌单";
+                title = listName.isEmpty() ? platformName(platform) + " · 歌单" : listName;
+                listCoverFallback = listCover;
             } else {
                 fileLog("detailContent unknown kind=" + kind);
                 return "";
@@ -1389,8 +1434,10 @@ public class QSYG extends Spider {
                 if (i > 0) play.append('#');
                 play.append(String.format("%02d", i + 1)).append('.').append(s.name)
                         .append('$').append(s.uid());
+                // hasK 第三段标记（v2.3）：1=可K歌（角标显示）；0=不可K歌；缺省=不显角标
+                play.append('$').append(s.hasK ? "1" : "0");
             }
-            String cover = songs.get(0).cover;
+            String cover = listCoverFallback.isEmpty() ? songs.get(0).cover : listCoverFallback;
             JSONObject v = new JSONObject();
             v.put("vod_id", id);
             v.put("vod_name", title);
@@ -1411,6 +1458,34 @@ public class QSYG extends Spider {
             return root.toString();
         } catch (Exception e) {
             fileLog("detailContent FAIL id=" + id + " : " + e);
+            return "";
+        }
+    }
+
+    /** 单曲详情（2 段 uid）：歌曲信息 + 单条播放队列（缺省无 hasK 第三段=不显 K 角标）。 */
+    private String singleDetail(String uid, long t0) {
+        try {
+            Song s = songInfo(uid);
+            String name = s == null ? uid : s.name;
+            String artist = s == null ? "" : s.artist;
+            JSONObject v = new JSONObject();
+            v.put("vod_id", uid);
+            v.put("vod_name", name);
+            v.put("vod_pic", s == null ? "" : s.cover);
+            v.put("vod_remarks", artist);
+            v.put("vod_content", artist + (s == null || s.album.isEmpty() ? "" : " · " + s.album));
+            v.put("type_id", uid.contains("_") ? uid.substring(0, uid.indexOf('_')) : "");
+            v.put("vod_play_from", PLAY_FLAG);
+            v.put("vod_play_url", "01." + name + "$" + uid);
+            JSONObject root = new JSONObject();
+            root.put("code", 1);
+            JSONArray list = new JSONArray();
+            list.put(v);
+            root.put("list", list);
+            fileLog("singleDetail done id=" + uid + " cost=" + (System.currentTimeMillis() - t0) + "ms");
+            return root.toString();
+        } catch (Exception e) {
+            fileLog("singleDetail FAIL id=" + uid + " : " + e);
             return "";
         }
     }
@@ -1608,6 +1683,7 @@ public class QSYG extends Spider {
                 String[] pi = resolvePlaylistFromUrl(url);
                 if (pi == null) return "{\"error\":\"unsupported playlist url\"}";
                 List<Song> songs;
+                String[] meta = nePlaylistMeta(pi[1]); // [name, cover]（仅 netease 精确，其他平台空值回退）
                 switch (pi[0]) {
                     case "netease":
                         songs = nePlaylistSongs(pi[1]);
@@ -1629,6 +1705,8 @@ public class QSYG extends Spider {
                 JSONObject root = new JSONObject();
                 root.put("platform", pi[0]);
                 root.put("playlistId", pi[1]);
+                root.put("playlistName", meta[0]);
+                root.put("playlistCover", meta[1]);
                 root.put("songs", arr);
                 fileLog("action playlistUrl done p=" + pi[0] + " id=" + pi[1]
                         + " items=" + songs.size() + " cost=" + (System.currentTimeMillis() - t0) + "ms");
@@ -1745,6 +1823,7 @@ public class QSYG extends Spider {
             o.put("cover", s.cover);
             o.put("duration", s.duration);
             o.put("platform", s.platform);
+            o.put("hasK", s.hasK);
         } catch (Exception ignore) {
         }
         return o;

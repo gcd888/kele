@@ -5,7 +5,7 @@
 			"name": "🎵果剧音乐",
 			"type": 3,
 			"api": "csp_QSYG",
-			"jar": "./lib/qsyg-spider.jar;md5;1257bde50cc34f4030c8d5e5b3994cce",
+			"jar": "./lib/qsyg-spider.jar;md5;b7e68fd96a8830e058c73f6e3ebf5b22",
 			"searchable": 1,
 			"quickSearch": 1,
 			"filterable": 1,
