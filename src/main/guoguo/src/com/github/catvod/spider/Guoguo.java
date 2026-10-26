@@ -43,17 +43,19 @@ import javax.crypto.spec.SecretKeySpec;
  * 算法蓝本：hongguoTV kotlin-tv core（Signer/MediaCrypto/ContentRepository/ComicRank）。
  *
  * 数据面：
- *  - 分类/详情/榜单/搜索：红果官网 SSR（hongguoduanju.com，无需签名）；
+ *  - 分类/详情/榜单：红果官网 SSR（hongguoduanju.com，无需签名）；
+ *  - 搜索：优先番茄 App 端接口（bookapi/search/tab/v，全套字节签名 + 匿名注册设备，全量索引），
+ *    失败/空结果回退官网 JSON 接口 /api/search/result（无需签名，索引残缺仅作兜底）；
  *  - 取流：fqnovel preload 接口（signSimple：老版 X-Gorgon 0x401c + X-Khronos + X-SS-Req-Ticket + X-SS-STUB）；
  *  - 解密：spade_a 密钥派生 + spade 解密（SHA512 + AES-128-CBC）+ CENC 逐样本 AES-CTR；
  *  - 播放：经壳本地代理 proxy() 回吐解密后的分段字节（206）。
  */
-public class Hongguo extends Spider {
+public class Guoguo extends Spider {
 
     private static final String TAG = "echo-drama-jar";
 
     /** 把 jar 内部排查日志桥接到壳的 LogWriter（落 guoju_log.txt，导出可见）；
-     *  反射失败时兜底直写 App 外部 files 目录 hongguo_spider.log（与 guoju_log.txt 同目录），双通道确保落盘。
+     *  反射失败时兜底直写 App 外部 files 目录 guoguo_spider.log（与 guoju_log.txt 同目录），双通道确保落盘。
      *  注意：壳包名是 com.github.gcd888.guoju（勿回退 tvbox 旧包名，旧包名反射必失败=日志静默丢失）。 */
     private static void fileLog(String msg) {
         Log.e(TAG, msg);
@@ -67,7 +69,7 @@ public class Hongguo extends Spider {
             if (mContext == null) return;
             java.io.File dir = mContext.getExternalFilesDir(null);
             if (dir == null) return;
-            java.io.File f = new java.io.File(dir, "hongguo_spider.log");
+            java.io.File f = new java.io.File(dir, "guoguo_spider.log");
             boolean rotate = f.exists() && f.length() > 512 * 1024;
             java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(f, !rotate));
             bw.write(new java.text.SimpleDateFormat("MM-dd HH:mm:ss.SSS", java.util.Locale.US)
@@ -311,6 +313,8 @@ public class Hongguo extends Spider {
         final List<Series> items;
         final int lastPage;
         final boolean hasMore;
+        /** App 搜索分页游标（search_id/passback），Web 搜索路径不使用。 */
+        LinkedHashMap<String, String> cursor;
 
         Page(List<Series> items, int page, int lastPage) {
             this.items = items;
@@ -1197,7 +1201,7 @@ public class Hongguo extends Spider {
             Executors.newSingleThreadExecutor(new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r, "hongguo-primer");
+                    Thread t = new Thread(r, "guoguo-primer");
                     t.setDaemon(true);
                     return t;
                 }
@@ -1261,6 +1265,1080 @@ public class Hongguo extends Spider {
         synchronized (preparedCache) {
             preparedCache.put(vid, p);
         }
+        return p;
+    }
+
+    // ============================ App 端搜索（bookapi/search/tab，蓝本 tsukiyo hongguo.cjs/Signer.kt 1:1） ============================
+    // 官网 Web 搜索索引残缺（部分剧不召回、pageNum 翻页无效），App 端接口为全量索引但需字节系全套签名 + 已注册设备。
+    // 实证链路（2026-10-26 Node golden.mjs）：匿名注册设备 → 签名搜索 code=0 → 搜到官网搜不到的新剧。
+
+    /** App 搜索接口（蓝本 hongguo.cjs APP_SEARCH_API）。包级可见供桌面金标测试。 */
+    static final String APP_SEARCH_API =
+            "https://api5-normal-sinfonlinea.fqnovel.com/reading/bookapi/search/tab/v";
+    /** App 搜索专用 UA（蓝本 VendorConstants.APP_UA），与播放/网页 UA 区分。 */
+    private static final String APP_UA =
+            "com.phoenix.read/72232 (Linux; U; Android 16; zh_CN; 25053RT47C; Build/BP2A.250605.031.A3)";
+    /** medusa 签名内嵌的 signKey（蓝本 buildMedusa 固定值）。 */
+    private static final byte[] APP_SIGN_KEY = hexOf(
+            "8ebdfa3806ecc5cee79423e6029ed82540bc2218bb7eaef71cb691f7aa8aa2f5");
+    /** 设备注册接口（蓝本 DeviceRegister.kt）：匿名、刻意不带任何签名头。 */
+    private static final String REG_URL =
+            "https://log5-applog-lf.fqnovel.com/service/2/device_register/"
+                    + "?tt_data=a&cronet_version=8d40f833_2026-03-03&ttnet_version=4.2.243.31-douyin&use_store_region_cookie=1";
+    private static final byte[] REG_MAGIC = {0x74, 0x63, 0x05, 0x10, 0x00, 0x00};
+
+    /** 随机源/时钟钩子（默认系统实现；桌面金标测试注入固定序列以复现 golden.json）。 */
+    interface Rand { double next(); }
+    interface ClockMs { long now(); }
+    static Rand RAND = new Rand() { @Override public double next() { return Math.random(); } };
+    static ClockMs CLOCK = new ClockMs() { @Override public long now() { return System.currentTimeMillis(); } };
+
+    /** App 搜索设备参数（蓝本 APP_DEVICE：DEVICE 顺序 + 版本覆盖 72232），iid/device_id 用注册下发的真实值。 */
+    static LinkedHashMap<String, String> appDeviceParams(String iid, String deviceId) {
+        LinkedHashMap<String, String> v = new LinkedHashMap<>();
+        v.put("iid", iid);
+        v.put("device_id", deviceId);
+        v.put("ac", "wifi");
+        v.put("channel", "update_64");
+        v.put("aid", "8662");
+        v.put("app_name", "novelread");
+        v.put("version_code", "72232");
+        v.put("version_name", "7.2.2.32");
+        v.put("device_platform", "android");
+        v.put("os", "android");
+        v.put("ssmix", "a");
+        v.put("device_type", "25053RT47C");
+        v.put("device_brand", "Redmi");
+        v.put("language", "zh");
+        v.put("os_api", "36");
+        v.put("os_version", "16");
+        v.put("manifest_version_code", "72232");
+        v.put("resolution", "1280*2772");
+        v.put("dpi", "520");
+        v.put("update_version_code", "72232");
+        v.put("host_abi", "arm64-v8a");
+        v.put("dragon_device_type", "phone");
+        v.put("pv_player", "72232");
+        v.put("compliance_status", "0");
+        v.put("need_personal_recommend", "1");
+        v.put("player_so_load", "1");
+        v.put("is_android_pad_screen", "0");
+        return v;
+    }
+
+    // ---- 基础位运算/编码（勿改位序，蓝本实测黑盒） ----
+
+    private static int rol32(int v, int n) { n &= 31; return (v << n) | (v >>> (32 - n)); }
+    private static int ror32(int v, int n) { n &= 31; return (v >>> n) | (v << (32 - n)); }
+
+    private static byte[] le32(int v) {
+        return new byte[]{(byte) v, (byte) (v >>> 8), (byte) (v >>> 16), (byte) (v >>> 24)};
+    }
+
+    private static byte[] be32(int v) {
+        return new byte[]{(byte) (v >>> 24), (byte) (v >>> 16), (byte) (v >>> 8), (byte) v};
+    }
+
+    private static byte[] le64(long v) {
+        byte[] out = new byte[8];
+        for (int i = 0; i < 8; i++) out[i] = (byte) (v >>> (8 * i));
+        return out;
+    }
+
+    private static int i32be(byte[] d, int at) {
+        return ((d[at] & 255) << 24) | ((d[at + 1] & 255) << 16) | ((d[at + 2] & 255) << 8) | (d[at + 3] & 255);
+    }
+
+    private static long i64le(byte[] d, int at) {
+        long out = 0;
+        for (int i = 7; i >= 0; i--) out = (out << 8) | (d[at + i] & 255);
+        return out;
+    }
+
+    /** cjs pythonUrlEncode 1:1：保留 A-Za-z0-9-_.~*，其余按 UTF-8 百分号大写编码；URL 与签名必须同一份字节。 */
+    static String pythonUrlEncode(LinkedHashMap<String, String> values) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> e : values.entrySet()) {
+            if (sb.length() > 0) sb.append('&');
+            sb.append(pythonEncodeValue(e.getKey())).append('=').append(pythonEncodeValue(e.getValue()));
+        }
+        return sb.toString();
+    }
+
+    private static String pythonEncodeValue(String v) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : v.getBytes(StandardCharsets.UTF_8)) {
+            int c = u(b);
+            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+                    || c == '-' || c == '_' || c == '.' || c == '~' || c == '*') {
+                sb.append((char) c);
+            } else {
+                sb.append('%').append(String.format("%02X", c));
+            }
+        }
+        return sb.toString();
+    }
+
+    // ---- protobuf 编码（cjs varint/zigzag/protoField 同构） ----
+
+    private static byte[] varint(long n) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        while (n > 127) {
+            out.write((int) ((n & 127) | 128));
+            n >>>= 7;
+        }
+        out.write((int) n);
+        return out.toByteArray();
+    }
+
+    private static byte[] protoFieldSint(long tag, long value) {
+        long z = (value << 1) ^ (value >> 63); // 标准 zigzag，等价 cjs zigzag()
+        return concat(varint(tag << 3), varint(z));
+    }
+
+    private static byte[] protoFieldFloat(long tag, double value) {
+        byte[] bits = le32(Float.floatToIntBits((float) value));
+        return concat(varint((tag << 3) | 5), bits);
+    }
+
+    private static byte[] protoFieldStr(long tag, String value) {
+        if (value == null || value.isEmpty()) return new byte[0];
+        return protoFieldBytes(tag, value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static byte[] protoFieldBytes(long tag, byte[] body) {
+        if (body == null) return new byte[0];
+        return concat(concat(varint((tag << 3) | 2), varint(body.length)), body);
+    }
+
+    private static byte[] proto(byte[]... parts) {
+        int len = 0;
+        for (byte[] p : parts) len += p.length;
+        byte[] out = new byte[len];
+        int at = 0;
+        for (byte[] p : parts) {
+            System.arraycopy(p, 0, out, at, p.length);
+            at += p.length;
+        }
+        return out;
+    }
+
+    // ---- SM3（Android 无内置实现，纯 Java 移植；标准向量见桌面测试 sm3("abc")） ----
+
+    static byte[] sm3(byte[] input) {
+        int[] iv = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600,
+                0xa96f30bc, 0x163138aa, 0xe38dee4d, 0xb0fb0e4e};
+        int[] t = {0x79cc4519, 0x7a879d8a};
+        long bitLen = (long) input.length * 8;
+        byte[] msg = Arrays.copyOf(input, ((input.length + 8) / 64 + 1) * 64);
+        msg[input.length] = (byte) 0x80;
+        for (int i = msg.length - 8; i < msg.length; i++) msg[i] = 0;
+        for (int i = 0; i < 8; i++) msg[msg.length - 1 - i] = (byte) (bitLen >>> (8 * i));
+        int[] w = new int[68];
+        int[] w1 = new int[64];
+        for (int off = 0; off < msg.length; off += 64) {
+            for (int i = 0; i < 16; i++) {
+                w[i] = ((msg[off + i * 4] & 255) << 24) | ((msg[off + i * 4 + 1] & 255) << 16)
+                        | ((msg[off + i * 4 + 2] & 255) << 8) | (msg[off + i * 4 + 3] & 255);
+            }
+            for (int i = 16; i < 68; i++) {
+                int p1in = w[i - 16] ^ w[i - 9] ^ rol32(w[i - 3], 15);
+                int p1 = p1in ^ rol32(p1in, 15) ^ rol32(p1in, 23); // P1(X)=X^(X<<<15)^(X<<<23)
+                w[i] = p1 ^ rol32(w[i - 13], 7) ^ w[i - 6];
+            }
+            for (int i = 0; i < 64; i++) w1[i] = w[i] ^ w[i + 4];
+            int a = iv[0], b = iv[1], c = iv[2], d = iv[3], e = iv[4], f = iv[5], g = iv[6], h = iv[7];
+            for (int j = 0; j < 64; j++) {
+                boolean j16 = j < 16;
+                int tj = j16 ? t[0] : t[1];
+                int ff = j16 ? (a ^ b ^ c) : ((a & b) | (a & c) | (b & c));
+                int gg = j16 ? (e ^ f ^ g) : ((e & f) | ((~e) & g));
+                int ss1 = rol32(rol32(a, 12) + e + rol32(tj, j % 32), 7);
+                int ss2 = ss1 ^ rol32(a, 12);
+                int tt = ff + d + ss2 + w1[j];
+                int dd = gg + h + ss1 + w[j];
+                d = c;
+                c = rol32(b, 9);
+                b = a;
+                a = tt;
+                h = g;
+                g = rol32(f, 19);
+                f = e;
+                e = dd ^ rol32(dd, 9) ^ rol32(dd, 17); // P0(X)=X^(X<<<9)^(X<<<17)
+            }
+            iv[0] ^= a; iv[1] ^= b; iv[2] ^= c; iv[3] ^= d;
+            iv[4] ^= e; iv[5] ^= f; iv[6] ^= g; iv[7] ^= h;
+        }
+        byte[] out = new byte[32];
+        for (int i = 0; i < 8; i++) System.arraycopy(be32(iv[i]), 0, out, i * 4, 4);
+        return out;
+    }
+
+    // ---- hashF13 branch 0（蓝本 Signer.kt hashF13：只实现 branch 0，调用前抖动 ticket 凑分支） ----
+
+    private static final int[] IVV1_LIST = {0xc4a78580, 0xb3c0fd39, 0xc58c5686, 0xc9aa3ba7, 0xf5a7adf2, 0x963c2ed1};
+    private static final int[][] CHOSEN = {
+            {101, 5, 7, 6, 3, 2, 1, 0, 5, 4, 3},
+            {96, 0, 6, 7, 5, 3, 2, 1, 5, 4, 4},
+            {96, 7, 6, 2, 1, 4, 0, 5, 4, 3, 5},
+            {99, 3, 6, 2, 4, 5, 1, 0, 0, 7, 6},
+            {96, 0, 5, 6, 7, 3, 1, 2, 5, 4, 4},
+            {100, 2, 0, 3, 5, 4, 6, 7, 2, 1, 5},
+    };
+    private static final int[] HASH_TABLE = {
+            0xebb64faf, 0x07aadcc2, 0xcf3187bf, 0xe01138ff, 0x6d0bfcff, 0x5a30a3be,
+            0xb41ad638, 0x34180eb8, 0xf233eb6f, 0xb1a584cc, 0xccc30dc7, 0x47d1db51,
+            0xd55653de, 0x70a84fa1, 0x57473c12, 0xf76f0288, 0x2c077f0a, 0xda0dcad0,
+            0xfbb86f6c, 0xfdc4cf00, 0x688a020d, 0xe676c6a6, 0x8cd6338b, 0x1a3c8d0e,
+            0xcce8b06b, 0x6ad0ed0b, 0xa0522717, 0xdc71ac83, 0x2285db71, 0xd5b4dda6,
+            0x736f8650, 0x6560306c, 0x617ce2a6, 0xe423417e, 0x0a40e143, 0x544e4032,
+            0x88dffb2a, 0x716c1ae0, 0x4c467a88, 0x05b23bb3, 0xe1d0b866, 0xbaa3dcb8,
+            0xae3374d3, 0xc3381a50, 0x1702f75b, 0xfe6da368, 0xf0b4cf48, 0x4e0ffbb8,
+            0x72aad10d, 0x26c53a3d, 0xf2bce0f6, 0xb4557581, 0x4a257fdd, 0x8c3182a2,
+            0xab0b3b86, 0x3d5dfb14, 0x4f103634, 0xd37b52d7, 0x444eff16, 0xeb0a33d1,
+            0x6ca86f6e, 0x284ba7, 0x08387cfa, 0x5fb37586,
+    };
+
+    private static int getIv(int iv, byte[] data) {
+        int value = iv;
+        for (int i = 0; i < data.length; i++) {
+            if ((i & 1) == 0) value = (value >>> 4) ^ value ^ (value << 6) ^ u(data[i]);
+            else value = ~((value >>> 7) ^ value ^ (u(data[i]) | (value << 12)));
+        }
+        return value;
+    }
+
+    static int ivOf(byte[] querySm3, byte[] bodyMd5, int ts) {
+        return getIv(getIv(getIv(0x20230928, querySm3), bodyMd5), le32(ts));
+    }
+
+    /** 计算签名分支（0/1/2）；本实现只支持 branch 0，由 sign() 抖动 _rticket 凑中。 */
+    static int branchOf(String query, int ts) {
+        return (ivOf(sm3(query.getBytes(StandardCharsets.UTF_8)), new byte[16], ts) & 15) % 3;
+    }
+
+    private static int sumMd5(byte[] d) {
+        int check = 0x20220420;
+        for (int i = 0; i < 12; i++) {
+            int temp = (check >>> ((i & 1) == 0 ? 3 : 5)) ^ check;
+            check = (i & 1) == 0 ? (u(d[i]) ^ (check << 7)) : ~(u(d[i]) | (check << 11));
+            check ^= temp;
+        }
+        return (check | 4) ^ 0x1000000;
+    }
+
+    static byte[] hashF13branch0(byte[] querySm3, byte[] bodyMd5, int ts) {
+        int iv = ivOf(querySm3, bodyMd5, ts);
+        int index = (iv & 15) / 3;
+        int count = IVV1_LIST[index] + ts; // int 溢出回绕 = JS ToUint32 低 32 位
+        int[] tt = new int[64];
+        for (int i = 0; i < 64; i++) tt[i] = ror32(HASH_TABLE[i], count + 1);
+        int shift = (count + 2) & 7;
+        int[] seed = {0xfa, 0x45, 0x61, 0xd7};
+        byte[] pad = new byte[4];
+        for (int i = 0; i < 4; i++) pad[i] = (byte) (((seed[i] | (seed[i] << 8)) >> shift) & 255);
+        byte[] data = concat(concat(querySm3, bodyMd5), concat(concat(le32(ts), pad), hexOf("00000000000001a0")));
+        int[] di = new int[128];
+        for (int i = 0; i < 16; i++) di[i] = i32be(data, i * 4);
+        for (int i = 0; i < 112; i++) {
+            int x = di[i + 1];
+            int y = di[i + 14];
+            int r1 = rol32(x, 14) ^ rol32(x, 25) ^ (x >>> 3);
+            int r2 = rol32(y, 13) ^ rol32(y, 15) ^ (y >>> 10);
+            di[16 + i] = di[i] + di[i + 9] + r1 + r2;
+        }
+        int[] init = {0x7aba4fc8, 0x67166507, 0x6403fa00, 0x340f512f,
+                984304912, (int) 3005047866L, (int) 2874125293L, (int) 2152413264L};
+        // cjs：init 即旋转后的数组，末尾 ret 与旋转后的 init 相加
+        for (int i = 0; i < 8; i++) init[i] = ror32(init[i], count);
+        int[] d = init.clone();
+        int[] chosen = CHOSEN[index];
+        for (int i = 0; i < chosen[0]; i++) {
+            int base = IVV1_LIST[index] + i;
+            int n1 = ((d[chosen[3]] ^ d[chosen[4]]) & d[chosen[1]]) ^ d[chosen[3]];
+            int n2 = rol32(d[chosen[1]], 26) ^ rol32(d[chosen[1]], 21) ^ rol32(d[chosen[1]], 7);
+            int n4 = di[base & 127] + n1 + n2 + tt[base & 63] + d[chosen[5]];
+            int n5 = rol32(d[chosen[2]], 30) ^ rol32(d[chosen[2]], 19) ^ rol32(d[chosen[2]], 10);
+            int n6 = (d[chosen[2]] & d[chosen[6]]) | ((d[chosen[2]] | d[chosen[6]]) & d[chosen[7]]);
+            int old = d[chosen[9]];
+            int last = d[7]; // d.unshift(d.pop())
+            for (int k = 7; k > 0; k--) d[k] = d[k - 1];
+            d[0] = last;
+            d[chosen[10]] = n5 + n6 + n4;
+            d[chosen[8]] = old + n4;
+        }
+        byte[] ret = new byte[32];
+        for (int i = 0; i < 8; i++) System.arraycopy(be32(d[i] + init[i]), 0, ret, i * 4, 4);
+        byte[] folded = new byte[16];
+        for (int i = 0; i < 16; i++) folded[i] = (byte) (ret[i] ^ ret[i + 16]);
+        return concat(folded, le32(sumMd5(folded)));
+    }
+
+    // ---- x-gorgon（RC4 变体，蓝本 cjs xGorgon/rc4Gorgon 逐位对照） ----
+
+    static String xGorgon(String query, byte[] body, int ts, int random) {
+        byte[] input = concat(
+                Arrays.copyOf(digest("MD5", query.getBytes(StandardCharsets.UTF_8)), 4),
+                concat(body != null ? Arrays.copyOf(digest("MD5", body), 4) : new byte[4],
+                        concat(new byte[4], concat(le32(67503104), be32(ts)))));
+        int[] key = {0x4a, 0x40, 0x16, (random >> 8) & 255, 0x47, 0x6c, 0x01, random & 255};
+        int[] s = new int[256];
+        for (int i = 0; i < 256; i++) s[i] = i;
+        int j = 0;
+        for (int i = 0; i < 256; i++) {
+            j = (j + s[i] + key[i % 8]) & 255;
+            s[i] = s[j]; // 非标准 KSA（无交换），蓝本原样
+        }
+        int i2 = 0;
+        j = 0;
+        byte[] out = new byte[input.length];
+        for (int n = 0; n < input.length; n++) {
+            i2 += 1;
+            int x = s[i2];
+            j += x;
+            int y = s[j & 255];
+            s[i2] = y;
+            out[n] = (byte) (u(input[n]) ^ s[(y + y) & 255]);
+        }
+        for (int k = 0; k < out.length; k++) {
+            int value = ((u(out[k]) >> 4) | (u(out[k]) << 4)) & 255;
+            int next = u(out[k + 1 < out.length ? k + 1 : 0]);
+            int reversed = Integer.reverse((next ^ value) & 255) >>> 24;
+            out[k] = (byte) (~(reversed ^ 20) & 255);
+        }
+        byte[] head = {(byte) 0x84, (byte) 0x04, (byte) (random & 255), (byte) ((random >> 8) & 255), 0x40, 0x01};
+        StringBuilder sb = new StringBuilder();
+        for (byte b : concat(head, out)) sb.append(String.format("%02x", b & 255));
+        return sb.toString();
+    }
+
+    // ---- x-helios（蓝本 cjs helios 1:1，long 数学） ----
+
+    static String helios(int ts) {
+        int random = (int) (long) (RAND.next() * 4294967296.0); // long 中转避免 (int) 对 >2^31 钳位，JS 语义为模回绕
+        byte[] md5hex = hexOfLower(digest("MD5", concat(le32(random), "8662".getBytes(StandardCharsets.UTF_8))))
+                .getBytes(StandardCharsets.US_ASCII);
+        long w0 = i64le(md5hex, 0);
+        long w1 = i64le(md5hex, 8);
+        java.util.ArrayDeque<Long> queue = new java.util.ArrayDeque<>();
+        queue.add(i64le(md5hex, 16));
+        queue.add(i64le(md5hex, 24));
+        List<Long> table = new ArrayList<>();
+        table.add(w0);
+        long b0 = w0;
+        long b8 = w1;
+        for (int i = 0; i < 34; i++) {
+            long x8 = Long.rotateRight(b8, 8) + b0;
+            x8 ^= i;
+            queue.add(x8);
+            x8 ^= Long.rotateRight(b0, 61);
+            table.add(x8);
+            b0 = x8;
+            b8 = queue.poll();
+        }
+        byte[] text = (ts + "-1588093228-8662").getBytes(StandardCharsets.UTF_8);
+        int padding = 16 - (text.length % 16);
+        byte[] padded = new byte[text.length + padding];
+        Arrays.fill(padded, (byte) padding);
+        System.arraycopy(text, 0, padded, 0, text.length);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(le32(random), 0, 4);
+        for (int at = 0; at < padded.length; at += 16) {
+            long a = i64le(padded, at);
+            long b = i64le(padded, at + 8);
+            for (int i = 0; i < 34; i++) {
+                b = table.get(i) ^ (a + Long.rotateRight(b, 8));
+                a = b ^ Long.rotateRight(a, 61);
+            }
+            out.write(le64(a), 0, 8);
+            out.write(le64(b), 0, 8);
+        }
+        return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
+    }
+
+    private static String hexOfLower(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) sb.append(String.format("%02x", b & 255));
+        return sb.toString();
+    }
+
+    // ---- x-medusa（deviceProto/xmxor/keyHash/AesV3/buildMedusa，蓝本 cjs 1:1） ----
+
+    private static byte[] deviceProto(String deviceId) {
+        return proto(
+                protoFieldSint(1, 1), protoFieldSint(2, 2), protoFieldStr(3, "8662"),
+                protoFieldStr(4, deviceId), protoFieldStr(5, "Ai6svO3PyrwDOUSmO6ZcResxu"),
+                protoFieldStr(6, "!noperm!"), protoFieldSint(7, -888888), protoFieldSint(8, -888888),
+                protoFieldSint(9, 3), protoFieldSint(10, -888888), protoFieldStr(11, "!notset!"),
+                protoFieldStr(12, "Asia/Shanghai,8"), protoFieldStr(13, "zh_CN"), protoFieldSint(14, 4),
+                protoFieldFloat(16, 255.24993896484375), protoFieldFloat(17, 35.58599090576172),
+                protoFieldFloat(18, 3.467449188232422), protoFieldFloat(19, 3.467449188232422),
+                protoFieldFloat(20, 255.1754913330078), protoFieldFloat(21, 42.17544174194336),
+                protoFieldStr(22, "16"), protoFieldSint(23, 41), protoFieldSint(24, 36),
+                protoFieldSint(25, 1728388016635L), protoFieldSint(26, 1728388016635L),
+                protoFieldSint(27, 1728388016635L), protoFieldSint(28, 1728388016637L),
+                protoFieldSint(29, -1), protoFieldStr(30, "25053RT47C"), protoFieldStr(31, "Redmi"),
+                protoFieldStr(32, "25053RT47C"), protoFieldStr(33, "25053RT47C"), protoFieldStr(34, "Xiaomi"),
+                protoFieldStr(35, "Redmi"), protoFieldStr(36, "Redmi"), protoFieldSint(38, 31));
+    }
+
+    private static byte[] xmxor(byte[] data, byte[] key) {
+        int[] encoded = new int[data.length];
+        for (int i = 0; i < data.length; i++) {
+            int at = (i * 4) & 28;
+            int d0 = u(key[at]);
+            int d1 = u(key[at + 1]);
+            int v = u(data[i]);
+            int d2 = ((((v << 4) | (v >>> 4)) & 255) + d0);
+            d2 = (~d2) ^ d1;
+            d2 = (((d2 & 255) << 3) | ((d2 & 255) >>> 5)) & 255;
+            d2 = (d2 + d1) & 255;
+            d2 = (d2 ^ d0) & 255;
+            encoded[data.length - i - 1] = (~d2) & 255;
+        }
+        int last = encoded[encoded.length - 1] ^ encoded[encoded.length - 2];
+        int first = encoded[0];
+        encoded[0] = ((~last) + first) & 255;
+        encoded[1] = ((encoded[0] ^ encoded[encoded.length - 1] ^ 254) + encoded[1]) & 255;
+        encoded[2] = (encoded[2] + ((last - first)
+                ^ (((encoded[1] << 3) | (encoded[1] >>> 5)) & 255) ^ 2)) & 255;
+        for (int i = 0; i < encoded.length - 4; i++) {
+            int temp = (((encoded[i + 2] << 3) | (encoded[i + 2] >>> 5)) & 255)
+                    ^ encoded[i + 1] ^ (i + 3);
+            encoded[i + 3] = ((~temp) + encoded[i + 3]) & 255;
+        }
+        encoded[encoded.length - 1] ^= encoded[encoded.length - 2];
+        int sum = 0;
+        for (int i = 0; i < encoded.length - 1; i++) sum += encoded[i + 1];
+        encoded[0] = ((encoded[0] ^ encoded[1]) + sum) & 255;
+        byte[] out = new byte[encoded.length];
+        for (int i = 0; i < out.length; i++) out[i] = (byte) encoded[i];
+        return out;
+    }
+
+    private static byte[][] keyHash(int random) {
+        byte[] input = concat(concat(APP_SIGN_KEY, le32(random)), APP_SIGN_KEY);
+        byte[] hash = sm3(input);
+        int d1 = (random >> 16) & 255;
+        int d2 = ((d1 << 11) | (random >>> 24)) ^ (d1 >> 5) ^ d1;
+        return new byte[][]{hash, le32(~d2)};
+    }
+
+    private static final byte[] SBOX = b64("+n0Ia5xZs0sEXznQOEqRmQBnpiCf9U2Ccybu3xhmgzOAAxn72f6uqqmwUsYL83klTni0NqxdGieeiNu9PGPsSRXBMB/cuFbUbM3KCUPINaPvHvSW0vwOcnuUhNHqRVpiAj/TEoE0K91+5ijypUYTATsh9mE3KSoN7Yyvv51cuyR2D3XkU4nhmI2xmmVwT1RMWKtub4sjxAcRDLrPoKSO2AU9FLLadMPX577Wf95IFj6FkKFVt3dCIsmGUC4X+WQxLJvxbRxEaOPpqJOXyzJX6+Vxaq3AzMfF/WAdoi1Hp+JRaV56zgpBtpWP97mH4DoGEIq1+FvV8LyS/3wvwugbQOwb2r26mJEMsiuDQTRn+wrYdrVGBVlhI3WQhyrjUBVMrLF5667llUcEaPCGPVGLD8qO5LlO8hKCvA7V9+8oJc9bXelqVQLhM76T5/WtnT45JKji+hdX0HoNCDDWuKON/QeaxB5uImSX0h2wv0VmP2zd2yeApxHcpsVS+MC2yFwAc2B7oBkTqsk1SEvTpM2fmfMQREBUfin0Bh+iq6EvPPavhWI2IX9e3yAas7Tm/3KEj2UmlFp36kN4x0rMLBRrxuh0U/zUHM4xcAMYjJY4MonxOl/X+alpt2M3WMI7w3HLnpIBigtNiJu7T21v4P6lSd5WFgntnMEt7oF92XzRLkJbTcGmXepE/UVOG6E/0YnhfS+q26utWcuxzpooyeD2cDlK1/8w9d28VzsRjbLuALbmGlp8+d7EzS6Au7lMpZ+ECMZvQmzwJ+eLOpxR+2chdUExp8ogQyq3v9l68rX4jCwjg0+PYKAEEzcU4wHFY2ZcdIHfWL1okD3SszT0GZMyKdZJrg1L2AeerB4tC0C4crp2EHGo5FYdSP7lwkeR2ocmnR+Ia8CYviUJlzOjhRZef9xuVOn3qcjow3fQgivsAmKKkg4+sA8F8/GWeDiGNhg8JM8KtFPMYWWkx5TVFX5t73kiNRJqjlIGVXtGZFCV4gzt0xcDopuZ6xz8r9Rzafpf9ywev8jh8592gHFIqpStZPuJxmDDMrNN0uBE3V+oscdoIzTJbRJ/t+sVvqnReJOgDJKk10fjisJwqyZBmnmn2BSFj8BvVtCMEbkuPOKdzw7eA11GPs04Qw8zWtkaZWwiO/wwpojqN6K0jY5RnNZA7vn4hPSul+nKCkVnVwQvg1zVxcSCtqORmB9KrJaBbssbCQivGJVJfVTt+hYxOtq4ZvWl8f4QAQZ0zGPffCgl9s6yT4vlvIdpu4YhBwA25wtQWZsc6GJYGWHyvSdeuh3mmUI9DSq13Fsp8C1MU3tqc04/df9LoTUXVXI5INOw/e8C7Hd+5CvbkMEFnnrUUmskEw==");
+
+    private static int xt(int x) {
+        return ((x << 1) ^ ((x & 128) != 0 ? 0x1b : 0)) & 255;
+    }
+
+    private static void aesMix(int[][] rows) {
+        for (int i = 0; i < 4; i++) {
+            int t = rows[0][i] ^ rows[1][i] ^ rows[2][i] ^ rows[3][i];
+            int u0 = rows[0][i];
+            rows[0][i] ^= t ^ xt(rows[0][i] ^ rows[1][i]);
+            rows[1][i] ^= t ^ xt(rows[1][i] ^ rows[2][i]);
+            rows[2][i] ^= t ^ xt(rows[2][i] ^ rows[3][i]);
+            rows[3][i] ^= t ^ xt(rows[3][i] ^ u0);
+        }
+    }
+
+    /** 自研 AES 变体（蓝本 cjs AesV3 逐位对照，勿改轮常量/置换顺序）。 */
+    private static final class AesV3 {
+        private final int wordSize;
+        private final byte[] box;
+        private final int[] con2;
+        private final int[] order;
+        private final int init;
+        private final int[][] keys;
+
+        AesV3(byte[] key, int khronos) {
+            wordSize = khronos & 3;
+            box = Arrays.copyOfRange(SBOX, wordSize * 256, (wordSize + 1) * 256);
+            int[][] cons = {{1, 0, 2, 3}, {1, 3, 0, 2}, {0, 1, 3, 2}, {1, 0, 2, 3}};
+            int[][] cons2 = {{1, 0, 2, 3}, {2, 0, 3, 1}, {0, 1, 3, 2}, {1, 0, 2, 3}};
+            int[][] orders = {
+                    {0, 9, 14, 11, 4, 13, 2, 7, 8, 1, 6, 15, 12, 5, 10, 3},
+                    {0, 9, 14, 15, 4, 13, 2, 7, 8, 1, 6, 3, 12, 5, 10, 11},
+                    {0, 9, 14, 7, 4, 13, 2, 11, 8, 1, 6, 3, 12, 5, 10, 15},
+                    {0, 9, 14, 11, 4, 13, 2, 7, 8, 1, 6, 15, 12, 5, 10, 3},
+            };
+            con2 = cons2[wordSize];
+            order = orders[wordSize];
+            int[] inits = {0xca025ddc, 0x823dc546, 0xc9420583, 0xc298225f};
+            init = inits[wordSize];
+            byte[] initial = new byte[16];
+            for (int i = 0; i < 4; i++) System.arraycopy(le32(init), 0, initial, i * 4, 4);
+            byte[] expanded = new byte[48];
+            for (int i = 0; i < 16; i++) expanded[i] = (byte) (initial[i] ^ key[i]);
+            int rounds = 8;
+            for (int i = 4; i < 12; i++) {
+                int at = 4 * (i - 1);
+                int a = u(expanded[at]);
+                int b = u(expanded[at + 1]);
+                int c = u(expanded[at + 2]);
+                int d = u(expanded[at + 3]);
+                if ((i & 3) == 0) {
+                    int t = ((init >> (rounds & 24)) ^ box[b]) & 255;
+                    b = box[c];
+                    c = box[d];
+                    d = box[a];
+                    a = t;
+                }
+                rounds += 2;
+                expanded[at + 4] = (byte) (a ^ expanded[at - 12]);
+                expanded[at + 5] = (byte) (b ^ expanded[at - 11]);
+                expanded[at + 6] = (byte) (c ^ expanded[at - 10]);
+                expanded[at + 7] = (byte) (d ^ expanded[at - 9]);
+            }
+            keys = new int[12][4];
+            for (int i = 0; i < 12; i++) {
+                for (int k = 0; k < 4; k++) keys[i][k] = u(expanded[i * 4 + k]);
+            }
+        }
+
+        private void addCon(int[][] rows, int base) {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) rows[i][j] ^= keys[base + i][con2[j]];
+            }
+        }
+
+        private void add(int[][] rows, int base) {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) rows[i][j] ^= keys[base + i][j];
+            }
+        }
+
+        private void sub(int[][] rows) {
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) rows[i][j] = box[rows[i][j]] & 255; // box 为 byte[]，需 &255 防 JS/Java 符号差异
+            }
+            int[][] old = new int[4][];
+            for (int i = 0; i < 4; i++) old[i] = rows[i].clone();
+            for (int i = 0; i < 4; i++) rows[i] = old[con2[i]];
+        }
+
+        private void shift(int[][] rows) {
+            int[] b = new int[16];
+            for (int i = 0; i < 16; i++) b[i] = rows[i / 4][i % 4];
+            for (int i = 0; i < 16; i++) rows[i / 4][i % 4] = b[order[i]];
+        }
+
+        private void shiftCon(int[][] rows) {
+            int[][] old = new int[4][];
+            for (int i = 0; i < 4; i++) old[i] = rows[i].clone();
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) rows[i][j] = old[i][con2[j]];
+            }
+        }
+
+        private byte[] block(byte[] value) {
+            int[][] rows = new int[4][4];
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) rows[i][j] = u(value[i * 4 + j]);
+            }
+            addCon(rows, 0);
+            for (int i = 1; i < 3; i++) {
+                sub(rows);
+                shift(rows);
+                if (i == 1) {
+                    shiftCon(rows);
+                    aesMix(rows);
+                }
+                addCon(rows, i * 4);
+            }
+            add(rows, 4);
+            byte[] out = new byte[16];
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) out[i * 4 + j] = (byte) rows[i][j];
+            }
+            return out;
+        }
+
+        byte[] encrypt(byte[] source, byte[] iv) {
+            byte[] plaintext = new byte[32];
+            for (int i = 0; i < 31; i++) {
+                int at = i * 8;
+                int n0 = (u(source[at]) >> 4) & 2;
+                int n1 = n0 | (u(source[at + 1]) & 64);
+                int n2 = n1 | ((u(source[at + 2]) >> 2) & 1);
+                int n3 = n2 | ((u(source[at + 3]) << 3) & 128);
+                int n4 = n3 | ((u(source[at + 4]) >> 1) & 4);
+                int n5 = n4 | ((u(source[at + 5]) << 3) & 16);
+                int n6 = n5 | ((u(source[at + 6]) << 5) & 32);
+                plaintext[i] = (byte) (n6 | ((u(source[at + 7]) >> 4) & 8));
+            }
+            plaintext[31] = 1;
+            byte[] key = new byte[32];
+            byte[] previous = iv.clone();
+            for (int i = 0; i < 32; i += 16) {
+                byte[] x = new byte[16];
+                for (int k = 0; k < 16; k++) x[k] = (byte) (plaintext[i + k] ^ previous[k]);
+                byte[] value = block(x);
+                System.arraycopy(value, 0, key, i, 16);
+                previous = value;
+            }
+            byte[] out = source.clone();
+            for (int i = 0; i < 31; i++) {
+                int at = i * 8;
+                int k = u(key[i]);
+                out[at] = (byte) ((out[at] & 0xdf) | ((k << 4) & 32));
+                out[at + 1] = (byte) ((out[at + 1] & 0xbf) | (k & 64));
+                out[at + 2] = (byte) ((out[at + 2] & 0xfb) | ((k << 2) & 4));
+                out[at + 3] = (byte) ((out[at + 3] & 0xef) | ((k >> 3) & 16));
+                out[at + 4] = (byte) ((out[at + 4] & 0xf7) | ((k + k) & 8));
+                out[at + 5] = (byte) ((out[at + 5] & 0xfd) | ((k >> 3) & 2));
+                out[at + 6] = (byte) ((out[at + 6] & 0xfe) | ((k >> 5) & 1));
+                out[at + 7] = (byte) ((out[at + 7] & 0x7f) | ((k << 4) & 128));
+            }
+            return concat(new byte[]{key[31]}, out);
+        }
+    }
+
+    static String buildMedusa(String url, byte[] body, int khronos, String deviceId) {
+        byte[] bodyMd5 = body != null ? digest("MD5", body) : new byte[16];
+        String query = url.substring(url.indexOf('?') + 1);
+        byte[] querySm3 = sm3(query.getBytes(StandardCharsets.UTF_8));
+        byte[] queryBodyTs = hashF13branch0(querySm3, bodyMd5, khronos);
+        byte[] nested = proto(protoFieldSint(1, 111), protoFieldSint(2, 10),
+                protoFieldSint(3, 694367), protoFieldSint(5, 586952199));
+        int messageRand = (int) (long) (RAND.next() * 4294967296.0);
+        int envLaunch = (int) (RAND.next() * 21) + 100;
+        int envPid = (int) (RAND.next() * 2000) + 10001;
+        byte[] env = proto(
+                protoFieldSint(1, envLaunch), protoFieldSint(2, 146331399), protoFieldSint(3, 146331396),
+                protoFieldSint(5, 7), protoFieldStr(6, "v04.06.04.03-bugfix"), protoFieldSint(7, envPid),
+                protoFieldBytes(12, deviceProto(deviceId)),
+                protoFieldBytes(13, proto(protoFieldSint(1, CLOCK.now() / 1000),
+                        protoFieldSint(2, -2), protoFieldSint(4, 200))),
+                protoFieldStr(14, "7.1.3.32"));
+        byte[] queryHash = sm3(concat(query.getBytes(StandardCharsets.UTF_8),
+                concat(bodyMd5, "none".getBytes(StandardCharsets.UTF_8))));
+        byte[] message = proto(
+                protoFieldBytes(1, hexOf("f7e85ffad7d7dc3bd62ac87057cf6118")),
+                protoFieldSint(2, 3),
+                protoFieldSint(3, messageRand & 0xFFFFFFFFL),
+                protoFieldStr(4, "8662"),
+                protoFieldStr(5, deviceId),
+                protoFieldStr(6, "1588093228"),
+                protoFieldStr(7, "7.1.3.32"),
+                protoFieldStr(8, "v04.06.04-ml-android"),
+                protoFieldSint(9, 67503104),
+                protoFieldBytes(10, hexOf("4001000000000000")),
+                protoFieldSint(12, khronos & 0xFFFFFFFFL),
+                protoFieldBytes(13, queryBodyTs),
+                protoFieldBytes(14, Arrays.copyOf(querySm3, 6)),
+                protoFieldBytes(15, nested),
+                protoFieldStr(16, "AXYQOS6n2m60x1fVZHIrH3iol"),
+                protoFieldSint(17, khronos & 0xFFFFFFFFL),
+                protoFieldBytes(19, queryHash),
+                protoFieldStr(20, "none"),
+                protoFieldSint(21, 312),
+                protoFieldBytes(23, env),
+                protoFieldStr(24, "{\"cmr\":16777216,\"cmr2\":16777216,\"un_h\":1879194040,\"vpn\":0,"
+                        + "\"kd\":0,\"fkd\":3672518972,\"pd\":-1872573247,\"dyn\":\"\",\"do\":0,\"tk\":true}"));
+        int random = (int) (long) (RAND.next() * 4294967296.0);
+        byte[][] kh = keyHash(random);
+        byte[] transformed = concat(hexOf("4001000000000000"), xmxor(message, kh[0]));
+        for (int i = 0, j2 = transformed.length - 1; i < j2; i++, j2--) {
+            byte t2 = transformed[i];
+            transformed[i] = transformed[j2];
+            transformed[j2] = t2;
+        }
+        for (int i = 0; i < transformed.length; i++) transformed[i] ^= kh[1][(byte) (~i) & 3];
+        int check = ((u(querySm3[0]) & 63) << 14) | 0x18000001 | ((u(queryBodyTs[0]) & 63) << 8);
+        int xmRand = (int) (long) (RAND.next() * 4294967296.0);
+        byte[] packed = concat(new byte[]{0x35},
+                concat(le32(xmRand), concat(le32(check), concat(transformed,
+                        new byte[]{(byte) ((random >>> 16) & 255), (byte) ((random >>> 24) & 255)}))));
+        byte[] encrypted = new AesV3(hexOf("f1593376766ea98d34f31b057a9d5be4"), khronos)
+                .encrypt(packed, hexOf("1fe109a4125283f418de9e051a969e12"));
+        byte[] versionB = hexOf("03000000f7e85ffad7d7dc3bd62ac87057cf6118");
+        byte[] prefix = new byte[20];
+        for (int i = 0; i < 20; i += 4) {
+            int w = u(versionB[i]) | (u(versionB[i + 1]) << 8) | (u(versionB[i + 2]) << 16) | (u(versionB[i + 3]) << 24);
+            System.arraycopy(le32(w ^ khronos), 0, prefix, i, 4); // cjs readUInt32LE 小端
+        }
+        byte[] tail = {(byte) (random & 255), (byte) ((random >> 8) & 255), 0, 1};
+        return Base64.encodeToString(concat(prefix, concat(tail, encrypted)), Base64.NO_WRAP);
+    }
+
+    // ---- 设备注册（蓝本 DeviceRegister.kt：匿名、免签名、body 为原始二进制） ----
+
+    /** ttEncrypt：MAGIC || rnd[32] || AES-128-CBC(SHA512(SHA512(rnd)+KDF_SALT), PKCS7(SHA512(data)||data))。 */
+    private static byte[] ttEncrypt(byte[] data) {
+        byte[] rnd = new byte[32];
+        new Random().nextBytes(rnd);
+        byte[] derived = digest("SHA-512",
+                concat(digest("SHA-512", rnd), hexOf(SPADE_CONST)));
+        byte[] body = concat(digest("SHA-512", data), data);
+        int padding = 16 - (body.length % 16);
+        byte[] padded = Arrays.copyOf(body, body.length + padding);
+        for (int i = body.length; i < padded.length; i++) padded[i] = (byte) padding;
+        return concat(REG_MAGIC, concat(rnd,
+                aes(true, Arrays.copyOfRange(derived, 0, 16), Arrays.copyOfRange(derived, 16, 32), padded, "CBC")));
+    }
+
+    /** 注册请求体：ttEncrypt(gzip(JSON))，字段顺序/类型严格照抄 Node 实证成功样例（7.3.9.32 口径）。 */
+    private static byte[] registerPayload(long now) {
+        try {
+            // 手拼 JSON：org.json 的 HashMap 乱序会被服务端拒（device_id=0），顺序必须与抓包/实证一致
+            String uuid = UUID.randomUUID().toString();
+            String openudid = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+            String header = "{\"display_name\":\"红果免费短剧\","
+                    + "\"update_version_code\":73932,"
+                    + "\"manifest_version_code\":73932,"
+                    + "\"app_version_minor\":\"7.3.9.32\","
+                    + "\"aid\":8662,"
+                    + "\"channel\":\"69310258a\","
+                    + "\"package\":\"com.phoenix.read\","
+                    + "\"app_version\":\"7.3.9.32\","
+                    + "\"version_code\":73932,"
+                    + "\"sdk_version\":\"3.7.0-rc.34-fanqie-xiaoshuo\","
+                    + "\"sdk_target_version\":29,"
+                    + "\"git_hash\":\"3a88f4e\","
+                    + "\"os\":\"Android\","
+                    + "\"os_version\":\"12\","
+                    + "\"os_api\":32,"
+                    + "\"device_model\":\"25053RT47C\","
+                    + "\"device_brand\":\"Redmi\","
+                    + "\"device_manufacturer\":\"Redmi\","
+                    + "\"cpu_abi\":\"arm64-v8a\","
+                    + "\"release_build\":\"b5e187f\","
+                    + "\"density_dpi\":520,"
+                    + "\"display_density\":\"mdpi\","
+                    + "\"resolution\":\"1280x2772\","
+                    + "\"language\":\"zh\","
+                    + "\"timezone\":8,"
+                    + "\"access\":\"wifi\","
+                    + "\"not_request_sender\":0,"
+                    + "\"carrier\":\"CHINA MOBILE\","
+                    + "\"mcc_mnc\":\"46000\","
+                    + "\"rom\":\"eng.root.20231116.160340\","
+                    + "\"rom_version\":\"W528JS release-keys\","
+                    + "\"cdid\":\"" + uuid + "\","
+                    + "\"sig_hash\":\"56a962410c494bbaf0b58dba20cae56f\","
+                    + "\"openudid\":\"" + openudid + "\","
+                    + "\"clientudid\":\"" + UUID.randomUUID() + "\","
+                    + "\"ipv6_list\":[],"
+                    + "\"region\":\"CN\","
+                    + "\"tz_name\":\"Asia/Shanghai\","
+                    + "\"tz_offset\":28800,"
+                    + "\"sim_region\":\"cn\","
+                    + "\"sim_serial_number\":[],"
+                    + "\"oaid_may_support\":false,"
+                    + "\"req_id\":\"" + UUID.randomUUID() + "\","
+                    + "\"device_platform\":\"android\","
+                    + "\"custom\":{\"account_region_src\":\"fallback\",\"host_bit\":64,"
+                    + "\"account_region\":\"cn\",\"dragon_device_type\":\"phone\"},"
+                    + "\"pre_installed_channel\":\"\","
+                    + "\"apk_first_install_time\":" + now + ","
+                    + "\"is_system_app\":0,"
+                    + "\"sdk_flavor\":\"china\","
+                    + "\"guest_mode\":0"
+                    + "}";
+            String json = "{\"magic_tag\":\"ss_app_log\",\"header\":" + header
+                    + ",\"_gen_time\":" + now + "}";
+            byte[] raw = json.getBytes(StandardCharsets.UTF_8);
+            ByteArrayOutputStream gz = new ByteArrayOutputStream();
+            java.util.zip.GZIPOutputStream gzos = new java.util.zip.GZIPOutputStream(gz);
+            gzos.write(raw);
+            gzos.close();
+            return ttEncrypt(gz.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /** 匿名注册设备，返回 {device_id, install_id}；全 0/缺失表示被拒。 */
+    private static String[] registerDevice() {
+        long now = CLOCK.now();
+        byte[] body = registerPayload(now);
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(REG_URL).openConnection();
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(20000);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("User-Agent", APP_UA);
+            conn.setRequestProperty("Content-Type", "application/octet-stream;tt-data=a");
+            conn.setRequestProperty("log-encode-type", "gzip");
+            conn.setRequestProperty("x-ss-dp", "8662");
+            conn.setRequestProperty("x-ss-req-ticket", String.valueOf(now));
+            conn.setRequestProperty("x-vc-bdturing-sdk-version", "4.0.3.cn");
+            conn.setRequestProperty("lc", "101");
+            conn.setRequestProperty("sdk-version", "2");
+            conn.setRequestProperty("passport-sdk-version", "5051452");
+            conn.setRequestProperty("x-neptune", "-8|50:51:59:30:40:47:49:39");
+            conn.setRequestProperty("x-ss-stub", hexOfLower(digest("MD5", body)).toUpperCase());
+            conn.setRequestProperty("Accept-Encoding", "identity"); // 防 brotli，拿明文 JSON
+            conn.setDoOutput(true);
+            conn.getOutputStream().write(body);
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[65536];
+            if (in != null) {
+                int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                in.close();
+            }
+            String resp = new String(out.toByteArray(), StandardCharsets.UTF_8);
+            fileLog("device_register http " + code + " len=" + resp.length());
+            JSONObject json = new JSONObject(resp);
+            String deviceId = json.optString("device_id_str", json.optString("device_id", ""));
+            String installId = json.optString("install_id_str", json.optString("install_id", ""));
+            if (deviceId.isEmpty() || installId.isEmpty() || "0".equals(deviceId) || "0".equals(installId)) {
+                throw new RuntimeException("注册被拒 device_id=" + deviceId + " resp=" + resp);
+            }
+            return new String[]{deviceId, installId};
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    /** App 搜索设备身份：进程缓存 + 外部存储持久化（guoguo_device.json），force 时强制重新注册。 */
+    private static volatile String[] appDeviceIds = null;
+
+    private static String deviceStorePath() {
+        try {
+            if (mContext == null) return null;
+            java.io.File dir = mContext.getExternalFilesDir(null);
+            if (dir == null) return null;
+            return new java.io.File(dir, "guoguo_device.json").getAbsolutePath();
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    private static synchronized String[] appDevice(boolean force) {
+        if (!force && appDeviceIds != null) return appDeviceIds;
+        String path = deviceStorePath();
+        if (!force && path != null) {
+            try {
+                java.io.File f = new java.io.File(path);
+                if (f.exists()) {
+                    // java.nio.file 在 API<26 不可用，统一 java.io 流读写
+                    java.io.FileInputStream fin = new java.io.FileInputStream(f);
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                    byte[] buf = new byte[4096];
+                    int n;
+                    while ((n = fin.read(buf)) > 0) bout.write(buf, 0, n);
+                    fin.close();
+                    JSONObject json = new JSONObject(new String(bout.toByteArray(), StandardCharsets.UTF_8));
+                    String d = json.optString("device_id", "");
+                    String i = json.optString("install_id", "");
+                    if (!d.isEmpty() && !i.isEmpty()) {
+                        appDeviceIds = new String[]{d, i};
+                        return appDeviceIds;
+                    }
+                }
+            } catch (Throwable ignore) {
+            }
+        }
+        String[] reg = registerDevice();
+        appDeviceIds = reg;
+        if (path != null) {
+            try {
+                String json = new JSONObject().put("device_id", reg[0]).put("install_id", reg[1]).toString();
+                java.io.FileOutputStream fout = new java.io.FileOutputStream(path);
+                fout.write(json.getBytes(StandardCharsets.UTF_8));
+                fout.close();
+            } catch (Throwable ignore) {
+            }
+        }
+        return reg;
+    }
+
+    // ---- App 搜索请求与解析 ----
+
+    /** 组参 → 抖动 ticket 凑 branch 0 → 全套签名 → GET；返回响应 JSON。 */
+    private static JSONObject appSearchRequest(LinkedHashMap<String, String> values, String deviceId) {
+        long now = CLOCK.now();
+        int ts = (int) (now / 1000);
+        long ticket = now;
+        String query = null;
+        for (int offset = 0; offset <= 127; offset++) {
+            ticket = now + offset;
+            LinkedHashMap<String, String> vals = new LinkedHashMap<>(values);
+            vals.put("ts", String.valueOf(ts));
+            vals.put("_rticket", String.valueOf(ticket));
+            query = pythonUrlEncode(vals);
+            if (branchOf(query, ts) == 0) break;
+            query = null;
+        }
+        if (query == null) throw new RuntimeException("签名分支抖动失败（128 次）");
+        String url = APP_SEARCH_API + "?" + query;
+        int random = (int) (RAND.next() * 65536);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put("User-Agent", APP_UA);
+        headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+        headers.put("x-ss-req-ticket", String.valueOf(ticket));
+        headers.put("x-tt-request-tag", "t=0;n=0");
+        headers.put("sdk-version", "2");
+        headers.put("passport-sdk-version", "50561");
+        headers.put("x-xs-from-web", "0");
+        headers.put("x-khronos", String.valueOf(ts));
+        headers.put("x-ladon", Base64.encodeToString(be32(ts), Base64.NO_WRAP));
+        headers.put("x-argus", Base64.encodeToString(le32(ts), Base64.NO_WRAP));
+        headers.put("x-gorgon", xGorgon(query, null, ts, random));
+        headers.put("x-helios", helios(ts));
+        headers.put("x-medusa", buildMedusa(url, null, ts, deviceId));
+        headers.put("x-tt-dt", "");
+        String resp = text(url, "GET", null, headers).trim();
+        if (resp.isEmpty()) throw new RuntimeException("空响应（设备失效特征）");
+        JSONObject json;
+        try {
+            json = new JSONObject(resp);
+        } catch (Exception e) {
+            throw new RuntimeException("非 JSON 响应: " + resp.substring(0, Math.min(120, resp.length())));
+        }
+        if (!"0".equals(json.optString("code", "-1"))) {
+            throw new RuntimeException("code=" + json.optString("code", "?")
+                    + (json.has("message") ? " " + json.optString("message") : ""));
+        }
+        return json;
+    }
+
+    /** 搜索响应 → Series 列表（cells + lynx_data.cell_data 展开映射）。 */
+    private static Series appSearchVod(JSONObject cell) {
+        JSONArray va = cell.optJSONArray("video_data");
+        JSONObject video = null;
+        for (int i = 0; va != null && i < va.length(); i++) {
+            JSONObject v = va.optJSONObject(i);
+            if (v != null) {
+                video = v;
+                break;
+            }
+        }
+        if (video == null) return null;
+        String title = "";
+        JSONObject hl = cell.optJSONObject("search_high_light");
+        JSONObject hlTitle = hl == null ? null : hl.optJSONObject("title");
+        if (hlTitle != null) title = hlTitle.optString("text", "");
+        if (title.isEmpty()) title = video.optString("title", "");
+        if (title.isEmpty()) title = cell.optString("cell_name", "");
+        String id = video.optString("series_id", "");
+        if (id.isEmpty()) id = cell.optString("book_id", cell.optString("search_result_id", ""));
+        // 只收真剧集条目（19 位 series_id），过滤「系列剧」「其他版本」等聚合位（id 短、进详情必失败）
+        if (!id.matches("[0-9]{15,30}") || title.trim().isEmpty()) return null;
+        int cnt = video.optInt("episode_cnt", 0);
+        String badge = cnt > 0 ? "全" + cnt + "集" : video.optString("rec_text", video.optString("sub_title", ""));
+        return new Series(id.trim(), title.trim(), cleanUrl(video.optString("cover",
+                video.optString("cover_url", ""))), video.optString("video_desc", ""), badge == null ? "" : badge, "");
+    }
+
+    /** 分页 cursor 缓存：key=keyword|page → {search_id, passback}，5 分钟 TTL（蓝本 searchCursors 同口径）。 */
+    private static final java.util.concurrent.ConcurrentHashMap<String, Object[]> appSearchCache =
+            new java.util.concurrent.ConcurrentHashMap<String, Object[]>();
+    private static final long APP_SEARCH_TTL = 5 * 60 * 1000L;
+
+    /** App 端搜索整页：顺序回放 1..page 取 cursor（缓存命中跳过），设备失效空响应时重注册重试一次。 */
+    private Page appSearchPage(String keyword, int page) {
+        Page result = null;
+        String searchId = null;
+        String passback = null;
+        for (int p = 1; p <= page; p++) {
+            String key = keyword + "|" + p;
+            Object[] cached = appSearchCache.get(key);
+            if (cached != null && CLOCK.now() - (Long) cached[2] < APP_SEARCH_TTL) {
+                @SuppressWarnings("unchecked") LinkedHashMap<String, String> cur =
+                        (LinkedHashMap<String, String>) cached[1];
+                searchId = cur.get("search_id");
+                passback = cur.get("passback");
+                result = (Page) cached[0];
+                continue;
+            }
+            try {
+                result = appSearchOnce(keyword, p, searchId, passback);
+            } catch (RuntimeException e) {
+                if (e.getMessage() != null && e.getMessage().contains("空响应")) {
+                    fileLog("app search 设备失效，重新注册后重试 page=" + p);
+                    String[] dev = appDevice(true);
+                    result = appSearchOnce(keyword, p, searchId, passback, dev);
+                } else {
+                    throw e;
+                }
+            }
+            LinkedHashMap<String, String> cur = result.cursor;
+            appSearchCache.put(key, new Object[]{result, cur, CLOCK.now()});
+            searchId = cur.get("search_id");
+            passback = cur.get("passback");
+        }
+        return result;
+    }
+
+    private Page appSearchOnce(String keyword, int page, String searchId, String passback) {
+        return appSearchOnce(keyword, page, searchId, passback, appDevice(false));
+    }
+
+    private Page appSearchOnce(String keyword, int page, String searchId, String passback, String[] dev) {
+        fileLog("app search begin kw=[" + keyword + "] page=" + page);
+        LinkedHashMap<String, String> values = appDeviceParams(dev[1], dev[0]);
+        values.put("query", keyword);
+        values.put("count", "20");
+        values.put("offset", String.valueOf(Math.max(0, (page - 1) * 20)));
+        values.put("tab_type", "11");
+        values.put("bookshelf_search_plan", "4");
+        values.put("use_correct", "true");
+        values.put("user_is_login", "0");
+        if (searchId != null && !searchId.isEmpty()) values.put("search_id", searchId);
+        if (passback != null && !passback.isEmpty()) values.put("passback", passback);
+        JSONObject resp = appSearchRequest(values, dev[0]);
+        JSONObject data = resp.optJSONObject("data");
+        JSONArray tabs = resp.optJSONArray("search_tabs");
+        if (tabs == null && data != null) tabs = data.optJSONArray("search_tabs");
+        JSONObject tab = null;
+        for (int i = 0; tabs != null && i < tabs.length(); i++) {
+            JSONObject t = tabs.optJSONObject(i);
+            if (t != null && t.optInt("tab_type", -1) == 11) {
+                tab = t;
+                break;
+            }
+        }
+        List<Series> items = new ArrayList<>();
+        if (tab != null) {
+            JSONArray rows = tab.optJSONArray("data");
+            for (int i = 0; rows != null && i < rows.length(); i++) {
+                JSONObject cell = rows.optJSONObject(i);
+                if (cell == null) continue;
+                List<JSONObject> cells = new ArrayList<>();
+                cells.add(cell);
+                String lynx = cell.optString("lynx_data", "");
+                if (!lynx.isEmpty()) {
+                    try {
+                        JSONArray cd = new JSONObject(lynx).optJSONArray("cell_data");
+                        for (int k = 0; cd != null && k < cd.length(); k++) {
+                            JSONObject c2 = cd.optJSONObject(k);
+                            if (c2 != null) cells.add(c2);
+                        }
+                    } catch (Exception ignore) {
+                    }
+                }
+                for (JSONObject c : cells) {
+                    Series s = appSearchVod(c);
+                    if (s == null) continue;
+                    boolean dup = false;
+                    for (Series d : items) {
+                        if (d.id.equals(s.id)) {
+                            dup = true;
+                            break;
+                        }
+                    }
+                    if (!dup) items.add(s);
+                }
+            }
+        }
+        boolean hasMore = tab != null && tab.optBoolean("has_more", false);
+        LinkedHashMap<String, String> cur = new LinkedHashMap<>();
+        cur.put("search_id", tab == null ? "" : tab.optString("search_id", ""));
+        cur.put("passback", tab == null ? "" : tab.optString("passback", ""));
+        Page p = new Page(items, page, hasMore ? page + 1 : page);
+        p.cursor = cur;
+        fileLog("app search done kw=[" + keyword + "] page=" + page + " items=" + items.size()
+                + " hasMore=" + hasMore);
         return p;
     }
 
@@ -1402,10 +2480,25 @@ public class Hongguo extends Spider {
             fileLog("searchContent skip empty/long keyword");
             return pageData(new ArrayList<Series>(), page, page, false);
         }
+        // ① App 端搜索（bookapi/search/tab，全量索引；官网索引残缺、部分剧不召回）
+        try {
+            Page p = appSearchPage(keyword, page);
+            if (!p.items.isEmpty()) {
+                String out = pageData(p.items, page, p.lastPage, p.hasMore);
+                fileLog("searchContent done(app) kw=[" + keyword + "] page=" + page
+                        + " items=" + p.items.size() + " cost=" + (System.currentTimeMillis() - t0) + "ms");
+                return out;
+            }
+            fileLog("app search 空结果 kw=[" + keyword + "] page=" + page + " → 官网 Web 兜底");
+        } catch (Throwable t) {
+            fileLog("app search FAIL kw=[" + keyword + "] page=" + page
+                    + " → 官网 Web 兜底 : " + t.getClass().getSimpleName() + ": " + t.getMessage());
+        }
+        // ② 官网 JSON 接口兜底（/api/search/result；有频控、索引残缺，作降级通道）
         try {
             Page p = searchPage(keyword, page);
             String out = pageData(p.items, page, p.lastPage, p.hasMore);
-            fileLog("searchContent done kw=[" + keyword + "] page=" + page
+            fileLog("searchContent done(web) kw=[" + keyword + "] page=" + page
                     + " items=" + p.items.size() + " lastPage=" + p.lastPage + " more=" + p.hasMore
                     + " outLen=" + out.length() + " cost=" + (System.currentTimeMillis() - t0) + "ms");
             return out;
@@ -1496,7 +2589,7 @@ public class Hongguo extends Spider {
             // 填清晰度会被当作过期结果静默丢弃 → 永远转圈
             result.put("flag", flag == null || flag.isEmpty() ? "红果短剧" : flag);
             result.put("url", "proxy://do=play&siteKey="
-                    + (siteKey == null || siteKey.isEmpty() ? "hongguo" : siteKey)
+                    + (siteKey == null || siteKey.isEmpty() ? "guoguo" : siteKey)
                     + "&vid=" + id);
             Log.e(TAG, "playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms quality=" + si.quality);
             return result.toString();

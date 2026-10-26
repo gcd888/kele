@@ -8,4 +8,6 @@ unpackage/
 .npm-cache/
 .idea/
 demo/
-tmp-hongguo-test/
+# spider 源码工程编译产物与桌面测试类（不入库）
+src/main/*/build/
+src/main/*/test/

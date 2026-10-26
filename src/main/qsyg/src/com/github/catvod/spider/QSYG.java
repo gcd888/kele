@@ -54,7 +54,7 @@ public class QSYG extends Spider {
     private static final String TAG = "echo-music-jar";
     private static final String PLAY_FLAG = "果剧音乐";
 
-    // ============================ 日志桥接（与 hongguo 同机制） ============================
+    // ============================ 日志桥接（与 guoguo 同机制） ============================
 
     private static void fileLog(String msg) {
         Log.e(TAG, msg);
