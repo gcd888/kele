@@ -636,11 +636,19 @@ public class Guoguo extends Spider {
 
     /**
      * 播放设备号：'3' + 18 位随机数字，进程内固定（蓝本 ContentRepository.newPlayerDeviceId 同款口径）。
-     * 2026-10-23 风控升级后不再轮换：服务端按设备放行，稳定身份比随机轮换更可靠。
+     * 常规状态保持稳定身份；取流遇持续空响应（设备被服务端软拒特征）时 rotatePlayerDevice() 轮换自愈。
      */
     private static String deviceId = newPlayerDeviceId();
     private static String installId = newPlayerDeviceId();
-    private static final String playerCdid = UUID.randomUUID().toString();
+    private static String playerCdid = UUID.randomUUID().toString();
+
+    /** 持续空响应（设备软拒特征）时轮换整套播放设备参数。 */
+    private static synchronized void rotatePlayerDevice() {
+        deviceId = newPlayerDeviceId();
+        installId = newPlayerDeviceId();
+        playerCdid = UUID.randomUUID().toString();
+        fileLog("rotatePlayerDevice 已轮换播放设备 " + deviceId);
+    }
 
     private static String newPlayerDeviceId() {
         StringBuilder sb = new StringBuilder("3");
@@ -696,50 +704,72 @@ public class Guoguo extends Spider {
         byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
 
         // v1 端点参数集（对齐蓝本 VendorConstants.device + 覆盖项，桌面实测 200/code=0）：
-        // 版本回落 7.1.3.32(71332)、设备号 3+18 位进程内固定、cdid 随机 UUID、免签名头
-        LinkedHashMap<String, String> values = new LinkedHashMap<>();
-        values.put("iid", installId);
-        values.put("device_id", deviceId);
-        values.put("ac", "wifi");
-        values.put("channel", "update_64");
-        values.put("aid", "8662");
-        values.put("app_name", "novelread");
-        values.put("version_code", "71332");
-        values.put("version_name", "7.1.3.32");
-        values.put("device_platform", "android");
-        values.put("os", "android");
-        values.put("ssmix", "a");
-        values.put("device_type", "25053RT47C");
-        values.put("device_brand", "Redmi");
-        values.put("language", "zh");
-        values.put("os_api", "36");
-        values.put("os_version", "16");
-        values.put("manifest_version_code", "71332");
-        values.put("resolution", "1280*2772");
-        values.put("dpi", "520");
-        values.put("update_version_code", "71332");
-        values.put("host_abi", "arm64-v8a");
-        values.put("dragon_device_type", "phone");
-        values.put("pv_player", "71332");
-        values.put("compliance_status", "0");
-        values.put("need_personal_recommend", "1");
-        values.put("player_so_load", "1");
-        values.put("is_android_pad_screen", "0");
-        values.put("cdid", playerCdid);
-        values.put("_rticket", String.valueOf(System.currentTimeMillis()));
-        String query = encodeQuery(values);
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put("User-Agent", PLAYER_UA);
-        headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
-        String respText = text(V1_URL + "?" + query, "POST", body, headers).trim();
-        fileLog("v1 http done respLen=" + respText.length()
-                + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
-        if (respText.isEmpty()) throw new RuntimeException("播放接口返回空响应，请稍后重试");
-        JSONObject resp;
-        try {
-            resp = new JSONObject(respText);
-        } catch (Exception e) {
-            throw new RuntimeException("播放接口非 JSON 响应: " + respText.substring(0, Math.min(120, respText.length())));
+        // 版本回落 7.1.3.32(71332)、设备号 3+18 位进程内固定、cdid 随机 UUID、免签名头。
+        // 服务端按需生成播放数据：首请求常返回 200 空体（桌面实证重试即成功），故空响应重试并在
+        // 持续空响应（设备软拒特征）时轮换播放设备自愈；总重试窗口约 4s + 5 次请求 < 壳 15s 播放超时。
+        JSONObject resp = null;
+        String lastErr = null;
+        for (int attempt = 1; attempt <= 5 && resp == null; attempt++) {
+            if (attempt > 1) {
+                long backoff = attempt == 2 ? 600 : attempt == 3 ? 900 : attempt == 4 ? 900 : 1200;
+                try {
+                    Thread.sleep(backoff);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+            LinkedHashMap<String, String> values = new LinkedHashMap<>();
+            values.put("iid", installId);
+            values.put("device_id", deviceId);
+            values.put("ac", "wifi");
+            values.put("channel", "update_64");
+            values.put("aid", "8662");
+            values.put("app_name", "novelread");
+            values.put("version_code", "71332");
+            values.put("version_name", "7.1.3.32");
+            values.put("device_platform", "android");
+            values.put("os", "android");
+            values.put("ssmix", "a");
+            values.put("device_type", "25053RT47C");
+            values.put("device_brand", "Redmi");
+            values.put("language", "zh");
+            values.put("os_api", "36");
+            values.put("os_version", "16");
+            values.put("manifest_version_code", "71332");
+            values.put("resolution", "1280*2772");
+            values.put("dpi", "520");
+            values.put("update_version_code", "71332");
+            values.put("host_abi", "arm64-v8a");
+            values.put("dragon_device_type", "phone");
+            values.put("pv_player", "71332");
+            values.put("compliance_status", "0");
+            values.put("need_personal_recommend", "1");
+            values.put("player_so_load", "1");
+            values.put("is_android_pad_screen", "0");
+            values.put("cdid", playerCdid);
+            values.put("_rticket", String.valueOf(System.currentTimeMillis()));
+            String query = encodeQuery(values);
+            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+            headers.put("User-Agent", PLAYER_UA);
+            headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+            String respText = text(V1_URL + "?" + query, "POST", body, headers).trim();
+            fileLog("v1 http attempt#" + attempt + " respLen=" + respText.length()
+                    + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
+            if (respText.isEmpty()) {
+                lastErr = "播放接口返回空响应";
+                // 第 2/4 次仍空响应：轮换播放设备号（老设备可能被服务端软拒）
+                if (attempt == 2 || attempt == 4) rotatePlayerDevice();
+                continue;
+            }
+            try {
+                resp = new JSONObject(respText);
+            } catch (Exception e) {
+                throw new RuntimeException("播放接口非 JSON 响应: " + respText.substring(0, Math.min(120, respText.length())));
+            }
+        }
+        if (resp == null) {
+            throw new RuntimeException(lastErr == null ? "播放接口无响应" : lastErr + "（已重试）");
         }
         String code = resp.optString("Code", resp.optString("code", ""));
         if (!"0".equals(code)) throw new RuntimeException("播放接口 code=" + code);
@@ -2596,7 +2626,19 @@ public class Guoguo extends Spider {
         } catch (Exception e) {
             Log.e(TAG, "playerContent FAIL id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms : " + e.getMessage());
             fileLog("playerContent FAIL id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms : " + e);
-            return "";
+            // 失败必须显式回传 msg（壳侧 handleResolvePlayUrlFailed 会显示），返回空串会被当无结果处理
+            try {
+                String reason = e.getMessage() == null || e.getMessage().isEmpty()
+                        ? e.getClass().getSimpleName() : e.getMessage();
+                JSONObject err = new JSONObject();
+                err.put("msg", "获取播放数据失败：" + reason);
+                err.put("flag", flag == null || flag.isEmpty() ? "红果短剧" : flag);
+                err.put("url", "");
+                err.put("parse", 0);
+                return err.toString();
+            } catch (Exception ignored) {
+                return "";
+            }
         }
     }
 
