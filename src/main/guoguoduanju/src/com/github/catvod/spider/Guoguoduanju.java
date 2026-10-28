@@ -43,7 +43,8 @@ import javax.crypto.spec.SecretKeySpec;
  * 算法蓝本：hongguoTV kotlin-tv core（Signer/MediaCrypto/ContentRepository/ComicRank）。
  *
  * 数据面：
- *  - 分类/详情/榜单：红果官网 SSR（hongguoduanju.com，无需签名）；
+ *  - 分类/榜单：红果官网 SSR（hongguoduanju.com，无需签名）；详情：H5 album-share SSR 主路
+ *    （novelquickapp.com，免签）+ 官网 SSR 兜底（superguoguo 融合，2026-10-29）；
  *  - 搜索：优先番茄 App 端接口（bookapi/search/tab/v，全套字节签名 + 匿名注册设备，全量索引），
  *    失败/空结果回退官网 JSON 接口 /api/search/result（无需签名，索引残缺仅作兜底）；
  *  - 取流：fqnovel preload 接口（signSimple：老版 X-Gorgon 0x401c + X-Khronos + X-SS-Req-Ticket + X-SS-STUB）；
@@ -88,6 +89,14 @@ public class Guoguoduanju extends Spider {
     // 200 空体，tsukiyo 2026-10-27 PR#30 同因修复）。播放与搜索共享 appDevice() 注册身份并持久化。
     private static final String V1_URL =
             "https://api5-normal-sinfonlineb.fqnovel.com/novel/player/multi_video_model/v1/";
+    // superguoguo 融合（2026-10-29）：详情换 H5 album-share SSR 主路（官网 SSR 兜底）。
+    // 首页/分类实测维持官网主路：bookmall/tab 只回 tab 布局+找剧精选 6 卡（无分页，真人剧/漫剧
+    // tab 为空壳、卡片走未知的 bookstore feed），bottom_video_feed recommend 对匿名设备软拒 42B。
+    private static final String H5_ALBUM_URL =
+            "https://novelquickapp.com/hongguo/ug/pages/video-album-share";
+    private static final String H5_UA =
+            "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) " +
+            "Chrome/124.0.0.0 Mobile Safari/537.36";
     private static final String VIDEO_UA =
             "com.phoenix.read/73532 (Linux; U; Android 16; zh_CN; 25053RT47C; " +
             "Build/BP2A.250605.031.A3; Cronet/TTNetVersion:04657795 2026-01-23 " +
@@ -295,6 +304,62 @@ public class Guoguoduanju extends Spider {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    // ============================ superguoguo 免签面（bookmall/tab 首页 + H5 详情） ============================
+
+    /** H5/JSON 内嵌实体转义还原（&quot; 等在配对扫描前必须还原，否则字符串边界判断失效）。 */
+    private static String unescapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&quot;", "\"").replace("&#34;", "\"").replace("&#x22;", "\"")
+                .replace("&#39;", "'").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&amp;", "&");
+    }
+
+    /** 从 s 的 at 位置（'{' 或 '['）做括号配对扫描，返回平衡的 JSON 文本；失败抛 RuntimeException。 */
+    private static String scanBalanced(String s, int at) {
+        char open = s.charAt(at);
+        char close = open == '{' ? '}' : ']';
+        boolean inString = false;
+        boolean escaped = false;
+        int depth = 0;
+        for (int i = at; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (inString) {
+                if (escaped) escaped = false;
+                else if (c == '\\') escaped = true;
+                else if (c == '"') inString = false;
+            } else if (c == '"') {
+                inString = true;
+            } else if (c == open) {
+                depth++;
+            } else if (c == close) {
+                depth--;
+                if (depth == 0) return s.substring(at, i + 1);
+            }
+        }
+        throw new RuntimeException("unbalanced json at " + at);
+    }
+
+    /**
+     * H5 album-share SSR 详情（superguoguo 主路）：一次拿 series_data 元数据 + chapter_ids 全集 vid。
+     * 返回 {"sd": series_data 对象, "vids": chapter_ids 数组}。
+     */
+    private static JSONObject h5Album(String seriesId) throws Exception {
+        String html = text(H5_ALBUM_URL + "?video_id=" + seriesId, "GET", null,
+                java.util.Collections.singletonMap("User-Agent", H5_UA));
+        if (html == null || html.isEmpty()) throw new RuntimeException("H5 空响应");
+        String s = unescapeHtml(html);
+        int at = s.indexOf("\"series_data\"");
+        if (at < 0) throw new RuntimeException("series_data missing htmlLen=" + s.length());
+        JSONObject sd = new JSONObject(scanBalanced(s, s.indexOf('{', at)));
+        int at2 = s.indexOf("\"chapter_ids\"");
+        if (at2 < 0) throw new RuntimeException("chapter_ids missing");
+        JSONArray vids = new JSONArray(scanBalanced(s, s.indexOf('[', at2)));
+        if (vids.length() == 0) throw new RuntimeException("chapter_ids 空");
+        fileLog("h5Album done id=" + seriesId + " title=" + sd.optString("title", "")
+                + " vids=" + vids.length());
+        return new JSONObject().put("sd", sd).put("vids", vids);
     }
 
     private static final class Series {
@@ -2544,28 +2609,47 @@ public class Guoguoduanju extends Spider {
         try {
             String id = ids.get(0);
             fileLog("detailContent enter id=" + id);
-            // 单次抓取：详情元数据与分集 vid 同源（此前抓两次，弱网下易触发壳 30s 超时）
-            JSONObject data = router(SITE + "/detail?series_id=" + id);
-            JSONObject sd = seriesDetailOf(data);
-            if (sd == null) throw new RuntimeException("seriesDetail missing (loaderData keys: " + keysOf(data) + ")");
-            List<String> vids = vidsOf(sd);
-            if (vids.isEmpty() && sd.optJSONArray("episodeVids") != null) {
-                JSONArray ev = sd.optJSONArray("episodeVids");
-                for (int i = 0; i < ev.length(); i++) {
-                    String v = ev.optString(i, "");
+            // superguoguo 免签主路：H5 album-share SSR 单次拿 series_data + chapter_ids 全集（失败回落官网 SSR）
+            JSONObject sd = null;
+            List<String> vids = new ArrayList<String>();
+            try {
+                JSONObject h5 = h5Album(id);
+                sd = h5.optJSONObject("sd");
+                JSONArray cv = h5.optJSONArray("vids");
+                for (int i = 0; cv != null && i < cv.length(); i++) {
+                    String v = cv.optString(i, "");
                     if (!v.isEmpty()) vids.add(v);
+                }
+            } catch (Throwable t) {
+                fileLog("h5Album FAIL id=" + id + " → 官网兜底 : " + t.getClass().getSimpleName() + ": " + t.getMessage());
+            }
+            // 官网 SSR 兜底：详情元数据与分集 vid 同源（此前抓两次，弱网下易触发壳 30s 超时）
+            if (sd == null || vids.isEmpty()) {
+                JSONObject data = router(SITE + "/detail?series_id=" + id);
+                sd = seriesDetailOf(data);
+                if (sd == null) throw new RuntimeException("seriesDetail missing (loaderData keys: " + keysOf(data) + ")");
+                vids = vidsOf(sd);
+                if (vids.isEmpty() && sd.optJSONArray("episodeVids") != null) {
+                    JSONArray ev = sd.optJSONArray("episodeVids");
+                    for (int i = 0; i < ev.length(); i++) {
+                        String v = ev.optString(i, "");
+                        if (!v.isEmpty()) vids.add(v);
+                    }
                 }
             }
             if (vids.isEmpty()) throw new RuntimeException("vid_list missing");
 
+            // 字段兼容：H5 用 title/serial_count，官网用 series_title/episode_cnt
             int count = sd.optInt("episode_cnt", sd.optInt("series_episode_cnt", 0));
+            if (count == 0) count = sd.optInt("serial_count", 0);
             if (count == 0) {
                 JSONObject info = sd.optJSONObject("series_episode_info");
                 if (info != null) count = info.optInt("episode_cnt", 0);
             }
             String badge = sd.optString("episode_right_text", "");
             if (badge.isEmpty() && count > 0) badge = "全 " + count + " 集";
-            Series s = new Series(id, sd.optString("series_title", sd.optString("series_name", "")),
+            Series s = new Series(id,
+                    sd.optString("series_title", sd.optString("series_name", sd.optString("title", ""))),
                     sd.optString("series_cover", ""), sd.optString("series_intro", ""), badge, "");
 
             StringBuilder play = new StringBuilder();
