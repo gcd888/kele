@@ -1,8 +1,12 @@
 {
   "urls": [
 	{
-      "url": "https://gcd888.github.io/kele/src/ysc/diy/果果短剧/果果短剧.json",
+      "url": "https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/果果短剧/果果短剧.json?ref=main",
       "name": "🍎果果短剧"
+    },
+    {
+      "url": "https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/果果音乐/果果音乐.json?ref=main",
+      "name": "🍎果果音乐"
     },
     {
       "url": "https://gcd888.github.io/kele/src/ysc/diy/饭太硬/fty.json",
@@ -44,10 +48,6 @@
     {
       "url": "https://gcd888.github.io/kele/src/ysc/diy/儿童堡/儿童堡.json",
       "name": "👦🏻儿童堡"
-    },
-    {
-      "url": "https://gcd888.github.io/kele/src/ysc/diy/Q水易购/Q水易购.json",
-      "name": "🎵Q水易购"
     }
   ]
 }

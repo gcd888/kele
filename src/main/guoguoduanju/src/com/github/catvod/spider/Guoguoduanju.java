@@ -50,12 +50,12 @@ import javax.crypto.spec.SecretKeySpec;
  *  - 解密：spade_a 密钥派生 + spade 解密（SHA512 + AES-128-CBC）+ CENC 逐样本 AES-CTR；
  *  - 播放：经壳本地代理 proxy() 回吐解密后的分段字节（206）。
  */
-public class Guoguo extends Spider {
+public class Guoguoduanju extends Spider {
 
     private static final String TAG = "echo-drama-jar";
 
     /** 把 jar 内部排查日志桥接到壳的 LogWriter（落 guoju_log.txt，导出可见）；
-     *  反射失败时兜底直写 App 外部 files 目录 guoguo_spider.log（与 guoju_log.txt 同目录），双通道确保落盘。
+     *  反射失败时兜底直写 App 外部 files 目录 guoguoduanju_spider.log（与 guoju_log.txt 同目录），双通道确保落盘。
      *  注意：壳包名是 com.github.gcd888.guoju（勿回退 tvbox 旧包名，旧包名反射必失败=日志静默丢失）。 */
     private static void fileLog(String msg) {
         Log.e(TAG, msg);
@@ -69,7 +69,7 @@ public class Guoguo extends Spider {
             if (mContext == null) return;
             java.io.File dir = mContext.getExternalFilesDir(null);
             if (dir == null) return;
-            java.io.File f = new java.io.File(dir, "guoguo_spider.log");
+            java.io.File f = new java.io.File(dir, "guoguoduanju_spider.log");
             boolean rotate = f.exists() && f.length() > 512 * 1024;
             java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(f, !rotate));
             bw.write(new java.text.SimpleDateFormat("MM-dd HH:mm:ss.SSS", java.util.Locale.US)
@@ -1231,7 +1231,7 @@ public class Guoguo extends Spider {
             Executors.newSingleThreadExecutor(new ThreadFactory() {
                 @Override
                 public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r, "guoguo-primer");
+                    Thread t = new Thread(r, "guoguoduanju-primer");
                     t.setDaemon(true);
                     return t;
                 }
@@ -2129,7 +2129,7 @@ public class Guoguo extends Spider {
         }
     }
 
-    /** App 搜索设备身份：进程缓存 + 外部存储持久化（guoguo_device.json），force 时强制重新注册。 */
+    /** App 搜索设备身份：进程缓存 + 外部存储持久化（guoguoduanju_device.json），force 时强制重新注册。 */
     private static volatile String[] appDeviceIds = null;
 
     private static String deviceStorePath() {
@@ -2137,7 +2137,7 @@ public class Guoguo extends Spider {
             if (mContext == null) return null;
             java.io.File dir = mContext.getExternalFilesDir(null);
             if (dir == null) return null;
-            return new java.io.File(dir, "guoguo_device.json").getAbsolutePath();
+            return new java.io.File(dir, "guoguoduanju_device.json").getAbsolutePath();
         } catch (Throwable t) {
             return null;
         }
@@ -2619,7 +2619,7 @@ public class Guoguo extends Spider {
             // 填清晰度会被当作过期结果静默丢弃 → 永远转圈
             result.put("flag", flag == null || flag.isEmpty() ? "红果短剧" : flag);
             result.put("url", "proxy://do=play&siteKey="
-                    + (siteKey == null || siteKey.isEmpty() ? "guoguo" : siteKey)
+                    + (siteKey == null || siteKey.isEmpty() ? "guoguoduanju" : siteKey)
                     + "&vid=" + id);
             Log.e(TAG, "playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms quality=" + si.quality);
             return result.toString();

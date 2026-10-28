@@ -11,3 +11,6 @@ demo/
 # spider 源码工程编译产物与桌面测试类（不入库）
 src/main/*/build/
 src/main/*/test/
+
+# 嵌套独立仓库：果果接口配置（独立推送 gitcode）
+src/guoju-api/
