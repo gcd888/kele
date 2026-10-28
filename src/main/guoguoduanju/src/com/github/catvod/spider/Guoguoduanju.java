@@ -84,17 +84,18 @@ public class Guoguoduanju extends Spider {
     private static final String SITE = "https://hongguoduanju.com";
     // 2026-10-23 风控升级后取流链路（对齐 tsukiyo/hongguoTV 实测可用实现，桌面已验证）：
     // 旧 preload/v1 + legacyGorgon 0x401c 已被服务端软拒（200 空体，按设备放行）；
-    // 新链路 multi_video_model/v1 免签名头，只需播放专用 UA + 稳定设备参数（3+18 位、进程内固定）
+    // 新链路 multi_video_model/v1 免签名头，但必须携带「已注册」匿名设备（未注册随机设备号被软拒
+    // 200 空体，tsukiyo 2026-10-27 PR#30 同因修复）。播放与搜索共享 appDevice() 注册身份并持久化。
     private static final String V1_URL =
             "https://api5-normal-sinfonlineb.fqnovel.com/novel/player/multi_video_model/v1/";
     private static final String VIDEO_UA =
             "com.phoenix.read/73532 (Linux; U; Android 16; zh_CN; 25053RT47C; " +
             "Build/BP2A.250605.031.A3; Cronet/TTNetVersion:04657795 2026-01-23 " +
             "QuicVersion:c67e9834 2025-09-08)";
-    /** 播放接口专用 UA（v1 端点配合此 UA 免签名放行，与搜索页 UA 区分） */
+    /** 播放接口 UA（注册设备 + 此 UA 实测免签名放行，对齐注册 payload 版本口径 72232） */
     private static final String PLAYER_UA =
-            "com.phoenix.read/71532 (Linux; U; Android 9; SM-N9860; " +
-            "Build/PQ3A.190705.10241111;tt-ok/3.12.13.20)";
+            "com.phoenix.read/72232 (Linux; U; Android 16; zh_CN; 25053RT47C; " +
+            "Build/BP2A.250605.031.A3)";
     private static final int SEG_SIZE = 1048576;       // 1MB 分段
     private static final int HEADER_HINT = 8388608;    // moov 头部兜底抓取 8MB
 
@@ -634,26 +635,22 @@ public class Guoguoduanju extends Spider {
     // 进程内复用设备标识（蓝本 streamDeviceId/streamInstallId 各生成一次后复用）
     private static final Random RNG = new Random();
 
-    /**
-     * 播放设备号：'3' + 18 位随机数字，进程内固定（蓝本 ContentRepository.newPlayerDeviceId 同款口径）。
-     * 常规状态保持稳定身份；取流遇持续空响应（设备被服务端软拒特征）时 rotatePlayerDevice() 轮换自愈。
-     */
-    private static String deviceId = newPlayerDeviceId();
-    private static String installId = newPlayerDeviceId();
+    /** 播放 cdid：进程内随机 UUID，与注册设备解耦（实测 cdid 不参与设备放行判定）。 */
     private static String playerCdid = UUID.randomUUID().toString();
 
-    /** 持续空响应（设备软拒特征）时轮换整套播放设备参数。 */
+    /**
+     * 持续空响应（设备软拒特征）时强制重新注册匿名设备（tsukiyo PR#30 思路：
+     * 未注册设备是空响应根因，随机轮换治标不治本；重注册走 device_register 并持久化覆盖旧文件）。
+     */
     private static synchronized void rotatePlayerDevice() {
-        deviceId = newPlayerDeviceId();
-        installId = newPlayerDeviceId();
+        try {
+            appDevice(true);
+        } catch (Throwable t) {
+            fileLog("rotatePlayerDevice 重注册失败: " + t);
+        }
         playerCdid = UUID.randomUUID().toString();
-        fileLog("rotatePlayerDevice 已轮换播放设备 " + deviceId);
-    }
-
-    private static String newPlayerDeviceId() {
-        StringBuilder sb = new StringBuilder("3");
-        for (int i = 0; i < 18; i++) sb.append(RNG.nextInt(10));
-        return sb.toString();
+        String[] dev = appDevice(false);
+        fileLog("rotatePlayerDevice 已重注册播放设备 " + dev[0]);
     }
 
     private StreamInfo stream(String vid) {
@@ -704,9 +701,9 @@ public class Guoguoduanju extends Spider {
         byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
 
         // v1 端点参数集（对齐蓝本 VendorConstants.device + 覆盖项，桌面实测 200/code=0）：
-        // 版本回落 7.1.3.32(71332)、设备号 3+18 位进程内固定、cdid 随机 UUID、免签名头。
-        // 服务端按需生成播放数据：首请求常返回 200 空体（桌面实证重试即成功），故空响应重试并在
-        // 持续空响应（设备软拒特征）时轮换播放设备自愈；总重试窗口约 4s + 5 次请求 < 壳 15s 播放超时。
+        // 版本口径 7.2.2.32(72232)、设备号取 appDevice() 注册身份（与搜索共享、持久化）、cdid 随机 UUID、免签名头。
+        // 服务端按需生成播放数据：首请求常返回 200 空体（桌面实证重试即成功），故首次空响应保持同一身份
+        // 重试、再次空响应重注册一次自愈；总重试窗口约 4s + 5 次请求 < 壳 15s 播放超时。
         JSONObject resp = null;
         String lastErr = null;
         for (int attempt = 1; attempt <= 5 && resp == null; attempt++) {
@@ -719,15 +716,16 @@ public class Guoguoduanju extends Spider {
                     break;
                 }
             }
+            String[] dev = appDevice(false);
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
-            values.put("iid", installId);
-            values.put("device_id", deviceId);
+            values.put("iid", dev[1]);
+            values.put("device_id", dev[0]);
             values.put("ac", "wifi");
             values.put("channel", "update_64");
             values.put("aid", "8662");
             values.put("app_name", "novelread");
-            values.put("version_code", "71332");
-            values.put("version_name", "7.1.3.32");
+            values.put("version_code", "72232");
+            values.put("version_name", "7.2.2.32");
             values.put("device_platform", "android");
             values.put("os", "android");
             values.put("ssmix", "a");
@@ -736,13 +734,13 @@ public class Guoguoduanju extends Spider {
             values.put("language", "zh");
             values.put("os_api", "36");
             values.put("os_version", "16");
-            values.put("manifest_version_code", "71332");
+            values.put("manifest_version_code", "72232");
             values.put("resolution", "1280*2772");
             values.put("dpi", "520");
-            values.put("update_version_code", "71332");
+            values.put("update_version_code", "72232");
             values.put("host_abi", "arm64-v8a");
             values.put("dragon_device_type", "phone");
-            values.put("pv_player", "71332");
+            values.put("pv_player", "72232");
             values.put("compliance_status", "0");
             values.put("need_personal_recommend", "1");
             values.put("player_so_load", "1");
@@ -758,8 +756,8 @@ public class Guoguoduanju extends Spider {
                     + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
             if (respText.isEmpty()) {
                 lastErr = "播放接口返回空响应";
-                // 第 2/4 次仍空响应：轮换播放设备号（老设备可能被服务端软拒）
-                if (attempt == 2 || attempt == 4) rotatePlayerDevice();
+                // 对齐 tsukiyo PR#30：首次空响应保持同一身份重试；再次空响应才重注册一次（设备软拒特征）
+                if (attempt == 2) rotatePlayerDevice();
                 continue;
             }
             try {
