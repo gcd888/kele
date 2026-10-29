@@ -18,7 +18,9 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -41,7 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * 协议（对壳端 SourceViewModel / MusicSession 透明复用）：
  *  - homeContent：平台分类 + 榜单/歌单 tabs（聚合源=all 六平台搜索；独立源=本平台内容）
- *  - categoryContent：榜单目录（{p}_rank）/ 歌单列表（netease）/ 热歌直出（hot）
+ *  - categoryContent：热歌榜（聚合源=六平台合并去重）/ 榜单目录（{p}_rank）/ 歌单列表（netease/kugou）/ 榜单目录（qq/kuwo/migu）
  *  - detailContent({p}_toplist_{id} | {p}_playlist_{id})：榜内/歌单内歌曲 = 播放集
  *  - searchContent：独立源仅本平台；聚合源六平台并行交错
  *  - playerContent(flag="果剧音乐")：音频直链 + lyric(LRC)/klyric(逐词)/accompany/trackMode/mv
@@ -2661,14 +2663,18 @@ public final class MusicCore {
 
     // ============================ homeContent / categoryContent ============================
 
-    /** homeContent：all=聚合源（网易云歌单 + 热歌榜）；单平台=榜单 + 热歌（netease 加歌单 tab）。 */
+    /** homeContent：all=聚合源（热歌榜 + 歌单/榜单目录）；单平台=榜单 + 热歌（netease 加歌单 tab）。 */
     public static String homeContent(String platform, boolean filter) {
         try {
             JSONObject result = new JSONObject();
             JSONArray classes = new JSONArray();
             if ("all".equals(platform)) {
-                classes.put(new JSONObject().put("type_id", "netease").put("type_name", "网易云歌单"));
                 classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热歌榜"));
+                classes.put(new JSONObject().put("type_id", "netease").put("type_name", platformName("netease") + "歌单"));
+                classes.put(new JSONObject().put("type_id", "kugou").put("type_name", platformName("kugou") + "歌单"));
+                classes.put(new JSONObject().put("type_id", "qq").put("type_name", platformName("qq") + "榜单"));
+                classes.put(new JSONObject().put("type_id", "kuwo").put("type_name", platformName("kuwo") + "榜单"));
+                classes.put(new JSONObject().put("type_id", "migu").put("type_name", platformName("migu") + "榜单"));
                 if (filter) {
                     JSONArray cats = new JSONArray();
                     cats.put(new JSONObject().put("n", "全部").put("v", ""));
@@ -2745,17 +2751,17 @@ public final class MusicCore {
 
     /**
      * categoryContent：
-     *  - hot / {p}_hot：本平台热歌榜歌曲直出
+     *  - hot：聚合源=六平台热歌合并去重；独立源=本平台热歌榜歌曲直出
      *  - {p}_rank：榜单卡片目录（点击进 detailContent({p}_toplist_{id})）
-     *  - netease：歌单列表（cat 筛选 + 分页）
+     *  - netease / kugou：歌单列表（netease 支持 cat 筛选）
+     *  - qq / kuwo / migu：榜单目录（QQ 歌单聚合 API 匿名已关闭；酷我需 JS 种 cookie，均退回内置榜单）
      */
     public static String categoryContent(String platform, String tid, String pg, boolean filter, HashMap<String, String> extend) {
         String platformOfTid = tid == null ? "" : tid.trim();
         try {
             if ("hot".equals(platformOfTid)) {
-                // 聚合源 hot tab = 网易云热歌榜（原语义）；独立源 = 本平台热歌
-                String hotPlatform = "all".equals(platform) ? "netease" : platform;
-                List<Song> songs = rankSongs(hotPlatform, hotRankId(hotPlatform));
+                if ("all".equals(platform)) return songsToPageData(hotMerge());
+                List<Song> songs = rankSongs(platform, hotRankId(platform));
                 return songsToPageData(songs);
             }
             if (platformOfTid.endsWith("_rank")) {
@@ -2764,6 +2770,12 @@ public final class MusicCore {
             }
             if ("netease".equals(platformOfTid)) {
                 return nePlaylistPage(pg, extend);
+            }
+            if ("kugou".equals(platformOfTid)) {
+                return kgPlaylistPage(pg);
+            }
+            if ("qq".equals(platformOfTid) || "kuwo".equals(platformOfTid) || "migu".equals(platformOfTid)) {
+                return rankPage(platformOfTid);
             }
             return pageDataEmpty(1);
         } catch (Exception e) {
@@ -2796,6 +2808,110 @@ public final class MusicCore {
             return result.toString();
         } catch (Exception e) {
             fileLog("rankPage FAIL p=" + p + " : " + e);
+            return pageDataEmpty(1);
+        }
+    }
+
+    /** 聚合热歌榜：六平台热歌并发抓取（每家前 40），按 歌名+歌手 去重，轮询交错合并。 */
+    private static List<Song> hotMerge() {
+        final int perPlatform = 40;
+        final List<List<Song>> buckets = Collections.synchronizedList(new ArrayList<List<Song>>());
+        ExecutorService pool = Executors.newFixedThreadPool(PLATFORMS.length);
+        List<Future<?>> futures = new ArrayList<>();
+        for (final String p : PLATFORMS) {
+            futures.add(pool.submit(new Runnable() {
+                public void run() {
+                    try {
+                        List<Song> songs = rankSongs(p, hotRankId(p));
+                        buckets.add(songs.size() > perPlatform ? new ArrayList<>(songs.subList(0, perPlatform)) : songs);
+                    } catch (Exception e) {
+                        fileLog("hotMerge " + p + " FAIL: " + e);
+                    }
+                }
+            }));
+        }
+        for (Future<?> f : futures) {
+            try {
+                f.get();
+            } catch (Exception ignored) {
+            }
+        }
+        pool.shutdown();
+        List<Song> out = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        boolean added = true;
+        for (int i = 0; added && out.size() < 150; i++) {
+            added = false;
+            for (List<Song> bucket : buckets) {
+                if (i >= bucket.size()) continue;
+                Song s = bucket.get(i);
+                String key = dedupeKey(s);
+                if (key.isEmpty() || !seen.add(key)) continue;
+                out.add(s);
+                added = true;
+            }
+        }
+        fileLog("hotMerge done total=" + out.size());
+        return out;
+    }
+
+    /** 热歌合并去重键：歌名+歌手（忽略大小写与首尾空白）。 */
+    private static String dedupeKey(Song s) {
+        if (s == null || s.name == null) return "";
+        return s.name.trim().toLowerCase() + "|" + (s.artist == null ? "" : s.artist.trim().toLowerCase());
+    }
+
+    /** 播放量格式化：>=1万 显示 N万。 */
+    private static String playCountText(long n) {
+        if (n <= 0) return "";
+        if (n >= 10000) return (n / 10000) + "万";
+        return String.valueOf(n);
+    }
+
+    /** 果果枸歌单列表页（酷狗 v3 公开歌单 API）。 */
+    private static String kgPlaylistPage(String pg) {
+        try {
+            int page = 1;
+            try {
+                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+            } catch (Exception ignored) {
+            }
+            JSONObject resp = getJson("http://mobilecdn.kugou.com/api/v3/playlist/list?page=" + page + "&pagesize=30", kgHeaders());
+            JSONObject data = resp.optJSONObject("data");
+            JSONArray specials = data == null ? null : data.optJSONArray("specials");
+            JSONObject result = new JSONObject();
+            JSONArray list = new JSONArray();
+            int i = 0;
+            if (specials != null) {
+                for (int k = 0; k < specials.length(); k++) {
+                    JSONObject p = specials.optJSONObject(k);
+                    if (p == null) continue;
+                    String id = p.optString("specialid", "");
+                    String name = p.optString("specialname", "").trim();
+                    if (id.isEmpty() || name.isEmpty()) continue;
+                    JSONObject v = new JSONObject();
+                    v.put("vod_id", "kugou_playlist_" + id);
+                    v.put("vod_name", name);
+                    String cover = p.optString("imgurl", "").replace("{size}", "240");
+                    if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
+                    v.put("vod_pic", cover);
+                    v.put("vod_remarks", playCountText(p.optLong("play_count", p.optLong("playcount", 0))));
+                    v.put("vod_actor", platformName("kugou"));
+                    v.put("vod_content", platformName("kugou") + " · " + name);
+                    list.put(v);
+                    i++;
+                }
+            }
+            boolean more = i >= 30;
+            result.put("list", list);
+            result.put("page", page);
+            result.put("pagecount", more ? page + 1 : page);
+            result.put("limit", 30);
+            result.put("total", more ? -1 : i);
+            fileLog("kgPlaylistPage done pg=" + page + " items=" + i);
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("kgPlaylistPage FAIL : " + e);
             return pageDataEmpty(1);
         }
     }
