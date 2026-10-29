@@ -169,7 +169,8 @@ public class Fanqieduanju extends Spider {
 
     private static byte[] aes(boolean encrypt, byte[] data, byte[] key, byte[] iv) {
         try {
-            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            // NoPadding：所有调用方已手动 pkcs7（PKCS5 会双重填充，服务端解密校验必败）
+            Cipher c = Cipher.getInstance("AES/CBC/NoPadding");
             c.init(encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE,
                     new SecretKeySpec(key, "AES"), new IvParameterSpec(iv));
             return c.doFinal(data);
