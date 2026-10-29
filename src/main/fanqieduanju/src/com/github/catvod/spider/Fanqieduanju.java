@@ -8,8 +8,10 @@ import com.github.catvod.crawler.Spider;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -17,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -94,7 +98,7 @@ public class Fanqieduanju extends Spider {
     private static final String DETAIL_UA =
             "com.xs.fm/632 (Linux; U; Android 15; zh_CN; 23049RAD8C; Build/AQ3A.250226.002;tt-ok/3.12.13.20)";
     /** 取流 UA（fqapp dragon_read_json_headers：裸 UA） */
-    private static final String STREAM_UA = "com.dragon.read";
+    private static final String STREAM_UA = "com.xs.fm/632 (Linux; U; Android 15; zh_CN; 23049RAD8C; Build/AQ3A.250226.002; tt-ok/3.12.13.20)";
     /** 注册 UA（probe UA_REG 1:1） */
     private static final String REG_UA = SEARCH_UA;
 
@@ -932,14 +936,17 @@ public class Fanqieduanju extends Spider {
         }
     }
 
-    // ============================ 取流（签名 POST，明文 MP4 直链） ============================
+    // ============================ 取流（签名 POST + spade CENC 解密，红果蓝本同构） ============================
+    // 实测（2026-10-29）：免签请求空 body；551 签名请求服务端只给 spade_a 加密档（CENC）。
+    // 播放链路移植红果 Guoguoduanju：spade_a → deriveKey → moov 索引 → 逐样本 AES-CTR → proxy 分段解密。
 
     private static final class StreamInfo {
-        final String url;
-        final String quality;
+        final String url, quality;
+        final byte[] key; // null = 明文
 
-        StreamInfo(String url, String quality) {
+        StreamInfo(String url, byte[] key, String quality) {
             this.url = url;
+            this.key = key;
             this.quality = quality;
         }
     }
@@ -952,28 +959,36 @@ public class Fanqieduanju extends Spider {
             if (code != 0) throw new RuntimeException("stream code=" + code + " " + j.optString("message"));
             JSONObject data = j.optJSONObject("data");
             if (data == null) throw new RuntimeException("stream data missing");
+            // 结构 A：data[vid].video_model（嵌套）；结构 B：data.video_model 平铺——两者兼容
+            Object vmRaw = null;
             java.util.Iterator<String> it = data.keys();
             while (it.hasNext()) {
                 String mk = it.next();
                 JSONObject ent = data.optJSONObject(mk);
                 if (ent == null) continue;
-                Object vmRaw = ent.opt("video_model");
-                JSONObject vm;
-                if (vmRaw instanceof String) {
-                    try {
-                        vm = new JSONObject((String) vmRaw);
-                    } catch (Exception e) {
-                        continue;
-                    }
-                } else if (vmRaw instanceof JSONObject) {
-                    vm = (JSONObject) vmRaw;
-                } else {
-                    continue;
+                if (ent.has("video_model")) {
+                    vmRaw = ent.opt("video_model");
+                    break;
                 }
-                Object vl = vm.opt("video_list");
-                JSONObject best = null;
-                int bestScore = -1;
-                int total = 0;
+            }
+            if (vmRaw == null) vmRaw = data.opt("video_model");
+            if (vmRaw == null) throw new RuntimeException("video_model 缺失");
+            JSONObject vm;
+            if (vmRaw instanceof String) {
+                try {
+                    vm = new JSONObject((String) vmRaw);
+                } catch (Exception e) {
+                    throw new RuntimeException("video_model 字符串解析失败");
+                }
+            } else if (vmRaw instanceof JSONObject) {
+                vm = (JSONObject) vmRaw;
+            } else {
+                throw new RuntimeException("video_model 类型异常");
+            }
+            Object vl = vm.opt("video_list");
+            JSONObject best = null;
+            int bestScore = -1;
+            int total = 0;
                 if (vl instanceof JSONObject) {
                     JSONObject vlm = (JSONObject) vl;
                     java.util.Iterator<String> kit = vlm.keys();
@@ -981,12 +996,10 @@ public class Fanqieduanju extends Spider {
                         JSONObject q = vlm.optJSONObject(kit.next());
                         if (q == null) continue;
                         total++;
-                        // 排除 bytevc2/h265（壳侧播放器兼容性），其余按宽高分
+                        // 排除 bytevc2/bvc2（壳侧播放器兼容性），其余按宽高分；spade_a 加密档照收（走 CENC 解密）
                         String codec = q.optString("codec_type", "");
-                        if (codec.contains("bytevc2") || codec.contains("h265")) continue;
-                        if (!q.optString("spade_a", "").isEmpty()) continue; // 加密档不选
-                        String mu = q.optString("main_url", "");
-                        if (mu.isEmpty()) continue;
+                        if (codec.contains("bytevc2") || codec.contains("bvc2")) continue;
+                        if (q.optString("main_url", "").isEmpty()) continue;
                         int score = q.optInt("vwidth", 0) * 100 + q.optInt("bitrate", 0) / 1000;
                         if (score > bestScore) {
                             bestScore = score;
@@ -1000,8 +1013,7 @@ public class Fanqieduanju extends Spider {
                         JSONObject q = vla.optJSONObject(i);
                         if (q == null) continue;
                         String codec = q.optString("codec_type", "");
-                        if (codec.contains("bytevc2") || codec.contains("h265")) continue;
-                        if (!q.optString("spade_a", "").isEmpty()) continue;
+                        if (codec.contains("bytevc2") || codec.contains("bvc2")) continue;
                         if (q.optString("main_url", "").isEmpty()) continue;
                         int score = q.optInt("vwidth", 0) * 100 + q.optInt("bitrate", 0) / 1000;
                         if (score > bestScore) {
@@ -1010,23 +1022,23 @@ public class Fanqieduanju extends Spider {
                         }
                     }
                 }
-                if (best != null) {
-                    byte[] urlBytes = Base64.decode(best.optString("main_url"), Base64.DEFAULT);
-                    String url = new String(urlBytes, StandardCharsets.UTF_8).trim();
-                    if (!url.startsWith("http")) {
-                        // 尝试 URL-safe base64 兜底
-                        url = new String(Base64.decode(url, Base64.URL_SAFE), StandardCharsets.UTF_8).trim();
-                    }
-                    if (!url.startsWith("http")) throw new RuntimeException("main_url 解码异常");
-                    String def = best.optString("quality_desc",
-                            best.optJSONObject("video_meta") == null ? ""
-                                    : best.optJSONObject("video_meta").optString("definition", ""));
-                    if (def.isEmpty()) def = best.optInt("vwidth", 0) + "P";
-                    fileLog("pickStream model=" + mk + " 档数=" + total + " 选=" + def
-                            + " vwidth=" + best.optInt("vwidth", 0));
-                    return new StreamInfo(url, def);
+            if (best != null) {
+                byte[] urlBytes = Base64.decode(best.optString("main_url"), Base64.DEFAULT);
+                String url = cleanUrl(new String(urlBytes, StandardCharsets.UTF_8).trim());
+                if (!url.startsWith("http")) {
+                    // 尝试 URL-safe base64 兜底
+                    url = cleanUrl(new String(Base64.decode(url, Base64.URL_SAFE), StandardCharsets.UTF_8).trim());
                 }
-                fileLog("pickStream model=" + mk + " 无可用档（total=" + total + "）");
+                if (!url.startsWith("http")) throw new RuntimeException("main_url 解码异常");
+                String def = qualityText(best);
+                fileLog("pickStream 档数=" + total + " 选=" + def
+                        + " vwidth=" + best.optInt("vwidth", 0)
+                        + " spade=" + (best.optString("spade_a", "").isEmpty() ? "无" : "有"));
+                byte[] key = null;
+                if (!best.optString("spade_a", "").isEmpty()) {
+                    key = deriveKey(best.optString("spade_a"));
+                }
+                return new StreamInfo(url, key, def);
             }
             throw new RuntimeException("video_model 无可播放档位");
         } catch (RuntimeException e) {
@@ -1038,12 +1050,18 @@ public class Fanqieduanju extends Spider {
 
     private static StreamInfo stream(String vid) {
         try {
+            Long at = STREAM_CACHE_AT.get(vid);
+            StreamInfo cached = at == null ? null : STREAM_CACHE.get(vid);
+            if (cached != null && System.currentTimeMillis() - at < STREAM_TTL) {
+                return cached;
+            }
             JSONObject dev = device();
             String query = "iid=" + dev.optString("install_id")
                     + "&device_id=" + dev.optString("device_id")
                     + "&aid=1967&app_name=novelapp&version_code=72132"
                     + "&version_name=7.2.1.32&device_platform=android&device_brand=Xiaomi"
-                    + "&os_version=13&cdid=" + dev.optString("cdid");
+                    + "&os_version=13&cdid=" + dev.optString("cdid")
+                    + "&_rticket=" + System.currentTimeMillis();
             JSONObject bodyObj = new JSONObject();
             bodyObj.put("video_id", vid);
             bodyObj.put("content_type", 1004);
@@ -1061,17 +1079,482 @@ public class Fanqieduanju extends Spider {
             biz.put("video_platform", 3);
             bodyObj.put("biz_param", biz);
             byte[] body = bodyObj.toString().getBytes(StandardCharsets.UTF_8);
+            // 取流口径实测：免签请求返回空 body（2026-10-29 起），必须 551 签名才有数据
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("User-Agent", STREAM_UA);
             headers.put("Content-Type", "application/json; charset=utf-8");
-            headers.put("Accept-Language", "zh-CN,zh;q=0.9");
+            headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+            headers.put("Accept-Encoding", "identity");
             headers.putAll(playerHeaders(query, body, System.currentTimeMillis() / 1000));
             String resp = text(STREAM_API + "?" + query, "POST", body, headers);
-            return pickStream(resp);
+            StreamInfo si = pickStream(resp);
+            STREAM_CACHE.put(vid, si);
+            STREAM_CACHE_AT.put(vid, System.currentTimeMillis());
+            fileLog("stream done vid=" + vid + " quality=" + si.quality
+                    + " key=" + (si.key == null ? "none" : "spade"));
+            return si;
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("取流失败: " + e.getMessage(), e);
+        }
+    }
+
+    // ============================ spade 解密 + 本地代理（红果 Guoguoduanju 1:1 移植） ============================
+
+    private static final int SEG_SIZE = 1048576;       // proxy 分段 1MB
+    private static final int HEADER_HINT = 8388608;    // moov 头部兜底抓取 8MB
+    private static final long STREAM_TTL = 30L * 60 * 1000; // 取流数据 expire_time 约 28~54 分钟
+
+    /** spade 密钥派生常量（蓝本 SPADE_CONST）。 */
+    private static final String SPADE_CONST =
+            "4dd4c2e6b83162090e52b3c7a6733ba41cb2462b829ab58a196b39db57177524f49baf7f08e8d68d26a72e37c1a95a2f1f05a51892aef2949732b62a38aadd58";
+
+    /** 取流结果缓存：proxy 每 1MB 分段都回调，必须复用签名请求结果。 */
+    private static final Map<String, StreamInfo> STREAM_CACHE =
+            Collections.synchronizedMap(new LinkedHashMap<String, StreamInfo>(8, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, StreamInfo> eldest) {
+                    return size() > 8;
+                }
+            });
+    private static final Map<String, Long> STREAM_CACHE_AT = new HashMap<String, Long>();
+
+    private static String cleanUrl(String v) {
+        return v.replace("\\/", "/")
+                .replaceAll("(?i)\\\\u002f", "/")
+                .replace("\\u0026", "&")
+                .replace("&amp;", "&");
+    }
+
+    /** 蓝本 qualityText：档位描述兜底链。 */
+    private static String qualityText(JSONObject q) {
+        String v = q.optString("quality_desc", "");
+        if (v.isEmpty() || "0".equals(v)) v = String.valueOf(q.optInt("height", 0));
+        if (v.isEmpty() || "0".equals(v)) v = String.valueOf(q.optInt("vheight", 0));
+        if (v.isEmpty() || "0".equals(v)) v = String.valueOf(q.optInt("quality", 0));
+        if (v.isEmpty() || "0".equals(v)) v = String.valueOf(q.optInt("vwidth", 0));
+        return v;
+    }
+
+    /** spade_a 密钥派生（蓝本 MediaCrypto.deriveKey）。 */
+    private static byte[] deriveKey(String value) {
+        byte[] raw = Base64.decode(value, Base64.DEFAULT);
+        if (raw.length < 3) throw new RuntimeException("key too short");
+        int length = Math.min(raw.length - (u(raw[0]) ^ u(raw[1]) ^ u(raw[2])) + 47, raw.length - 1);
+        if (length < 33) throw new RuntimeException("key length " + length);
+        byte[] work = Arrays.copyOfRange(raw, 1, 1 + length);
+        int a = 85, b = 246;
+        for (int i = 0; i < work.length; i++) {
+            int old = u(work[i]);
+            int previous = (i & 1) != 0 ? a : b;
+            if ((i & 1) != 0) a = old;
+            else b = old;
+            work[i] = (byte) (-21 - Integer.bitCount(i) + (previous ^ old));
+        }
+        byte[] key = hexOf(new String(Arrays.copyOfRange(work, 1, 33), StandardCharsets.ISO_8859_1));
+        if (key.length != 16) throw new RuntimeException("derived key size " + key.length);
+        return key;
+    }
+
+    /** 多模式 AES（红果 aes：CBC/CTR 通用，NoPadding）。 */
+    private static byte[] aesMode(boolean encrypt, byte[] key, byte[] iv, byte[] data, String mode) {
+        try {
+            Cipher cipher = Cipher.getInstance("AES/" + mode + "/NoPadding");
+            cipher.init(encrypt ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE,
+                    new SecretKeySpec(key, "AES"), new IvParameterSpec(iv));
+            return cipher.doFinal(data);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    /** 取 CDN 分段字节，total[0] 回填文件总长。 */
+    private static byte[] range(String url, long start, long end, long[] total) {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(30000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", STREAM_UA);
+            conn.setRequestProperty("Accept", "*/*");
+            conn.setRequestProperty("Range", "bytes=" + start + "-" + end);
+            int code = conn.getResponseCode();
+            if (code >= 400) throw new RuntimeException("range http " + code);
+            String cr = conn.getHeaderField("Content-Range");
+            long tot = -1;
+            if (cr != null) {
+                int slash = cr.lastIndexOf('/');
+                if (slash >= 0 && slash < cr.length() - 1) {
+                    try {
+                        tot = Long.parseLong(cr.substring(slash + 1).trim());
+                    } catch (NumberFormatException ignore) {
+                    }
+                }
+            }
+            if (tot <= 0) tot = conn.getContentLengthLong();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            InputStream in = conn.getInputStream();
+            byte[] buf = new byte[65536];
+            int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            in.close();
+            total[0] = tot;
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    // ---- MP4/CENC（蓝本 MediaCrypto.prepare/decrypt 同构） ----
+
+    private static final class Box {
+        final int start, end, body;
+        final String type;
+
+        Box(int start, int end, int body, String type) {
+            this.start = start;
+            this.end = end;
+            this.body = body;
+            this.type = type;
+        }
+    }
+
+    private static Box box(byte[] d, int at, int limit) {
+        if (at < 0 || at + 8 > limit) return null;
+        long size = u32(d, at);
+        int header = 8;
+        if (size == 1) {
+            if (at + 16 > limit) return null;
+            size = i64(d, at + 8);
+            header = 16;
+        }
+        if (size == 0) size = limit - at;
+        if (size < header || size > limit - at) return null;
+        return new Box(at, at + (int) size, at + header, ascii4(d, at + 4));
+    }
+
+    private static Box find(byte[] d, String type, int start, int limit) {
+        for (int at = start; at <= limit - 8; at++) {
+            if (d[at + 4] == type.charAt(0)) {
+                Box b = box(d, at, limit);
+                if (b != null && type.equals(b.type)) return b;
+            }
+        }
+        return null;
+    }
+
+    private static String ascii4(byte[] d, int at) {
+        return new String(d, at, 4, StandardCharsets.US_ASCII);
+    }
+
+    private static long u32(byte[] d, int at) {
+        return ((long) i32(d, at)) & 0xFFFFFFFFL;
+    }
+
+    private static int i32(byte[] d, int at) {
+        return ((d[at] & 255) << 24) | ((d[at + 1] & 255) << 16) | ((d[at + 2] & 255) << 8) | (d[at + 3] & 255);
+    }
+
+    private static long i64(byte[] d, int at) {
+        long v = 0;
+        for (int i = 0; i < 8; i++) v = (v << 8) | (d[at + i] & 255);
+        return v;
+    }
+
+    private static int count(byte[] d, int at, int limit) {
+        if (at + 4 > limit) throw new RuntimeException("索引越界");
+        long n = u32(d, at);
+        if (n > 200000) throw new RuntimeException("索引数量过大");
+        return (int) n;
+    }
+
+    private static final class Sample {
+        final long start, end, encryptedOffset;
+        final byte[] iv;
+
+        Sample(long start, long end, long encryptedOffset, byte[] iv) {
+            this.start = start;
+            this.end = end;
+            this.encryptedOffset = encryptedOffset;
+            this.iv = iv;
+        }
+    }
+
+    private static final class Prepared {
+        final byte[] header;
+        final List<Sample> samples;
+
+        Prepared(byte[] header, List<Sample> samples) {
+            this.header = header;
+            this.samples = samples;
+        }
+    }
+
+    private static Prepared prepare(byte[] data, byte[] key) {
+        if (key == null) return new Prepared(new byte[0], new ArrayList<Sample>());
+        // ftyp 之后紧跟 moov（蓝本 box(data, data.u32(0))）
+        Box moov = box(data, (int) u32(data, 0), data.length);
+        if (moov == null || !"moov".equals(moov.type)) throw new RuntimeException("视频索引不完整");
+
+        List<Sample> samples = new ArrayList<Sample>();
+        byte[] header = data.clone();
+        int moovEnd = moov.end;
+        int cursor = moov.body;
+        while (cursor < moov.end) {
+            Box track = box(data, cursor, moov.end);
+            if (track == null) throw new RuntimeException("视频轨道格式异常");
+            cursor = track.end;
+            if (!"trak".equals(track.type)) continue;
+            Box stbl = find(data, "stbl", track.body, track.end);
+            if (stbl == null) continue;
+            Box saiz = find(data, "saiz", stbl.body, stbl.end);
+            Box saio = find(data, "saio", stbl.body, stbl.end);
+            Box stsz = find(data, "stsz", stbl.body, stbl.end);
+            Box stsc = find(data, "stsc", stbl.body, stbl.end);
+            Box chunks = find(data, "stco", stbl.body, stbl.end);
+            if (chunks == null) chunks = find(data, "co64", stbl.body, stbl.end);
+            if (saiz == null) continue;
+            if (saio == null) throw new RuntimeException("视频加密索引缺失");
+            if (stsz == null) throw new RuntimeException("样本索引缺失");
+            if (stsc == null) throw new RuntimeException("块索引缺失");
+            if (chunks == null) throw new RuntimeException("块偏移缺失");
+
+            int n = count(data, stsz.body + 8, stsz.end);
+            int defaultSize = (int) u32(data, stsz.body + 4);
+            if (defaultSize == 0 && stsz.body + 12 + (long) n * 4 > stsz.end) throw new RuntimeException("样本索引截断");
+            long[] sizes = new long[n];
+            for (int i = 0; i < n; i++) sizes[i] = defaultSize > 0 ? defaultSize : u32(data, stsz.body + 12 + i * 4);
+
+            int chunkCount = count(data, chunks.body + 4, chunks.end);
+            int width = "co64".equals(chunks.type) ? 8 : 4;
+            if (chunks.body + 8 + (long) chunkCount * width > chunks.end) throw new RuntimeException("块偏移截断");
+            long[] offsets = new long[chunkCount];
+            for (int i = 0; i < chunkCount; i++) {
+                offsets[i] = width == 8 ? i64(data, chunks.body + 8 + i * 8) : u32(data, chunks.body + 8 + i * 4);
+            }
+
+            int entryCount = count(data, stsc.body + 4, stsc.end);
+            if (entryCount == 0 || stsc.body + 8 + (long) entryCount * 12 > stsc.end) throw new RuntimeException("块索引截断");
+            long[] firstChunk = new long[entryCount];
+            long[] samplesPerChunk = new long[entryCount];
+            for (int i = 0; i < entryCount; i++) {
+                firstChunk[i] = u32(data, stsc.body + 8 + i * 12);
+                samplesPerChunk[i] = u32(data, stsc.body + 12 + i * 12);
+            }
+
+            // saiz：body+4=default_size(1B)，body+5=count(4B)，body+9=sizes[]
+            int sizeBase = saiz.body + 4 + ((i32(data, saiz.body) & 1) != 0 ? 8 : 0);
+            if (sizeBase + 5 > saiz.end) throw new RuntimeException("辅助索引截断");
+            int auxDefault = u(data[sizeBase]);
+            int auxCount = count(data, sizeBase + 1, saiz.end);
+            if (auxCount != n || (auxDefault == 0 && sizeBase + 5 + n > saiz.end)) throw new RuntimeException("辅助索引数量不一致");
+            int[] auxSizes = new int[n];
+            for (int i = 0; i < n; i++) auxSizes[i] = auxDefault > 0 ? auxDefault : u(data[sizeBase + 5 + i]);
+
+            // saio：body+4=count(4B)，body+8=offset（宽 4/8）
+            int offsetBase = saio.body + 4 + ((i32(data, saio.body) & 1) != 0 ? 8 : 0);
+            int offsetWidth = u(data[saio.body]) == 1 ? 8 : 4;
+            if (count(data, offsetBase, saio.end) != 1 || offsetBase + 4 + offsetWidth > saio.end) {
+                throw new RuntimeException("不支持的辅助索引布局");
+            }
+            long aux = offsetWidth == 8 ? i64(data, offsetBase + 4) : u32(data, offsetBase + 4);
+            long auxTotal = 0;
+            for (int i = 0; i < n; i++) auxTotal += auxSizes[i];
+            if (aux < 0 || aux + auxTotal > data.length) throw new RuntimeException("辅助数据超出索引范围");
+
+            int sampleIndex = 0;
+            int entry = 0;
+            for (int chunk = 0; chunk < chunkCount; chunk++) {
+                while (entry + 1 < entryCount && firstChunk[entry + 1] <= chunk + 1) entry++;
+                if (firstChunk[entry] > chunk + 1) throw new RuntimeException("样本与块数量不一致");
+                int c = (int) samplesPerChunk[entry];
+                if (c > n - sampleIndex) throw new RuntimeException("样本与块数量不一致");
+                long position = offsets[chunk];
+                for (int i = 0; i < c; i++, sampleIndex++) {
+                    long length = sizes[sampleIndex];
+                    int auxSize = auxSizes[sampleIndex];
+                    if (length <= 0 || auxSize < 8) throw new RuntimeException("样本索引异常");
+                    byte[] iv = new byte[16];
+                    System.arraycopy(data, (int) aux, iv, 0, 8);
+                    if (auxSize == 8) {
+                        samples.add(new Sample(position, position + length, 0, iv));
+                    } else {
+                        if (auxSize < 10) throw new RuntimeException("不支持的加密样本格式");
+                        int subs = ((data[(int) (aux + 8)] & 255) << 8) | (data[(int) (aux + 9)] & 255);
+                        if (auxSize != 10 + subs * 6) throw new RuntimeException("加密子样本索引异常");
+                        long offset = position;
+                        long encrypted = 0;
+                        for (int s = 0; s < subs; s++) {
+                            int at = (int) (aux + 10 + s * 6);
+                            int clear = ((data[at] & 255) << 8) | (data[at + 1] & 255);
+                            int encSize = (int) u32(data, at + 2);
+                            offset += clear;
+                            if (offset + encSize > position + length) throw new RuntimeException("加密子样本越界");
+                            if (encSize > 0) samples.add(new Sample(offset, offset + encSize, encrypted, iv));
+                            encrypted += encSize;
+                            offset += encSize;
+                        }
+                        if (offset != position + length) throw new RuntimeException("加密子样本长度异常");
+                    }
+                    position += length;
+                    aux += auxSize;
+                }
+            }
+            if (sampleIndex != n) throw new RuntimeException("视频样本不完整");
+
+            // moov 改写：encv/enca → frma 原始编码，sinf → free 清零体
+            int at = stbl.body;
+            while (at + 8 <= stbl.end) {
+                Box sinf = find(data, "sinf", at, stbl.end);
+                if (sinf == null) break;
+                Box frma = find(data, "frma", sinf.body, sinf.end);
+                if (frma == null || frma.body + 4 > frma.end) throw new RuntimeException("原始编码格式缺失");
+                byte[] original = Arrays.copyOfRange(data, frma.body, frma.body + 4);
+                int entryAt = sinf.start - 1;
+                while (entryAt >= stbl.body
+                        && !"encv".equals(ascii4(data, entryAt))
+                        && !"enca".equals(ascii4(data, entryAt))) {
+                    entryAt--;
+                }
+                if (entryAt < stbl.body) throw new RuntimeException("encv 缺失");
+                System.arraycopy(original, 0, header, entryAt, 4);
+                System.arraycopy("free".getBytes(StandardCharsets.US_ASCII), 0, header, sinf.start + 4, 4);
+                for (int i = sinf.body; i < sinf.end; i++) header[i] = 0;
+                at = sinf.end;
+            }
+        }
+        if (samples.isEmpty()) throw new RuntimeException("视频加密索引不可用");
+
+        Collections.sort(samples, new java.util.Comparator<Sample>() {
+            @Override
+            public int compare(Sample a, Sample b) {
+                return Long.compare(a.start, b.start);
+            }
+        });
+        for (int i = 1; i < samples.size(); i++) {
+            if (samples.get(i).start < samples.get(i - 1).end) throw new RuntimeException("视频样本重叠");
+        }
+        // 头部截到 moov 结束：mdat 区间的密文字节绝不能进 header
+        return new Prepared(Arrays.copyOf(header, moovEnd), samples);
+    }
+
+    private static byte[] decryptBytes(byte[] data, long start, byte[] key, Prepared prepared) {
+        byte[] result = data.clone();
+        long end = start + data.length;
+        if (start < prepared.header.length) {
+            int from = (int) start;
+            int to = (int) Math.min(end, prepared.header.length);
+            System.arraycopy(prepared.header, from, result, 0, to - from);
+        }
+        if (key == null) return result;
+        int low = 0;
+        int high = prepared.samples.size();
+        while (low < high) {
+            int mid = (low + high) >>> 1;
+            if (prepared.samples.get(mid).end <= start) low = mid + 1;
+            else high = mid;
+        }
+        for (int i = low; i < prepared.samples.size(); i++) {
+            Sample s = prepared.samples.get(i);
+            if (s.start >= end) break;
+            long begin = Math.max(start, s.start);
+            long stop = Math.min(end, s.end);
+            if (begin >= stop) continue;
+            long relative = begin - s.start + s.encryptedOffset;
+            int skip = (int) (relative % 16);
+            BigInteger counter = new BigInteger(1, s.iv)
+                    .add(BigInteger.valueOf(relative / 16))
+                    .and(BigInteger.ONE.shiftLeft(128).subtract(BigInteger.ONE));
+            byte[] cb = counter.toByteArray();
+            byte[] iv = new byte[16];
+            int srcFrom = Math.max(0, cb.length - 16);
+            int dstFrom = Math.max(0, 16 - cb.length);
+            System.arraycopy(cb, srcFrom, iv, dstFrom, cb.length - srcFrom);
+            byte[] input = new byte[skip + (int) (stop - begin)];
+            System.arraycopy(result, (int) (begin - start), input, skip, (int) (stop - begin));
+            byte[] decrypted = aesMode(false, key, iv, input, "CTR");
+            System.arraycopy(decrypted, skip, result, (int) (begin - start), (int) (stop - begin));
+        }
+        return result;
+    }
+
+    private static final Map<String, Prepared> PREPARED_CACHE =
+            Collections.synchronizedMap(new LinkedHashMap<String, Prepared>(4, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Prepared> eldest) {
+                    return size() > 8;
+                }
+            });
+
+    private static Prepared prepareFor(String vid, StreamInfo si, long total, byte[] firstBody) {
+        synchronized (PREPARED_CACHE) {
+            Prepared hit = PREPARED_CACHE.get(vid);
+            if (hit != null) return hit;
+        }
+        byte[] headerBody = firstBody;
+        if (headerBody == null || headerBody.length == 0) {
+            long[] totalRef = {total};
+            headerBody = range(si.url, 0, Math.max(HEADER_HINT, total) - 1L, totalRef);
+        }
+        Prepared p = prepare(headerBody, si.key);
+        synchronized (PREPARED_CACHE) {
+            PREPARED_CACHE.put(vid, p);
+        }
+        return p;
+    }
+
+    /** 壳本地代理回调：206 分段解密（红果 Guoguoduanju.proxy 1:1）。 */
+    @Override
+    public Object[] proxy(Map<String, String> params) {
+        try {
+            if (!"play".equals(params.get("do"))) return null;
+            String vid = params.get("vid");
+            if (vid == null || !vid.matches("\\d+")) {
+                fileLog("proxy invalid vid=" + vid);
+                return null;
+            }
+            String range = params.get("__range");
+            if (range == null || range.isEmpty()) range = params.get("range");
+            if (range == null || range.isEmpty()) range = "bytes=0-";
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("bytes=(\\d+)-(\\d*)").matcher(range);
+            if (!m.find()) {
+                fileLog("proxy bad range=" + range);
+                return null;
+            }
+            long start = Long.parseLong(m.group(1));
+
+            StreamInfo si = stream(vid);
+            long[] totalRef = {0};
+            long wantEnd = start + SEG_SIZE - 1;
+            byte[] body = range(si.url, start, wantEnd, totalRef);
+            long total = totalRef[0];
+            if (total <= 0) total = start + body.length;
+
+            Prepared prepared = si.key == null
+                    ? new Prepared(new byte[0], new ArrayList<Sample>())
+                    : prepareFor(vid, si, total, start == 0 ? body : null);
+            byte[] decrypted = decryptBytes(body, start, si.key, prepared);
+
+            if (decrypted.length == 0) {
+                Map<String, String> errHeaders = new LinkedHashMap<>();
+                errHeaders.put("Content-Length", "0");
+                return new Object[]{404, "text/plain", new ByteArrayInputStream(new byte[0]), errHeaders};
+            }
+            long realEnd = start + decrypted.length - 1;
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("Content-Range", "bytes " + start + "-" + realEnd + "/" + total);
+            headers.put("Accept-Ranges", "bytes");
+            fileLog("proxy vid=" + vid + " start=" + start + " got=" + body.length + " total=" + total);
+            return new Object[]{206, "video/mp4", new ByteArrayInputStream(decrypted), headers};
+        } catch (Exception e) {
+            fileLog("proxy FAIL vid=" + params.get("vid") + " : " + e);
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("Content-Length", "0");
+            return new Object[]{502, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
         }
     }
 
@@ -1212,16 +1695,17 @@ public class Fanqieduanju extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         long t0 = System.currentTimeMillis();
         try {
-            StreamInfo si = stream(id);
+            // spade CENC 加密档：统一走壳本地代理解密（红果同构）；明文档 proxy 内透传
             JSONObject result = new JSONObject();
             result.put("parse", 0);
             result.put("playUrl", "");
             result.put("header", new JSONObject());
             // flag 必须回显入参（壳侧 stale 校验比较 flag，否则结果被当过期丢弃）
             result.put("flag", flag == null || flag.isEmpty() ? "番茄短剧" : flag);
-            result.put("url", si.url);
-            fileLog("playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0)
-                    + "ms quality=" + si.quality);
+            result.put("url", "proxy://do=play&siteKey="
+                    + (siteKey == null || siteKey.isEmpty() ? "fanqieduanju" : siteKey)
+                    + "&vid=" + id);
+            fileLog("playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms");
             return result.toString();
         } catch (Exception e) {
             fileLog("playerContent FAIL id=" + id + " cost=" + (System.currentTimeMillis() - t0)

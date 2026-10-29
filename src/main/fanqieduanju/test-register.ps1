@@ -16,7 +16,7 @@ $t = $t -replace '(?s)private static void fileLog\(String msg\) \{.*?\r?\n    \}
 $t = $t -replace 'import android\.util\.Base64;\r?\n', ''
 $t = $t -replace 'import android\.util\.Log;\r?\n', ''
 $t = $t -replace 'import com\.github\.catvod\.crawler\.Spider;\r?\n', ''
-$t = $t.Replace('private static final String TAG = "echo-fq-drama-jar";', "private static final String TAG = `"echo-fq-drama-jar`";`r`n    private static Object mContext;")
+$t = $t.Replace('private static final String TAG = "echo-fq-drama-jar";', "private static final String TAG = `"echo-fq-drama-jar`";`r`n    private static Object mContext;`r`n    private String siteKey = `"fanqieduanju`";")
 $t = $t -replace '(?s)    /\*\* 设备存档读取（SharedPreferences；桌面 golden 变体整体替换本方法） \*/\r?\n    private static String devLoad\(\) \{.*?\n    \}', '    private static String devLoad() { return ""; }'
 $t = $t -replace '(?s)    /\*\* 设备存档写入（桌面 golden 变体整体替换本方法） \*/\r?\n    private static void devSave\(String json\) \{.*?\n    \}', '    private static void devSave(String json) { }'
 # main 尾部插入注册实调
@@ -32,6 +32,34 @@ if (!ok) System.exit(1);
                 System.out.println("SEARCH-TEST first=" + items.get(0).id + " | " + items.get(0).name + " | " + items.get(0).cover.substring(0, Math.min(40, items.get(0).cover.length())));
                 JSONObject det = detailAll(items.get(0).id);
                 System.out.println("DETAIL-TEST eps=" + det.optJSONArray("eps").length());
+                String vid0 = det.optJSONArray("eps").optJSONObject(0).optString("vid");
+                StreamInfo si = stream(vid0);
+                System.out.println("STREAM-TEST quality=" + si.quality + " url_ok=" + si.url.startsWith("http") + " len=" + si.url.length());
+                java.util.Map<String, String> pq = new java.util.HashMap<>();
+                pq.put("do", "play");
+                pq.put("vid", vid0);
+                pq.put("range", "bytes=0-1048575");
+                Object[] pr = new VerifyFqDesktop().proxy(pq);
+                if (pr == null) {
+                    System.out.println("PROXY-TEST null");
+                } else {
+                    java.io.InputStream pin = (java.io.InputStream) pr[2];
+                    byte[] head = new byte[64];
+                    int got = pin.read(head);
+                    pin.close();
+                    System.out.println("PROXY-TEST code=" + pr[0] + " mime=" + pr[1]
+                            + " got=" + got + " magic=" + new String(head, 4, 4, StandardCharsets.US_ASCII));
+                    java.util.Map<String, String> pq2 = new java.util.HashMap<>();
+                    pq2.put("do", "play");
+                    pq2.put("vid", vid0);
+                    pq2.put("range", "bytes=1048576-2097151");
+                    Object[] pr2 = new VerifyFqDesktop().proxy(pq2);
+                    java.io.InputStream pin2 = (java.io.InputStream) pr2[2];
+                    byte[] mid = new byte[4096];
+                    int got2 = pin2.read(mid);
+                    pin2.close();
+                    System.out.println("PROXY-TEST mid code=" + pr2[0] + " got=" + got2);
+                }
             }
         } catch (Throwable tr) {
             System.out.println("TEST FAIL " + tr);
