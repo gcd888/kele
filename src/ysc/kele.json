@@ -1,5 +1,9 @@
 {
   "storeHouse": [
+	{
+      "sourceName": "🏅果剧🏅",
+      "sourceUrl": "https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/guoju.json?ref=main"
+    },
     {
       "sourceName": "🏅可乐定制仓库🏅",
       "sourceUrl": "https://gcd888.github.io/kele/src/ysc/diy/kelediy.json"
