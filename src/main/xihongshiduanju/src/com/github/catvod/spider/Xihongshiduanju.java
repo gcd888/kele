@@ -1530,7 +1530,7 @@ public class Xihongshiduanju extends Spider {
     static final Map<String, String> DM_VID_SERIES =
             Collections.synchronizedMap(new LinkedHashMap<String, String>(64, 0.75f, false) {
                 protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
-                    return size() > 512;
+                    return size() > 4096;
                 }
             });
 
@@ -1973,7 +1973,8 @@ public class Xihongshiduanju extends Spider {
             fileLog("proxy danmu FAIL vid=" + vid + " : " + e);
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Content-Length", "0");
-            return new Object[]{502, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
+            // 用 500 不用 502：NanoHTTPD 2.3.1 Status 枚举缺 502，lookup 返回 null 会崩壳进程
+            return new Object[]{500, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
         }
     }
 
@@ -2025,7 +2026,8 @@ public class Xihongshiduanju extends Spider {
             fileLog("proxy FAIL vid=" + params.get("vid") + " : " + e);
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Content-Length", "0");
-            return new Object[]{502, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
+            // 用 500 不用 502：NanoHTTPD 2.3.1 Status 枚举缺 502，lookup 返回 null 会崩壳进程
+            return new Object[]{500, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
         }
     }
 
