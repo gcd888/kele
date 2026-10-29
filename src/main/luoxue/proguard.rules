@@ -1,0 +1,7 @@
+# R8 keep 规则：纯改名混淆（-dontshrink -dontoptimize）
+# 入口类：壳 JarLoader 按 "com.github.catvod.spider." + csp_ 后缀反射加载，类名与 public 方法不可改
+# Luoxue* 通配覆盖聚合 API 五平台独立源（Wy/Kg/Tx/Kw/Mg）；共享 MusicCore/MusicSpiderBase 类随包（改名无妨）
+-keep public class com.github.catvod.spider.Luoxue* { public *; }
+# 桩基类：运行时由壳 DexClassLoader 提供真类，壳还会反射访问 siteKey/empty 等 public 成员
+-keep public class com.github.catvod.crawler.Spider { public *; }
+-keepattributes Signature,InnerClasses,EnclosingMethod

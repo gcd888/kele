@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * 音乐 Spider 公共骨架：协议全部委托 MusicCore（六平台实现共享）。
- * 子类仅声明本源主平台：all=聚合源（全平台内容）；netease/qq/kugou/soda/kuwo/migu=独立源。
+ * 子类仅声明本源主平台：all=聚合源（全平台内容）；yun/qiu/gou/shui/wo/mi=独立源（对应五家+汽水）。
  * playerContent/action/detailContent 恒为全平台能力（跨源队列可直接播放任意 uid）。
  */
 public abstract class MusicSpiderBase extends Spider {

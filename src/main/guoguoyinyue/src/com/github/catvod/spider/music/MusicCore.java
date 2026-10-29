@@ -34,9 +34,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * 果果音乐公共核心（六平台实现，jar 内共享；壳不解析资源，全部经本接口）。
- * 数据蓝本：music-lib（netease/qq/kugou/soda provider）+ 新增 kuwo/migu（music-lib 同构端点移植）。
+ * 数据蓝本：music-lib（多平台 provider）+ 新增 kuwo/migu（music-lib 同构端点移植）。
  *
- * 平台：netease（网易云）/ qq / kugou（酷狗）/ soda（汽水）/ kuwo（酷我）/ migu（咪咕）。
+ * 平台：netease(芸)/ qq(秋) / kugou(枸) / soda(水) / kuwo(蜗) / migu(蜜) —— 内部平台代码，展示名见 platformName。
  * 歌曲统一 uid = {platform}_{songid}（kugou=hash、soda=trackid、kuwo=rid、migu=contentId）。
  *
  * 协议（对壳端 SourceViewModel / MusicSession 透明复用）：
@@ -568,17 +568,17 @@ public final class MusicCore {
         if (platform == null) return "";
         switch (platform) {
             case "netease":
-                return "网易云";
+                return "果果芸";
             case "qq":
-                return "QQ音乐";
+                return "果果秋";
             case "kugou":
-                return "酷狗";
+                return "果果枸";
             case "soda":
-                return "汽水";
+                return "果果水";
             case "kuwo":
-                return "酷我";
+                return "果果蜗";
             case "migu":
-                return "咪咕";
+                return "果果蜜";
             default:
                 return platform;
         }
@@ -2351,7 +2351,7 @@ public final class MusicCore {
     }
 
     /** 歌曲缓存元数据里的 MV id（netease mvid / qq vid）。 */
-    private static String[] mvMeta(String platform, String songId) {
+    public static String[] mvMeta(String platform, String songId) {
         if ("qq".equals(platform)) {
             String[] meta = qqSongMeta(songId);
             return new String[]{meta[0]};
@@ -2361,8 +2361,23 @@ public final class MusicCore {
 
     // ============================ 输出格式 ============================
 
+    /** 歌曲缓存（uid→Song）：playerContent 阶段反查歌名（欢乐源 B 站 MV 搜索用）。 */
+    private static final Map<String, Song> SONG_CACHE =
+            Collections.synchronizedMap(new LinkedHashMap<String, Song>(256, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Song> eldest) {
+                    return size() > 512;
+                }
+            });
+
+    /** uid 反查歌曲（未命中返回 null）。 */
+    public static Song songByUid(String uid) {
+        return uid == null ? null : SONG_CACHE.get(uid);
+    }
+
     public static String songsToPageData(List<Song> songs) {
         try {
+            for (Song s : songs) SONG_CACHE.put(s.uid(), s);
             JSONObject result = new JSONObject();
             JSONArray list = new JSONArray();
             for (Song s : songs) {
