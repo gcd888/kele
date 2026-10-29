@@ -11,10 +11,13 @@ import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -25,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -1507,10 +1511,477 @@ public class Xihongshiduanju extends Spider {
         return p;
     }
 
+    // ============================ 短剧弹幕（tsukiyo hongguoTV TimedComments 蓝图，金标对齐 danmu_api hongguo） ============================
+    // 链路：壳播放页取 playerContent.danmaku（本地代理 URL）→ 壳弹幕 Parser GET 该 URL →
+    // 壳 RemoteServer do=danmu 分发回 proxy() → 本节窗口循环拉番茄小说评论弹幕接口 → B 站 XML 回吐。
+    // 实测：番茄短剧 vid/series 与红果同命名空间，同一弹幕接口（aid=8662）对两平台均有效（桌面驱动已验证）。
+    // 签名四件套（X-Gorgon/X-Argus/X-Ladon/X-Khronos）已通过 danmu_api 金标逐字节校验（qingguoduanju/test/DanmuProbe golden）。
+
+    static final String DM_COMMENT_HOST = "https://api5-normal-sinfonlineb.fqnovel.com";
+    static final String DM_UA =
+            "com.phoenix.read/73532 (Linux; U; Android 16; zh_CN; 25053RT47C; Build/BP2A.250605.031.A3; "
+                    + "Cronet/TTNetVersion:04657795 2026-01-23 QuicVersion:c67e9834 2025-09-08)";
+    static final int DM_WINDOW_MS = 30000;
+    static final int DM_COUNT = 90;
+    static final int DM_MAX_WINDOWS = 40;   // 兜底上限：40 窗 ≈ 20 分钟，短剧单集远小于此
+    static final long DM_THROTTLE_MS = 300; // 窗间节流，防风控
+
+    /** vid → series_id（detailContent 时填充，弹幕 business_param.book_id 需要）。 */
+    static final Map<String, String> DM_VID_SERIES =
+            Collections.synchronizedMap(new LinkedHashMap<String, String>(64, 0.75f, false) {
+                protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                    return size() > 512;
+                }
+            });
+
+    /** 弹幕经壳本地代理回吐：反射取壳 Proxy 端口（9978 被占时会自增，不可写死）。 */
+    String dmProxyUrl(String vid) {
+        String base;
+        try {
+            Class<?> proxy = Class.forName("com.github.catvod.Proxy");
+            base = (String) proxy.getMethod("getUrl", boolean.class).invoke(null, Boolean.TRUE);
+        } catch (Throwable t) {
+            base = "http://127.0.0.1:9978/proxy";
+        }
+        String sk = siteKey == null || siteKey.isEmpty() ? "xihongshiduanju" : siteKey;
+        return base + "?do=danmu&siteKey=" + sk + "&vid=" + vid;
+    }
+
+    private static byte[] dmMd5(byte[] data) {
+        try {
+            return MessageDigest.getInstance("MD5").digest(data);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static byte[] dmHex(String s) {
+        byte[] out = new byte[s.length() / 2];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (byte) Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16);
+        }
+        return out;
+    }
+
+    private static String dmHexOf(byte[] b) {
+        StringBuilder sb = new StringBuilder(b.length * 2);
+        for (byte v : b) sb.append(String.format("%02x", v & 255));
+        return sb.toString();
+    }
+
+    private static byte[] dmConcat(byte[]... parts) {
+        int len = 0;
+        for (byte[] p : parts) len += p.length;
+        byte[] out = new byte[len];
+        int at = 0;
+        for (byte[] p : parts) {
+            System.arraycopy(p, 0, out, at, p.length);
+            at += p.length;
+        }
+        return out;
+    }
+
+    private static long dmWord64le(byte[] b, int at) {
+        long v = 0;
+        for (int i = 7; i >= 0; i--) v = (v << 8) | (b[at + i] & 255L);
+        return v;
+    }
+
+    private static byte[] dmLe64(long v) {
+        byte[] out = new byte[8];
+        for (int i = 0; i < 8; i++) out[i] = (byte) (v >>> (8 * i));
+        return out;
+    }
+
+    private static byte[] dmBe32(int v) {
+        return new byte[]{(byte) (v >>> 24), (byte) (v >>> 16), (byte) (v >>> 8), (byte) v};
+    }
+
+    private static int dmU(byte b) {
+        return b & 255;
+    }
+
+    private static byte[] dmPkcs7(byte[] data) {
+        int pad = 16 - data.length % 16;
+        byte[] out = Arrays.copyOf(data, data.length + pad);
+        Arrays.fill(out, data.length, out.length, (byte) pad);
+        return out;
+    }
+
+    private static void dmVarint(ByteArrayOutputStream out, long n) {
+        while ((n >>> 7) != 0) {
+            out.write((int) ((n & 127) | 128));
+            n >>>= 7;
+        }
+        out.write((int) n);
+    }
+
+    /** proto 编码（tsukiyo proto 1:1：Number→varint，其余→length-delimited UTF-8）。 */
+    private static byte[] dmProto(LinkedHashMap<Integer, Object> fields) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (Map.Entry<Integer, Object> en : fields.entrySet()) {
+            int tag = en.getKey();
+            Object value = en.getValue();
+            if (value instanceof Number) {
+                dmVarint(out, (long) tag << 3);
+                dmVarint(out, ((Number) value).longValue());
+            } else {
+                byte[] bytes = value instanceof byte[]
+                        ? (byte[]) value : value.toString().getBytes(StandardCharsets.UTF_8);
+                dmVarint(out, ((long) tag << 3) | 2);
+                dmVarint(out, bytes.length);
+                out.write(bytes, 0, bytes.length);
+            }
+        }
+        return out.toByteArray();
+    }
+
+    /** gorgon 种子 20 字节（danmu_api buildGorgonSeed）：md5(query)[0:4]+stub[0:4]+cookieMd5[0:4]+00010704+BE32(ts)。 */
+    private static byte[] dmGorgonSeed(String query, String stub, String cookie, long ts) {
+        byte[] body = stub.matches("(?i)[0-9a-f]{32}") ? dmHex(stub.substring(0, 8)) : new byte[4];
+        byte[] ck = cookie.isEmpty() ? new byte[4] : Arrays.copyOf(dmMd5(cookie.getBytes(StandardCharsets.UTF_8)), 4);
+        return dmConcat(Arrays.copyOf(dmMd5(query.getBytes(StandardCharsets.UTF_8)), 4), body, ck,
+                dmHex("00010704"), dmBe32((int) ts));
+    }
+
+    /** X-Gorgon（0x8404 新版 RC4 变体，金标校验与 danmu_api 逐字节一致）。 */
+    private static String dmGorgon(byte[] seed, int first, int second, int parameter) {
+        byte[] input = Arrays.copyOf(seed, seed.length);
+        int[] key = {0x4a, parameter & 255, 0x16, second, 0x47, 0x6c, parameter >>> 8, first};
+        int[] box = new int[256];
+        for (int i = 0; i < 256; i++) box[i] = i;
+        int j = 0;
+        for (int i = 0; i < 256; i++) {
+            j = (j + box[i] + key[i % 8]) & 255;
+            box[i] = box[j];
+        }
+        j = 0;
+        for (int n = 0; n < input.length; n++) {
+            int i = (n + 1) & 255;
+            j = (j + box[i]) & 255;
+            box[i] = box[j];
+            input[n] = (byte) (dmU(input[n]) ^ box[(box[i] + box[j]) & 255]);
+        }
+        int lengthMask = (~input.length) & 255;
+        for (int i = 0; i < input.length; i++) {
+            int v = dmU(input[i]);
+            int swapped = ((v << 4) | (v >>> 4)) & 255;
+            int next = dmU(input[(i + 1) % input.length]);
+            input[i] = (byte) (Integer.reverse(swapped ^ next) >>> 24 ^ lengthMask);
+        }
+        byte[] head = {(byte) 0x84, 4, (byte) first, (byte) second, (byte) parameter, (byte) (parameter >>> 8)};
+        return dmHexOf(dmConcat(head, input));
+    }
+
+    /** X-Ladon（simon 34 轮 + md5(salt|aid) 密钥，tsukiyo/danmu_api 同构）。 */
+    private static String dmLadon(long ts, byte[] salt) {
+        byte[] ascii = dmHexOf(dmMd5(dmConcat(salt, "8662".getBytes(StandardCharsets.UTF_8))))
+                .getBytes(StandardCharsets.US_ASCII);
+        List<Long> queue = new ArrayList<>();
+        queue.add(dmWord64le(ascii, 16));
+        queue.add(dmWord64le(ascii, 24));
+        long left = dmWord64le(ascii, 0);
+        long right = dmWord64le(ascii, 8);
+        long[] keys = new long[34];
+        for (int i = 0; i < keys.length; i++) {
+            keys[i] = left;
+            long next = (Long.rotateRight(right, 8) + left) ^ i;
+            queue.add(next);
+            left = next ^ Long.rotateLeft(left, 3);
+            right = queue.remove(0);
+        }
+        byte[] data = dmPkcs7((ts + "-1611921764-3019").getBytes(StandardCharsets.UTF_8));
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        result.write(salt, 0, salt.length);
+        for (int at = 0; at < data.length; at += 16) {
+            long a = dmWord64le(data, at);
+            long b = dmWord64le(data, at + 8);
+            for (long k : keys) {
+                b = k ^ (a + Long.rotateRight(b, 8));
+                a = b ^ Long.rotateLeft(a, 3);
+            }
+            result.write(dmLe64(a), 0, 8);
+            result.write(dmLe64(b), 0, 8);
+        }
+        return java.util.Base64.getEncoder().encodeToString(result.toByteArray());
+    }
+
+    private static final String DM_ARGUS_SECRET =
+            "ac1adaae95a7af94a5114ab3b3a97dd80050aa0a39314c40528caec95256c28c";
+
+    /** X-Argus（sm3 派生 + simon 128/256 72 轮 + AES-CBC，金标校验通过；注意密钥编排第二混合同步为右旋）。 */
+    private static String dmArgus(String query, String stub, long ts, long argusRandom, int signCount) {
+        byte[] bodyInput = stub.matches("(?i)[0-9a-f]{32}") ? dmHex(stub) : new byte[16];
+        byte[] nested = dmProto(new LinkedHashMap<Integer, Object>() {{
+            put(1, (long) signCount);
+            put(2, 1388734L);
+            put(3, 1388734L);
+            put(4, 1388734L);
+        }});
+        byte[] message = dmProto(new LinkedHashMap<Integer, Object>() {{
+            put(1, 0x40401252L);
+            put(2, 2L);
+            put(3, argusRandom);
+            put(4, "3019");
+            put(6, "1611921764");
+            put(7, "6.8.1.32");
+            put(8, "v04.07.01-ml-android");
+            put(9, 135135744L);
+            put(10, new byte[8]);
+            put(12, ts * 2);
+            put(13, Arrays.copyOfRange(sm3(bodyInput), 0, 6));
+            put(14, Arrays.copyOfRange(sm3(query.getBytes(StandardCharsets.UTF_8)), 0, 6));
+            put(15, nested);
+            put(20, "none");
+            put(21, 738L);
+        }});
+        byte[] secret = dmHex(DM_ARGUS_SECRET);
+        byte[] derived = sm3(dmConcat(secret, dmHex("3ccc567b"), secret));
+        long[] keys = new long[72];
+        for (int i = 0; i <= 3; i++) keys[i] = dmWord64le(derived, i * 8);
+        for (int i = 4; i <= 71; i++) {
+            // danmu_api simonRoundKeys：mixed = ror(k[i-1],3)^k[i-3]；mixed ^= ror(mixed,1)（右旋；
+            // tsukiyo CommentSignature 此处为左旋，实测服务端只认右旋）
+            long x = Long.rotateRight(keys[i - 1], 3) ^ keys[i - 3];
+            x ^= Long.rotateRight(x, 1);
+            keys[i] = ~keys[i - 4] ^ x ^ ((0x3dc94c3a046d678bL >>> ((i - 4) % 62)) & 1) ^ 3;
+        }
+        byte[] blocks = dmPkcs7(message);
+        ByteArrayOutputStream encrypted = new ByteArrayOutputStream();
+        for (int at = 0; at < blocks.length; at += 16) {
+            long a = dmWord64le(blocks, at);
+            long b = dmWord64le(blocks, at + 8);
+            for (long k : keys) {
+                long next = a ^ (Long.rotateLeft(b, 1) & Long.rotateLeft(b, 8)) ^ Long.rotateLeft(b, 2) ^ k;
+                a = b;
+                b = next;
+            }
+            encrypted.write(dmLe64(a), 0, 8);
+            encrypted.write(dmLe64(b), 0, 8);
+        }
+        byte[] mask = dmHex("d04ffdffd04ffdff");
+        byte[] enc = encrypted.toByteArray();
+        byte[] scrambled = new byte[enc.length];
+        for (int i = 0; i < enc.length; i++) scrambled[i] = (byte) (dmU(enc[i]) ^ dmU(mask[i % 8]));
+        byte[] maskScrambled = dmConcat(mask, scrambled);
+        byte[] reversed = new byte[maskScrambled.length];
+        for (int i = 0; i < maskScrambled.length; i++) reversed[i] = maskScrambled[maskScrambled.length - 1 - i];
+        byte[] container = dmConcat(dmHex("a6e783ee7001100918"), reversed, dmHex("567b"));
+        try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE,
+                    new SecretKeySpec(dmMd5(Arrays.copyOfRange(secret, 0, 16)), "AES"),
+                    new IvParameterSpec(dmMd5(Arrays.copyOfRange(secret, 16, 32))));
+            return java.util.Base64.getEncoder()
+                    .encodeToString(dmConcat(dmHex("3ccc"), cipher.doFinal(container)));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** 弹幕评论列表单窗请求（POST /novel/commentapi/comment/list/{vid}/v1/，全套签名头）。 */
+    private static JSONObject dmCommentWindow(String vid, String bookId, long startMs, long durationMs,
+                                              String cursor) throws Exception {
+        JSONObject business = new JSONObject();
+        business.put("book_id", bookId);
+        business.put("start_offset_time", startMs);
+        business.put("playlet_item_duration", durationMs);
+        business.put("need_danmaku_guide_type", new JSONArray(Arrays.asList(1, 3, 4, 2)));
+        JSONObject payload = new JSONObject();
+        payload.put("comment_source", 601);
+        payload.put("server_channel", 1000);
+        payload.put("group_id", vid);
+        payload.put("group_type", 30);
+        payload.put("comment_type", 20);
+        payload.put("sort", 1);
+        payload.put("count", DM_COUNT);
+        payload.put("cursor", cursor);
+        payload.put("aid", 8662);
+        payload.put("compliance_status", 0);
+        payload.put("business_param", business);
+
+        long now = System.currentTimeMillis();
+        Map<String, String> query = new TreeMap<>();
+        query.put("aid", "8662");
+        query.put("app_name", "novelread");
+        query.put("version_code", "73532");
+        query.put("version_name", "7.3.5.32");
+        query.put("manifest_version_code", "73532");
+        query.put("update_version_code", "73532");
+        query.put("channel", "update_64");
+        query.put("device_platform", "android");
+        query.put("os", "android");
+        query.put("ssmix", "a");
+        query.put("device_type", "25053RT47C");
+        query.put("device_brand", "Redmi");
+        query.put("language", "zh");
+        query.put("os_api", "36");
+        query.put("os_version", "16");
+        query.put("resolution", "1280*2772");
+        query.put("dpi", "520");
+        query.put("ac", "wifi");
+        query.put("device_id", "7397450988462912345");
+        query.put("iid", "7397450988462912346");
+        query.put("_rticket", String.valueOf(now));
+        StringBuilder q = new StringBuilder();
+        for (Map.Entry<String, String> en : query.entrySet()) {
+            if (q.length() > 0) q.append('&');
+            q.append(en.getKey()).append('=').append(URLEncoder.encode(en.getValue(), "UTF-8"));
+        }
+        String encoded = q.toString();
+
+        java.security.SecureRandom rnd = new java.security.SecureRandom();
+        byte[] nonce = new byte[11];
+        rnd.nextBytes(nonce);
+        int first = (((nonce[0] & 255) % 7) + 1) << 5;
+        int second = 0xe0 | (nonce[1] & 15);
+        ByteBuffer nb = ByteBuffer.wrap(nonce, 6, 4).order(ByteOrder.LITTLE_ENDIAN);
+        long argusRandom = nb.getInt() & 0xffffffffL;
+        int signCount = 2 + (nonce[10] & 255) % 49 * 2;
+
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(DM_COMMENT_HOST + "/novel/commentapi/comment/list/"
+                    + vid + "/v1/?" + encoded).openConnection();
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("User-Agent", DM_UA);
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("X-XS-From-Web", "0");
+            conn.setRequestProperty("Sdk-Version", "2");
+            conn.setRequestProperty("Comment-Source", "601");
+            conn.setRequestProperty("Server-Channel", "1000");
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            conn.setRequestProperty("X-Gorgon", dmGorgon(dmGorgonSeed(encoded, "", "", now / 1000), first, second, 0));
+            conn.setRequestProperty("X-Khronos", String.valueOf(now / 1000));
+            conn.setRequestProperty("X-SS-Req-Ticket", String.valueOf(now));
+            conn.setRequestProperty("X-SS-STUB", "");
+            conn.setRequestProperty("X-Argus", dmArgus(encoded, "", now / 1000, argusRandom, signCount));
+            conn.setRequestProperty("X-Ladon", dmLadon(now / 1000, Arrays.copyOfRange(nonce, 2, 6)));
+            byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
+            conn.setFixedLengthStreamingMode(body.length);
+            OutputStream os = conn.getOutputStream();
+            os.write(body);
+            os.close();
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            byte[] buf = new byte[8192];
+            int n;
+            while (in != null && (n = in.read(buf)) > 0) bout.write(buf, 0, n);
+            if (in != null) in.close();
+            if (code >= 400) throw new RuntimeException("danmu http " + code);
+            return new JSONObject(new String(bout.toByteArray(), StandardCharsets.UTF_8));
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private static String dmEscape(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&apos;");
+    }
+
+    /** 窗口循环拉全集弹幕 → B 站 XML（tsukiyo TimedComments.parse 同构 + danmu_api has_more 推进）。 */
+    static String dmFetchXml(String vid, String bookId) {
+        StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<i>");
+        List<String> markers = new ArrayList<>();
+        List<String> seenIds = new ArrayList<>();
+        long startMs = 0;
+        String cursor = "";
+        int total = 0;
+        try {
+            for (int i = 0; i < DM_MAX_WINDOWS; i++) {
+                String marker = startMs + ":" + cursor;
+                if (markers.contains(marker)) break;
+                markers.add(marker);
+                if (i > 0) {
+                    Thread.sleep(DM_THROTTLE_MS + (long) (Math.random() * 200));
+                }
+                JSONObject resp = dmCommentWindow(vid, bookId, startMs, 0, cursor);
+                if (resp.optInt("code", -1) != 0) {
+                    fileLog("danmu window code=" + resp.optInt("code", -1)
+                            + " msg=" + resp.optString("message", resp.optString("msg", "")));
+                    break;
+                }
+                JSONObject data = resp.optJSONObject("data");
+                if (data == null) break;
+                JSONObject extra = data.optJSONObject("extra");
+                long next = extra == null ? startMs + DM_WINDOW_MS
+                        : extra.optLong("next_query_danmaku_list_time", startMs + DM_WINDOW_MS);
+                if (next <= startMs) next = startMs + DM_WINDOW_MS;
+                JSONObject listInfo = data.optJSONObject("common_list_info");
+                String nextCursor = listInfo == null ? "" : listInfo.optString("cursor", "");
+                boolean hasMore = listInfo != null && listInfo.optBoolean("has_more", false);
+                JSONArray rows = data.optJSONArray("data_list");
+                int win = 0;
+                if (rows != null) {
+                    for (int r = 0; r < rows.length(); r++) {
+                        JSONObject row = rows.optJSONObject(r);
+                        JSONObject comment = row == null ? null : row.optJSONObject("comment");
+                        if (comment == null) continue;
+                        JSONObject common = comment.optJSONObject("common");
+                        JSONObject expand = comment.optJSONObject("expand");
+                        if (common == null || expand == null) continue;
+                        // 只收本集在播弹幕（group_id 匹配 + status=1 正常态）
+                        if (!vid.equals(common.optString("group_id")) || common.optInt("status", -1) != 1) continue;
+                        long time = expand.optLong("offset_time", -1);
+                        String id = comment.optString("comment_id");
+                        if (id.length() > 120) id = id.substring(0, 120);
+                        String text = "";
+                        JSONObject content = common.optJSONObject("content");
+                        if (content != null) text = content.optString("text");
+                        text = text.replaceAll("[\\p{Cc}\\u2028\\u2029]", " ").trim();
+                        if (text.length() > 180) text = text.substring(0, 180);
+                        if (id.isEmpty() || text.isEmpty() || seenIds.contains(id)) continue;
+                        seenIds.add(id);
+                        xml.append("<d p=\"").append(String.format(java.util.Locale.US, "%.2f", time / 1000.0))
+                                .append(",1,25,16777215\">").append(dmEscape(text)).append("</d>");
+                        total++;
+                        win++;
+                    }
+                }
+                if (!hasMore) break;
+                startMs = next;
+                cursor = nextCursor;
+            }
+        } catch (Exception e) {
+            fileLog("danmu fetch FAIL vid=" + vid + " : " + e);
+        }
+        xml.append("</i>");
+        fileLog("danmu fetch done vid=" + vid + " series=" + bookId + " windows=" + markers.size()
+                + " count=" + total + " bytes=" + xml.length());
+        return xml.toString();
+    }
+
+    /** 壳代理 do=danmu 分支：拉弹幕回吐 B 站 XML（失败 502 → 壳侧自动降级内置弹幕库搜索）。 */
+    private Object[] dmProxy(Map<String, String> params) {
+        String vid = params.get("vid");
+        if (vid == null || !vid.matches("\\d+")) {
+            fileLog("proxy danmu invalid vid=" + vid);
+            return null;
+        }
+        try {
+            String series = DM_VID_SERIES.containsKey(vid) ? DM_VID_SERIES.get(vid) : "";
+            String xml = dmFetchXml(vid, series);
+            byte[] body = xml.getBytes(StandardCharsets.UTF_8);
+            return new Object[]{200, "text/xml;charset=utf-8",
+                    new ByteArrayInputStream(body), new LinkedHashMap<String, String>()};
+        } catch (Exception e) {
+            fileLog("proxy danmu FAIL vid=" + vid + " : " + e);
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("Content-Length", "0");
+            return new Object[]{502, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
+        }
+    }
+
     /** 壳本地代理回调：206 分段解密（红果 Guoguoduanju.proxy 1:1）。 */
     @Override
     public Object[] proxy(Map<String, String> params) {
         try {
+            if ("danmu".equals(params.get("do"))) return dmProxy(params);
             if (!"play".equals(params.get("do"))) return null;
             String vid = params.get("vid");
             if (vid == null || !vid.matches("\\d+")) {
@@ -1664,6 +2135,8 @@ public class Xihongshiduanju extends Spider {
                 if (i > 0) play.append('#');
                 // 分集 id 必须是纯数字 vid：壳原样传给 playerContent
                 play.append("第").append(String.format("%02d", i + 1)).append("集$").append(ep.optString("vid"));
+                // 弹幕 business_param.book_id 需要 series_id：detail 时建立 vid→series 映射
+                DM_VID_SERIES.put(ep.optString("vid"), id);
             }
 
             JSONObject v = new JSONObject();
@@ -1705,6 +2178,8 @@ public class Xihongshiduanju extends Spider {
             result.put("url", "proxy://do=play&siteKey="
                     + (siteKey == null || siteKey.isEmpty() ? "xihongshiduanju" : siteKey)
                     + "&vid=" + id);
+            // 弹幕：壳 DanmuLoadController 拉取该 URL（本地代理 do=danmu 分支回吐 B 站 XML）
+            result.put("danmaku", dmProxyUrl(id));
             fileLog("playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms");
             return result.toString();
         } catch (Exception e) {
