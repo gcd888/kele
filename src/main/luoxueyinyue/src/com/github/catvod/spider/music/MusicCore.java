@@ -570,17 +570,17 @@ public final class MusicCore {
         if (platform == null) return "";
         switch (platform) {
             case "netease":
-                return "果果芸";
+                return "芸朵";
             case "qq":
-                return "果果秋";
+                return "秋秋";
             case "kugou":
-                return "果果枸";
+                return "小枸";
             case "soda":
-                return "果果水";
+                return "七七";
             case "kuwo":
-                return "果果蜗";
+                return "蜗牛";
             case "migu":
-                return "果果蜜";
+                return "小蜜";
             default:
                 return platform;
         }
@@ -2868,7 +2868,7 @@ public final class MusicCore {
         return String.valueOf(n);
     }
 
-    /** 果果枸歌单列表页（酷狗 v3 公开歌单 API）。 */
+    /** 小枸歌单列表页（酷狗 v3 公开歌单 API）。 */
     private static String kgPlaylistPage(String pg) {
         try {
             int page = 1;
