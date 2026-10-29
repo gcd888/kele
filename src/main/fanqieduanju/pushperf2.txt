@@ -1,7 +1,0 @@
-﻿--------- beginning of main
-10-29 01:04:27.252  3186  3186 D PushPerf: 收到推送 name=番茄短剧 url=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7.json?ref=main
-10-29 01:04:27.263  3186  3186 D PushPerf: [快扫]开始拉取 https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7.json?ref=main
-10-29 01:04:28.161  3186  3186 D PushPerf: 拉取成功 https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7.json?ref=main 下载=897ms 解析=1ms 大小=338字符
-10-29 01:04:28.163  3186  3186 D PushPerf: 全树扫描完成 节点数=1 总耗时=900ms 根=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7/%E7%95%AA%E8%8C%84%E7%9F%AD%E5%89%A7.json?ref=main
-10-29 01:04:28.210  3186  3186 D PushPerf: 路由表落库+自动应用 耗时=47ms 行数=1
-10-29 01:04:28.211  3186  3186 D PushPerf: 推送全流程完成 总耗时=959ms 成功=true

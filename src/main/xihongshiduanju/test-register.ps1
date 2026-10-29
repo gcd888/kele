@@ -1,13 +1,13 @@
-﻿# 桌面注册测试：生成 VerifyFqDesktop 变体后，main 尾部插入 registerDevice 实调，打印注册响应
+﻿# 桌面注册测试：生成 VerifyXhsDesktop 变体后，main 尾部插入 registerDevice 实调，打印注册响应
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$src = Join-Path $root "src\com\github\catvod\spider\Fanqieduanju.java"
+$src = Join-Path $root "src\com\github\catvod\spider\Xihongshiduanju.java"
 $dstDir = Join-Path $root "build\desktop"
 New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
-$dst = Join-Path $dstDir "VerifyFqDesktop.java"
+$dst = Join-Path $dstDir "VerifyXhsDesktop.java"
 
 $t = Get-Content $src -Raw -Encoding UTF8
-$t = $t -replace 'public class Fanqieduanju extends Spider', 'public class VerifyFqDesktop'
+$t = $t -replace 'public class Xihongshiduanju extends Spider', 'public class VerifyXhsDesktop'
 $t = $t -replace '(?m)^\s*@Override\s*\r?\n', ''
 $t = $t -replace 'Base64\.encodeToString\(([^;]+?), Base64\.NO_WRAP\)', 'java.util.Base64.getEncoder().encodeToString($1)'
 $t = $t -replace 'Base64\.decode\(([^;]+?), Base64\.DEFAULT\)', 'java.util.Base64.getDecoder().decode($1)'
@@ -16,7 +16,7 @@ $t = $t -replace '(?s)private static void fileLog\(String msg\) \{.*?\r?\n    \}
 $t = $t -replace 'import android\.util\.Base64;\r?\n', ''
 $t = $t -replace 'import android\.util\.Log;\r?\n', ''
 $t = $t -replace 'import com\.github\.catvod\.crawler\.Spider;\r?\n', ''
-$t = $t.Replace('private static final String TAG = "echo-fq-drama-jar";', "private static final String TAG = `"echo-fq-drama-jar`";`r`n    private static Object mContext;`r`n    private String siteKey = `"fanqieduanju`";")
+$t = $t.Replace('private static final String TAG = "echo-xhs-drama-jar";', "private static final String TAG = `"echo-xhs-drama-jar`";`r`n    private static Object mContext;`r`n    private String siteKey = `"xihongshiduanju`";")
 $t = $t -replace '(?s)    /\*\* 设备存档读取（SharedPreferences；桌面 golden 变体整体替换本方法） \*/\r?\n    private static String devLoad\(\) \{.*?\n    \}', '    private static String devLoad() { return ""; }'
 $t = $t -replace '(?s)    /\*\* 设备存档写入（桌面 golden 变体整体替换本方法） \*/\r?\n    private static void devSave\(String json\) \{.*?\n    \}', '    private static void devSave(String json) { }'
 # main 尾部插入注册实调
@@ -26,7 +26,7 @@ if (!ok) System.exit(1);
         try {
             JSONObject d = registerDevice();
             System.out.println("REG-TEST device_id=" + d.optString("device_id") + " install_id=" + d.optString("install_id"));
-            java.util.List<Series> items = new VerifyFqDesktop().appSearchPage("热播", 1);
+            java.util.List<Series> items = new VerifyXhsDesktop().appSearchPage("热播", 1);
             System.out.println("SEARCH-TEST items=" + items.size());
             if (!items.isEmpty()) {
                 System.out.println("SEARCH-TEST first=" + items.get(0).id + " | " + items.get(0).name + " | " + items.get(0).cover.substring(0, Math.min(40, items.get(0).cover.length())));
@@ -39,7 +39,7 @@ if (!ok) System.exit(1);
                 pq.put("do", "play");
                 pq.put("vid", vid0);
                 pq.put("range", "bytes=0-1048575");
-                Object[] pr = new VerifyFqDesktop().proxy(pq);
+                Object[] pr = new VerifyXhsDesktop().proxy(pq);
                 if (pr == null) {
                     System.out.println("PROXY-TEST null");
                 } else {
@@ -53,7 +53,7 @@ if (!ok) System.exit(1);
                     pq2.put("do", "play");
                     pq2.put("vid", vid0);
                     pq2.put("range", "bytes=1048576-2097151");
-                    Object[] pr2 = new VerifyFqDesktop().proxy(pq2);
+                    Object[] pr2 = new VerifyXhsDesktop().proxy(pq2);
                     java.io.InputStream pin2 = (java.io.InputStream) pr2[2];
                     byte[] mid = new byte[4096];
                     int got2 = pin2.read(mid);
@@ -84,4 +84,4 @@ try {
 }
 & javac -encoding UTF-8 -nowarn -cp "C:\Users\gcd888\.gradle\caches\modules-2\files-2.1\org.json\json\20240303\ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a\json-20240303.jar;$clsDir" -d $clsDir $dst
 if ($LASTEXITCODE -ne 0) { throw "desktop javac failed" }
-& java -cp "C:\Users\gcd888\.gradle\caches\modules-2\files-2.1\org.json\json\20240303\ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a\json-20240303.jar;$clsDir" com.github.catvod.spider.VerifyFqDesktop
+& java -cp "C:\Users\gcd888\.gradle\caches\modules-2\files-2.1\org.json\json\20240303\ebb88e8fb5122b7506d5cf1d69f1ccdb790d22a\json-20240303.jar;$clsDir" com.github.catvod.spider.VerifyXhsDesktop

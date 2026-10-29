@@ -35,7 +35,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * 番茄短剧 Spider（番茄小说 APP 内短剧板块，novelapp aid=1967）。
+ * 西红短剧 Spider（番茄小说 APP 内短剧板块，novelapp aid=1967）。
  * 算法蓝本：fq-Argus.kt（BearQu PR#23，源出 fqapp rust/src/sign，GPL-3.0）
  *          + Python 黄金验证栈（verify-fq-sig.py，golden vectors 全绿，2026-10-29）。
  *
@@ -50,15 +50,15 @@ import javax.crypto.spec.SecretKeySpec;
  *    data.*.video_model 为内嵌 JSON 字符串，video_list 多档清晰度，
  *    main_url 为 base64 明文 https MP4（无需解密），playerContent 直回 URL。
  */
-public class Fanqieduanju extends Spider {
+public class Xihongshiduanju extends Spider {
 
-    private static final String TAG = "echo-fq-drama-jar";
+    private static final String TAG = "echo-xhs-drama-jar";
 
     private static void fileLog(String msg) {
         Log.e(TAG, msg);
         try {
             Class<?> lw = Class.forName("com.github.gcd888.guoju.util.LogWriter");
-            lw.getMethod("i", String.class).invoke(null, "echo-fq jar: " + msg);
+            lw.getMethod("i", String.class).invoke(null, "echo-xhs jar: " + msg);
             return;
         } catch (Throwable ignored) {
         }
@@ -66,7 +66,7 @@ public class Fanqieduanju extends Spider {
             if (mContext == null) return;
             java.io.File dir = mContext.getExternalFilesDir(null);
             if (dir == null) return;
-            java.io.File f = new java.io.File(dir, "fanqieduanju_spider.log");
+            java.io.File f = new java.io.File(dir, "xihongshiduanju_spider.log");
             boolean rotate = f.exists() && f.length() > 512 * 1024;
             java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(f, !rotate));
             bw.write(new java.text.SimpleDateFormat("MM-dd HH:mm:ss.SSS", java.util.Locale.US)
@@ -519,7 +519,7 @@ public class Fanqieduanju extends Spider {
     private static String devLoad() {
         try {
             if (mContext == null) return "";
-            return mContext.getSharedPreferences("fq_duanju", 0).getString("device", "");
+            return mContext.getSharedPreferences("xhs_duanju", 0).getString("device", "");
         } catch (Throwable t) {
             fileLog("device read FAIL : " + t);
             return "";
@@ -530,7 +530,7 @@ public class Fanqieduanju extends Spider {
     private static void devSave(String json) {
         try {
             if (mContext == null) return;
-            mContext.getSharedPreferences("fq_duanju", 0).edit().putString("device", json).apply();
+            mContext.getSharedPreferences("xhs_duanju", 0).edit().putString("device", json).apply();
         } catch (Throwable ignored) {
         }
     }
@@ -1655,7 +1655,7 @@ public class Fanqieduanju extends Spider {
             String cover = vd.optString("series_cover", "");
             String intro = vd.optString("series_intro", "");
             String badge = vd.optString("episode_right_text", "");
-            if (name.isEmpty()) name = "番茄短剧 " + id;
+            if (name.isEmpty()) name = "西红短剧 " + id;
             if (badge.isEmpty()) badge = "全" + eps + "集";
 
             StringBuilder play = new StringBuilder();
@@ -1673,8 +1673,8 @@ public class Fanqieduanju extends Spider {
             v.put("vod_content", intro);
             v.put("vod_remarks", badge);
             v.put("type_id", "热播");
-            v.put("type_name", "番茄短剧");
-            v.put("vod_play_from", "番茄短剧");
+            v.put("type_name", "西红短剧");
+            v.put("vod_play_from", "西红短剧");
             v.put("vod_play_url", play.toString());
             // 壳侧 AbsJson 只解析 MacCMS 格式 {"list":[...]}
             JSONObject root = new JSONObject();
@@ -1701,9 +1701,9 @@ public class Fanqieduanju extends Spider {
             result.put("playUrl", "");
             result.put("header", new JSONObject());
             // flag 必须回显入参（壳侧 stale 校验比较 flag，否则结果被当过期丢弃）
-            result.put("flag", flag == null || flag.isEmpty() ? "番茄短剧" : flag);
+            result.put("flag", flag == null || flag.isEmpty() ? "西红短剧" : flag);
             result.put("url", "proxy://do=play&siteKey="
-                    + (siteKey == null || siteKey.isEmpty() ? "fanqieduanju" : siteKey)
+                    + (siteKey == null || siteKey.isEmpty() ? "xihongshiduanju" : siteKey)
                     + "&vid=" + id);
             fileLog("playerContent id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms");
             return result.toString();
@@ -1715,7 +1715,7 @@ public class Fanqieduanju extends Spider {
                         ? e.getClass().getSimpleName() : e.getMessage();
                 JSONObject err = new JSONObject();
                 err.put("msg", "获取播放数据失败：" + reason);
-                err.put("flag", flag == null || flag.isEmpty() ? "番茄短剧" : flag);
+                err.put("flag", flag == null || flag.isEmpty() ? "西红短剧" : flag);
                 err.put("url", "");
                 err.put("parse", 0);
                 return err.toString();

@@ -1,13 +1,13 @@
-﻿# 生成桌面 golden 验证变体：Fanqieduanju.java -> build\desktop\VerifyFqDesktop.java
+﻿# 生成桌面 golden 验证变体：Xihongshiduanju.java -> build\desktop\VerifyXhsDesktop.java
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$src = Join-Path $root "src\com\github\catvod\spider\Fanqieduanju.java"
+$src = Join-Path $root "src\com\github\catvod\spider\Xihongshiduanju.java"
 $dstDir = Join-Path $root "build\desktop"
 New-Item -ItemType Directory -Path $dstDir -Force | Out-Null
-$dst = Join-Path $dstDir "VerifyFqDesktop.java"
+$dst = Join-Path $dstDir "VerifyXhsDesktop.java"
 
 $t = Get-Content $src -Raw -Encoding UTF8
-$t = $t -replace 'public class Fanqieduanju extends Spider', 'public class VerifyFqDesktop'
+$t = $t -replace 'public class Xihongshiduanju extends Spider', 'public class VerifyXhsDesktop'
 $t = $t -replace '(?m)^\s*@Override\s*\r?\n', ''
 $t = $t -replace 'Base64\.encodeToString\(([^;]+?), Base64\.NO_WRAP\)', 'java.util.Base64.getEncoder().encodeToString($1)'
 $t = $t -replace 'Base64\.decode\(([^;]+?), Base64\.DEFAULT\)', 'java.util.Base64.getDecoder().decode($1)'
@@ -20,7 +20,7 @@ $t = $t -replace 'import android\.util\.Base64;\r?\n', ''
 $t = $t -replace 'import android\.util\.Log;\r?\n', ''
 $t = $t -replace 'import com\.github\.catvod\.crawler\.Spider;\r?\n', ''
 # mContext 仅存在于 Spider 基类：桌面变体补桩字段 + 抽空的设备存档方法
-$t = $t.Replace('private static final String TAG = "echo-fq-drama-jar";', "private static final String TAG = `"echo-fq-drama-jar`";`r`n    private static Object mContext;")
+$t = $t.Replace('private static final String TAG = "echo-xhs-drama-jar";', "private static final String TAG = `"echo-xhs-drama-jar`";`r`n    private static Object mContext;")
 $t = $t -replace '(?s)    /\*\* 设备存档读取（SharedPreferences；桌面 golden 变体整体替换本方法） \*/\r?\n    private static String devLoad\(\) \{.*?\n    \}', '    private static String devLoad() { return ""; }'
 $t = $t -replace '(?s)    /\*\* 设备存档写入（桌面 golden 变体整体替换本方法） \*/\r?\n    private static void devSave\(String json\) \{.*?\n    \}', '    private static void devSave(String json) { }'
 [System.IO.File]::WriteAllText($dst, $t, [System.Text.UTF8Encoding]::new($false))
@@ -43,5 +43,5 @@ try {
 }
 & javac -encoding UTF-8 -nowarn -cp $clsDir -d $clsDir $dst
 if ($LASTEXITCODE -ne 0) { throw "desktop javac failed" }
-& java -cp $clsDir com.github.catvod.spider.VerifyFqDesktop
+& java -cp $clsDir com.github.catvod.spider.VerifyXhsDesktop
 if ($LASTEXITCODE -ne 0) { throw "golden FAIL" }

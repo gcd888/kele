@@ -1,5 +1,5 @@
-﻿# Build guoguoduanju spider jar: javac (stub + android.jar) -> R8 obfuscate+dex -> zip (guoguoduanju-spider.jar)
-# Output: ..\..\guoju-api\果果短剧\lib\guoguoduanju-spider.jar (classes.dex) + MD5 (for 果果短剧.json dramas.jar)
+﻿# Build xihongshiduanju spider jar: javac (stub + android.jar) -> R8 obfuscate+dex -> zip (xihongshiduanju-spider.jar)
+# Output: ..\..\guoju-api\果果短剧\lib\xihongshiduanju-spider.jar (classes.dex) + MD5 (for 西红短剧.json dramas.jar)
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -75,7 +75,7 @@ if (-not (Test-Path $dexPath)) { throw "classes.dex not generated" }
 Add-Type -AssemblyName System.IO.Compression
 $outRepoDir = Join-Path (Join-Path $root "..\..\guoju-api\果果短剧") "lib"
 if (-not (Test-Path $outRepoDir)) { New-Item -ItemType Directory -Path $outRepoDir -Force | Out-Null }
-$jarPath = Join-Path $outRepoDir "guoguoduanju-spider.jar"
+$jarPath = Join-Path $outRepoDir "xihongshiduanju-spider.jar"
 if (Test-Path $jarPath) { Remove-Item $jarPath -Force }
 $fs = [System.IO.File]::Create($jarPath)
 try {
@@ -100,4 +100,4 @@ $size = (Get-Item $jarPath).Length
 Write-Host ""
 Write-Host "BUILD OK: $jarPath ($size bytes)"
 Write-Host "MD5: $md5"
-Write-Host "果果短剧.json ref: ./lib/guoguoduanju-spider.jar;md5;$md5"
+Write-Host "西红短剧.json ref: ./lib/xihongshiduanju-spider.jar;md5;$md5"
