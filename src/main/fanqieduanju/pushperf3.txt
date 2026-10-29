@@ -1,0 +1,5 @@
+﻿--------- beginning of main
+10-29 01:08:16.165  3546  3546 W PushPerf: 拉取失败 https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86.json?ref=main 耗时=35ms 错误=unexpected end of stream on Connection{gitcode.com:443, proxy=DIRECT hostAddress=gitcode.com/116.205.6.180:443 cipherSuite=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 protocol=http/1.1}
+10-29 01:08:16.167  3546  3546 D PushPerf: 全树扫描完成 节点数=1 总耗时=37ms 根=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86.json?ref=main
+10-29 01:08:16.230  3546  3546 D PushPerf: 路由表落库+自动应用 耗时=63ms 行数=0
+10-29 01:08:16.231  3546  3546 D PushPerf: 推送全流程完成 总耗时=154ms 成功=false

@@ -1,0 +1,60 @@
+﻿10-29 01:05:14.879 I/GuoJuHome: hero@44beaff tick pos=2 active=true paused=false attached=true count=3
+10-29 01:05:14.881 I/GuoJuHome: hero@44beaff switch 2->0 gap=12015ms
+10-29 01:05:14.893 I/GuoJuHome: hero bind[0] 空枪 meta=[2026 · 剧情 / 犯罪 · 电影 · 7.2 分] descLen=195
+10-29 01:05:14.935 I/GuoJuHome: hero@44beaff preload ok src=DATA_DISK_CACHE https://img3.doubanio.com/view/photo/l/public/p2936716088.jpg@User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36@Referer=https://www.douban.com/
+10-29 01:05:26.887 I/GuoJuHome: hero@44beaff tick pos=0 active=true paused=false attached=true count=3
+10-29 01:05:26.888 I/GuoJuHome: hero@44beaff switch 0->1 gap=12011ms
+10-29 01:05:26.904 I/GuoJuHome: hero bind[1] 小城良方 meta=[2026 · 剧情 · 电视剧 · 暂无评分] descLen=118
+10-29 01:05:38.904 I/GuoJuHome: hero@44beaff tick pos=1 active=true paused=false attached=true count=3
+10-29 01:05:38.906 I/GuoJuHome: hero@44beaff switch 1->2 gap=12011ms
+10-29 01:05:38.919 I/GuoJuHome: hero bind[2] 现在就出发 第四季 meta=[2026 · 真人秀 · 综艺 · 暂无评分] descLen=240
+10-29 01:05:38.964 I/GuoJuHome: hero@44beaff preload ok src=DATA_DISK_CACHE https://img3.doubanio.com/view/photo/l/public/p2935602792.jpg@User-Agent=Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36 OPR/36.0.2130.80@Referer=https://www.douban.com/
+10-29 01:05:49.118 I/GuoJuHome: hero@5be2b88 restart active=true count=0 at=38615737
+10-29 01:05:49.119 I/GuoJuHome: DramaHomeFragment: init savedKey=guoguoduanju savedFound=true totalSources=1 rankMode=true
+10-29 01:05:49.120 I/GuoJuHome: DramaHomeFragment: loadRankPage page=1
+10-29 01:05:49.122 I/GuoJuHome: DramaHomeFragment: hero bind[0] 和离后我带女儿横扫魔域
+10-29 01:05:49.122 I/GuoJuHome: DramaHomeFragment: hero bind[1] 备用联系人（完）
+10-29 01:05:49.123 I/GuoJuHome: hero@5be2b88 restart active=true count=3 at=38615823
+10-29 01:05:49.124 I/GuoJuHome: echo-drama csp: get spider key=guoguoduanju type=3 api=csp_Guoguoduanju jar=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E6%9E%9C%E6%9E%9C%E7%9F%AD%E5%89%A7/lib/guoguoduanju-spider.jar;md5;a58206af421c1d30a1cbbbdc33f63a5b
+10-29 01:05:49.127 I/GuoJuHome: echo-drama sort: homeContent key=guoguoduanju respLen=1452
+10-29 01:05:49.128 I/GuoJuHome: echo-drama sort: homeContent raw {"class":[{"type_id":"hot","type_name":"热播短剧"},{"type_id":"real-drama","type_name":"真人剧"},{"type_id":"comic-drama","type_name":"漫剧"},{"type_id":"ai-drama","type_name":"AI剧"},{"type_id":"rank","type_name":"漫剧榜"}],"filters":{"real-drama":[{"key":"cate","name":"分类","value":[{"n":"全部","v":""},{"n":"爱情","v":"romance"},{"n":"年代","v":"period"},{"n":"逆袭","v":"comeback"},{"n":"传奇","v":"legend"},{"n":"成长","v":"growth"},{"n":"家庭","v":"family"},{"n":"家族","v":"clan"},{"n":"萌宝","v":"cute-kids"},{"n":"悬疑","v":"suspense"},{"n":"惊悚","v":"thriller"},{"n":"恐怖","v":"horror"},{"n":"志怪","v":"supernatural"},{"n":"古装","v":"costume"},{"n":"玄幻","v":"fantasy"},{"n":"奇幻","v":"wonder"},{"n":"都市","v":"urban"},{"n":"青春","v":"youth"},{"n":"喜剧","v":"comedy"},{"n":"科幻","v":"sci-fi"},{"n":"灾难","v":"disaster"},{"n":"动作冒险","v":"action-adventure"},{"n":"战争","v":"war"},{"n":"综艺","v":"variety"},{"n":"剧情","v":"drama"}]}],"comic-drama":[{"key":"cate","name":"分类","value":[{"n":"全部","v":""},{"n":"脑洞","v":"creative"},{"n":"玄幻","v":"fantasy"},{"n":"剧情","v":"drama"},{"n":"末世","v":"apocalypse"},{"n":"豪门","v":"wealthy-family"},{"n":"奇幻","v":"wonder"},{"n":"科幻","v":"sci-fi"},{"n":"冒险","v":"adventure"}]}],"ai-drama":[{"key":"cate","name":"分类","value":[{"n":"全部","v":""},{"n":"脑洞","v":"creative"},{"n":"玄幻","v":"fantasy"},{"n":"剧情","v":"drama"},{"n":"末世","v":"apocalypse"},{"n":"豪门","v":"wealthy-family"},{"n":"奇幻","v":"wonder"},{"n":"科幻","v":"sci-fi"},{"n":"冒险","v":"adventure"}]}]}}
+10-29 01:05:49.380 I/GuoJuHome: DramaHomeFragment: hero bind[0] 和离后我带女儿横扫魔域
+10-29 01:05:49.381 I/GuoJuHome: DramaHomeFragment: hero bind[1] 备用联系人（完）
+10-29 01:05:49.446 I/GuoJuHome: DramaHomeFragment: hero bind[0] 和离后我带女儿横扫魔域
+10-29 01:05:49.450 I/GuoJuHome: DramaHomeFragment: hero bind[1] 备用联系人（完）
+10-29 01:05:49.468 I/GuoJuHome: DramaHomeFragment: sortResult categories=5
+10-29 01:05:49.836 I/GuoJuHome: DramaHomeFragment: shelf restore size=20
+10-29 01:05:49.863 I/GuoJuHome: echo-drama page: append categories=5
+10-29 01:05:49.899 I/GuoJuHome: hero@5be2b88 preload ok src=REMOTE https://p3-novel.byteimg.com/novel-pic/f68c6dc9abe69af4b32848b17afd8f1d~tplv-shrink:640:0.image
+10-29 01:05:49.901 I/GuoJuHome: hero@5be2b88 preload ok src=REMOTE https://p3-novel.byteimg.com/novel-pic/f68c6dc9abe69af4b32848b17afd8f1d~tplv-shrink:640:0.image
+10-29 01:05:49.917 I/GuoJuHome: hero@5be2b88 preload ok src=REMOTE https://p3-novel.byteimg.com/novel-pic/f68c6dc9abe69af4b32848b17afd8f1d~tplv-shrink:640:0.image
+10-29 01:05:50.161 I/GuoJuHome: DramaHomeFragment: shelf restore size=20
+10-29 01:06:00.837 I/GuoJuHome: hero@5be2b88 tick pos=0 active=true paused=false attached=true count=3
+10-29 01:06:00.838 I/GuoJuHome: hero@5be2b88 switch 0->1 gap=0ms
+10-29 01:06:00.851 I/GuoJuHome: DramaHomeFragment: hero bind[1] 备用联系人（完）
+10-29 01:06:00.893 I/GuoJuHome: hero@5be2b88 preload ok src=DATA_DISK_CACHE https://p3-novel.byteimg.com/novel-pic/8824990000958fbdb28fb29dca9da667~tplv-shrink:640:0.image
+10-29 01:06:12.863 I/GuoJuHome: hero@5be2b88 tick pos=1 active=true paused=false attached=true count=3
+10-29 01:06:12.865 I/GuoJuHome: hero@5be2b88 switch 1->2 gap=12016ms
+10-29 01:06:12.878 I/GuoJuHome: DramaHomeFragment: hero bind[2] 退役归来，这个保镖不好惹
+10-29 01:06:13.923 I/GuoJuHome: hero@5be2b88 preload ok src=DATA_DISK_CACHE https://p3-novel.byteimg.com/novel-pic/c37eb63db868db08eb95e0d8bacd0129~tplv-shrink:640:0.image
+10-29 01:06:34.458 I/GuoJuHome: ==== GuoJu v0.1.167 (167) build 2026-10-29 07:39:50 installed 10-28 23:40:20.812 ====
+10-29 01:06:34.428 I/GuoJuHome: echo-drama config: found dramas section
+10-29 01:06:34.431 I/GuoJuHome: echo-drama config: parsed key=guoguoduanju name=🍎果果短剧 type=3 api=csp_Guoguoduanju jar=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E6%9E%9C%E6%9E%9C%E7%9F%AD%E5%89%A7/lib/guoguoduanju-spider.jar;md5;a58206af421c1d30a1cbbbdc33f63a5b
+10-29 01:06:34.432 I/GuoJuHome: echo-drama config: total dramas=1
+10-29 01:06:35.700 I/GuoJuHome: echo-drama csp: get spider key=guoguoduanju type=3 api=csp_Guoguoduanju jar=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E6%9E%9C%E6%9E%9C%E7%9F%AD%E5%89%A7/lib/guoguoduanju-spider.jar;md5;a58206af421c1d30a1cbbbdc33f63a5b
+10-29 01:06:36.194 I/GuoJuHome: echo-drama jar: parseJar key=78027e4e21caa0a2d58ec1a2093d10ee source=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E6%9E%9C%E6%9E%9C%E7%9F%AD%E5%89%A7/lib/guoguoduanju-spider.jar md5=a58206af421c1d30a1cbbbdc33f63a5b
+10-29 01:06:36.197 I/GuoJuHome: echo-drama jar: cache hit (md5 match) file=/data/user/0/com.github.gcd888.guoju/cache/jar/95d5649aec7cf63285527e69b2fd77d4.jar
+10-29 01:06:36.201 I/GuoJuHome: hero@7e63659 restart active=true count=0 at=38661926
+10-29 01:06:36.206 I/GuoJuHome: echo-drama jar: load OK key=78027e4e21caa0a2d58ec1a2093d10ee, file=/data/user/0/com.github.gcd888.guoju/cache/jar/95d5649aec7cf63285527e69b2fd77d4.jar size=38682 dexOpted=false
+10-29 01:06:36.209 I/GuoJuHome: echo-drama jar: getSpider loading class com.github.catvod.spider.Guoguoduanju
+10-29 01:06:36.210 I/GuoJuHome: vod-recommend: hero cache hit today n=3
+10-29 01:06:36.248 I/GuoJuHome: hero bind[0] 空枪 meta=[2026 · 剧情 / 犯罪 · 电影 · 7.2 分] descLen=195
+10-29 01:06:36.250 I/GuoJuHome: hero bind[1] 小城良方 meta=[2026 · 剧情 · 电视剧 · 暂无评分] descLen=118
+10-29 01:06:36.251 I/GuoJuHome: hero@7e63659 restart active=true count=3 at=38662645
+10-29 01:06:37.127 I/GuoJuHome: hero bind[0] 空枪 meta=[2026 · 剧情 / 犯罪 · 电影 · 7.2 分] descLen=195
+10-29 01:06:37.131 I/GuoJuHome: hero bind[1] 小城良方 meta=[2026 · 剧情 · 电视剧 · 暂无评分] descLen=118
+10-29 01:06:37.523 I/GuoJuHome: hero@7e63659 preload ok src=DATA_DISK_CACHE https://img3.doubanio.com/view/photo/l/public/p2936716088.jpg@User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36@Referer=https://www.douban.com/
+10-29 01:06:37.526 I/GuoJuHome: hero@7e63659 preload ok src=DATA_DISK_CACHE https://img3.doubanio.com/view/photo/l/public/p2936716088.jpg@User-Agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36@Referer=https://www.douban.com/
+10-29 01:06:37.527 I/GuoJuHome: VodHomeFragment: shelf restore size=20
+10-29 01:06:38.231 I/GuoJuHome: hongguo rank parsed via=payload items=20 pages=5
+10-29 01:06:38.244 I/GuoJuHome: music_recommend: loaded list=200

@@ -1,0 +1,6 @@
+﻿--------- beginning of main
+10-29 01:11:36.700  4083  4083 D PushPerf: 收到推送 name=短剧合集 url=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86.json?ref=main
+10-29 01:11:36.734  4083  4083 D PushPerf: 节点[缓存命中] https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86.json?ref=main
+10-29 01:11:36.815  4083  4083 D PushPerf: 全树扫描完成 节点数=1 总耗时=81ms 根=https://gitcode.com/api/v5/repos/gcd888/guoju-api/raw/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86/%E7%9F%AD%E5%89%A7%E5%90%88%E9%9B%86.json?ref=main
+10-29 01:11:36.977  4083  4083 D PushPerf: 路由表落库+自动应用 耗时=161ms 行数=1
+10-29 01:11:36.979  4083  4083 D PushPerf: 推送全流程完成 总耗时=277ms 成功=true
