@@ -11,12 +11,18 @@ import java.util.List;
  */
 public abstract class LuoxueSpiderBase extends MusicSpiderBase {
 
+    /** 钩子：子类可插入自有取流（LX 脚本引擎），返回空串则走默认聚合 API */
+    protected String lxStream(String platform, String songId) {
+        return "";
+    }
+
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         if (!"MV".equals(flag)) {
             String[] uid = MusicCore.splitUid(id);
             if (uid != null) {
-                String url = LuoxueApi.stream(uid[0], uid[1]);
+                String url = lxStream(uid[0], uid[1]);
+                if (url == null || url.isEmpty()) url = LuoxueApi.stream(uid[0], uid[1]);
                 if (url != null && !url.isEmpty()) {
                     long t0 = System.currentTimeMillis();
                     try {

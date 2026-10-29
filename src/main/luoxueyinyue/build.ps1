@@ -41,7 +41,13 @@ New-Item -ItemType Directory -Path $classes | Out-Null
 
 $sources = Get-ChildItem -Path $srcDirs -Recurse -Filter *.java | ForEach-Object { $_.FullName }
 Write-Host "compiling $($sources.Count) source files"
-& javac -encoding UTF-8 -source 8 -target 8 -nowarn -bootclasspath "$androidJar" -d "$classes" $sources
+$wrapperJar = Join-Path $root "libs\wrapper-java.jar"
+$lambdaStubs = "D:\Tool\build-tools\35.0.0\core-lambda-stubs.jar"
+if (-not (Test-Path $lambdaStubs)) { $lambdaStubs = "D:\Tool\build-tools\36.0.0\core-lambda-stubs.jar" }
+$cpArgs = @()
+if (Test-Path $lambdaStubs) { $cpArgs += @("-bootclasspath", "$androidJar$([System.IO.Path]::PathSeparator)$lambdaStubs"); Write-Host "lambda stubs: $lambdaStubs" }
+if (Test-Path $wrapperJar) { $cpArgs += @("-classpath", "$wrapperJar"); Write-Host "wrapper jar: $wrapperJar" }
+& javac -encoding UTF-8 -source 8 -target 8 -nowarn -d "$classes" @cpArgs $sources
 if ($LASTEXITCODE -ne 0) { throw "javac failed" }
 
 # 4. pack classes -> in.jar, then R8 rename-obfuscate + dex
@@ -66,7 +72,10 @@ $rules = Join-Path $root "proguard.rules"
 if (-not (Test-Path $rules)) { throw "proguard.rules not found: $rules" }
 $dexOutDir = Join-Path $outDir "dexout"
 New-Item -ItemType Directory -Path $dexOutDir | Out-Null
-& java -cp $r8Jar com.android.tools.r8.R8 --release --min-api 21 --lib $androidJar --pg-conf $rules --pg-map-output (Join-Path $outDir "mapping.txt") --output $dexOutDir $inJar
+$r8Args = @("--release", "--min-api", "21", "--lib", "$androidJar")
+if (Test-Path $wrapperJar) { $r8Args += @("--lib", "$wrapperJar") }
+$r8Args += @("--pg-conf", "$rules", "--pg-map-output", (Join-Path $outDir "mapping.txt"), "--output", "$dexOutDir", "$inJar")
+& java -cp $r8Jar com.android.tools.r8.R8 @r8Args
 if ($LASTEXITCODE -ne 0) { throw "R8 failed" }
 $dexPath = Join-Path $dexOutDir "classes.dex"
 if (-not (Test-Path $dexPath)) { throw "classes.dex not generated" }
