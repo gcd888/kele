@@ -97,10 +97,11 @@ public class LuoxueApi {
         return "";
     }
 
-    /** 303：执行服务器下发的二次请求模板，按 check 校验、按 url 路径提取直链。 */
+    /** 303：执行服务器下发的二次请求模板，按 check 校验、按 url 路径提取直链（各平台模板字段不齐，全路径判空）。 */
     private static String follow303(JSONObject data) throws Exception {
-        JSONObject req = data.getJSONObject("request");
-        JSONObject respSpec = data.getJSONObject("response");
+        JSONObject req = data.optJSONObject("request");
+        if (req == null || req.optString("url", "").isEmpty()) return "";
+        JSONObject respSpec = data.optJSONObject("response");
         JSONObject opts = req.optJSONObject("options");
         Map<String, String> headers = new LinkedHashMap<>();
         if (opts != null && opts.optJSONObject("headers") != null) {
@@ -120,17 +121,19 @@ public class LuoxueApi {
             return raw.startsWith("http") ? raw.trim() : "";
         }
         JSONObject rj = new JSONObject(raw);
-        // check：key 路径逐层取值与 value 比对
-        JSONObject check = respSpec.optJSONObject("check");
-        if (check != null) {
+        // check：key 路径逐层取值与 value 比对（部分平台无 check）
+        JSONObject check = respSpec == null ? null : respSpec.optJSONObject("check");
+        if (check != null && check.optJSONArray("key") != null) {
             Object got = dig(rj, check.optJSONArray("key"));
-            String expect = String.valueOf(dig(rj, toArray(check.opt("value"))));
-            if (!expect.equals(String.valueOf(got))) {
-                MusicCore.fileLog("luoxue 303 check mismatch got=" + got + " expect=" + expect);
+            Object want = dig(rj, toArray(check.opt("value")));
+            if (got == null || want == null || !String.valueOf(want).equals(String.valueOf(got))) {
+                MusicCore.fileLog("luoxue 303 check mismatch got=" + got + " expect=" + want);
                 return "";
             }
         }
-        Object u = dig(rj, toArray(respSpec.opt("url")));
+        JSONArray urlPath = respSpec == null ? null : respSpec.optJSONArray("url");
+        if (urlPath == null) return "";
+        Object u = dig(rj, urlPath);
         String url = String.valueOf(u);
         return url.startsWith("http") ? url.trim() : "";
     }
