@@ -2708,6 +2708,8 @@ public final class MusicCore {
                 play.append(String.format("%02d", i + 1)).append('.').append(s.name)
                         .append('$').append(s.uid());
                 play.append('$').append(s.hasK ? "1" : "0");
+                play.append('$').append(s.artist == null ? "" : s.artist); // 歌手/封面随行下发（壳歌单页+播放队列展示）
+                play.append('$').append(s.cover == null ? "" : s.cover);
             }
             String cover = listCoverFallback.isEmpty() ? songs.get(0).cover : listCoverFallback;
             JSONObject v = new JSONObject();
