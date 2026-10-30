@@ -194,7 +194,14 @@ public final class LxScript {
                         Object r = rt.callFunction(handler, new Object[]{ev});
                         String url = extractUrl(r);
                         if (!TextUtils.isEmpty(url) && url.startsWith("http")) {
-                            log("musicUrl ok src=" + source + " q=" + q + " id=" + songId);
+                            // 脚本可能返回已失效直链（403/404），探活失败视为该音质不可用，
+                            // 继续下一音质；全部失败返回 "" 走 LuoxueApi/官方流兜底
+                            if (!streamReachable(url)) {
+                                log("musicUrl 拒绝(非200) src=" + source + " q=" + q + " id=" + songId);
+                                continue;
+                            }
+                            log("musicUrl ok src=" + source + " q=" + q + " id=" + songId
+                                    + " url=" + url.substring(0, Math.min(url.length(), 150)));
                             return url;
                         }
                         log("musicUrl 空 src=" + source + " q=" + q + " id=" + songId + " r=" + extractDebug(r));
@@ -274,6 +281,25 @@ public final class LxScript {
         return mi.toString();
     }
 
+    /** 流探活：Range GET 1KB，200/206 视为可用（脚本返回的第三方直链时效短，403 常见）。 */
+    private static boolean streamReachable(String url) {
+        HttpURLConnection c = null;
+        try {
+            c = (HttpURLConnection) new URL(url).openConnection();
+            c.setConnectTimeout(4000);
+            c.setReadTimeout(4000);
+            c.setRequestMethod("GET");
+            c.setRequestProperty("Range", "bytes=0-1023");
+            c.setRequestProperty("User-Agent", "Mozilla/5.0");
+            int code = c.getResponseCode();
+            return code == 200 || code == 206;
+        } catch (Throwable t) {
+            return false;
+        } finally {
+            if (c != null) c.disconnect();
+        }
+    }
+
     private static String extractUrl(Object r) {
         if (r == null) return "";
         if (r instanceof String) return (String) r;
@@ -318,20 +344,44 @@ public final class LxScript {
     }
 
     private static String download(String url) throws Exception {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setConnectTimeout(15000);
-        conn.setReadTimeout(15000);
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-        int code = conn.getResponseCode();
-        if (code != 200) throw new Exception("下载脚本 HTTP " + code);
-        InputStream in = conn.getInputStream();
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        byte[] tmp = new byte[8192];
-        int n;
-        while ((n = in.read(tmp)) > 0) buf.write(tmp, 0, n);
-        in.close();
-        conn.disconnect();
-        return buf.toString("UTF-8");
+        try {
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(15000);
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+            int code = conn.getResponseCode();
+            if (code == 200) {
+                InputStream in = conn.getInputStream();
+                ByteArrayOutputStream buf = new ByteArrayOutputStream();
+                byte[] tmp = new byte[8192];
+                int n;
+                while ((n = in.read(tmp)) > 0) buf.write(tmp, 0, n);
+                in.close();
+                conn.disconnect();
+                return buf.toString("UTF-8");
+            }
+            conn.disconnect();
+        } catch (Exception ignored) {
+            // 落入原始路径回退
+        }
+        // 中文路径回退：HttpURLConnection 请求行按 ISO-8859-1 打碎非 ASCII 字符
+        //（gitcode 实测原始 UTF-8 路径 200、编码/打碎形式 400/404），复用壳内 RawPathFetcher
+        String raw = rawFetch(url);
+        if (raw != null) return raw;
+        throw new Exception("下载脚本失败（含原始路径回退仍失败）: " + url);
+    }
+
+    /** 反射调用壳内 RawPathFetcher.fetch（原始 UTF-8 路径字节 GET）；类/方法均包级私有，需 declared+accessible；壳外环境返回 null。 */
+    private static String rawFetch(String url) {
+        try {
+            Class<?> cls = Class.forName("com.github.gcd888.guoju.api.RawPathFetcher");
+            java.lang.reflect.Method m = cls.getDeclaredMethod("fetch", String.class, int.class, int.class);
+            m.setAccessible(true);
+            Object r = m.invoke(null, url, 15000, 15000);
+            return r instanceof String ? (String) r : null;
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     private static String read(File f) throws Exception {

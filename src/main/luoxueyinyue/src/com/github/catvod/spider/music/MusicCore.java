@@ -750,11 +750,187 @@ public final class MusicCore {
         return new String[]{lrc, yrc};
     }
 
-    /** 网易云 MV 地址（公开 api/mv/url）。 */
+    /** 网易云 MV 地址（weapi song/enhance/play/mv/url，r=1080；旧公网 api/mv/url 已 404 下线）。 */
     private static String neMvUrl(String mvid) throws Exception {
-        JSONObject resp = getJson("https://music.163.com/api/mv/url?id=" + enc(mvid), neHeaders());
+        String[] encArr = weapi(new JSONObject()
+                .put("id", mvid).put("r", 1080).put("csrf_token", "").toString());
+        JSONObject resp = postJson("https://music.163.com/weapi/song/enhance/play/mv/url", neHeaders(),
+                "params=" + enc(encArr[0]) + "&encSecKey=" + enc(encArr[1]));
         JSONObject data = resp.optJSONObject("data");
         return data == null ? "" : data.optString("url", "");
+    }
+
+    // ============================ 网易云 MV 源（csp_NeteaseMv，芸映） ============================
+
+    /** MV 条目 → vod JSON（uid=mv_{mvid}；cover/picUrl 双兼容，http 升 https）。 */
+    private static JSONObject mvItem(JSONObject m) throws Exception {
+        String id = String.valueOf(m.optLong("id", 0));
+        String name = m.optString("name", "").trim();
+        if (id.isEmpty() || "0".equals(id) || name.isEmpty()) return null;
+        String cover = m.optString("cover", m.optString("picUrl", ""));
+        if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
+        String artist = m.optString("artistName", "").trim();
+        JSONObject v = new JSONObject();
+        v.put("vod_id", "mv_" + id);
+        v.put("vod_name", name);
+        v.put("vod_pic", cover);
+        v.put("vod_remarks", artist);
+        v.put("vod_actor", artist);
+        v.put("vod_content", m.optString("briefDesc", m.optString("desc", "")).trim());
+        return v;
+    }
+
+    /** MV 列表 → 分页 JSON（hasMore 时 pagecount=pg+1 支撑壳继续翻页）。 */
+    private static String mvPageData(JSONArray data, int pg, boolean hasMore) throws Exception {
+        JSONArray list = new JSONArray();
+        for (int i = 0; i < data.length(); i++) {
+            JSONObject item = data.optJSONObject(i);
+            if (item == null) continue;
+            JSONObject v = mvItem(item);
+            if (v != null) list.put(v);
+        }
+        JSONObject result = new JSONObject();
+        result.put("list", list);
+        result.put("page", pg);
+        result.put("pagecount", hasMore ? pg + 1 : pg);
+        result.put("limit", Math.max(data.length(), 1));
+        result.put("total", list.length());
+        return result.toString();
+    }
+
+    private static int pageSafe(String pg) {
+        try {
+            return Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    private static JSONArray filterValues(String... vals) throws Exception {
+        JSONArray arr = new JSONArray();
+        for (String v : vals) arr.put(new JSONObject().put("n", v).put("v", v));
+        return arr;
+    }
+
+    /** MV 源 homeContent：推荐/排行榜/最新/全部 四分类（排行榜/最新带地区筛选，全部带地区/类型/排序筛选）。 */
+    public static String mvHomeContent(boolean filter) {
+        try {
+            JSONObject result = new JSONObject();
+            JSONArray classes = new JSONArray();
+            classes.put(new JSONObject().put("type_id", "mv_rcmd").put("type_name", "推荐MV"));
+            classes.put(new JSONObject().put("type_id", "mv_top").put("type_name", "MV排行榜"));
+            classes.put(new JSONObject().put("type_id", "mv_first").put("type_name", "最新MV"));
+            classes.put(new JSONObject().put("type_id", "mv_all").put("type_name", "全部MV"));
+            if (filter) {
+                JSONArray areas = filterValues("全部", "内地", "港台", "欧美", "韩国", "日本");
+                JSONArray types = filterValues("全部", "官方版", "原生", "现场版", "网易出品");
+                JSONArray orders = filterValues("上升最快", "最热", "最新");
+                JSONObject filters = new JSONObject();
+                filters.put("mv_top", new JSONArray().put(new JSONObject()
+                        .put("key", "area").put("name", "地区").put("value", areas)));
+                filters.put("mv_first", new JSONArray().put(new JSONObject()
+                        .put("key", "area").put("name", "地区").put("value", areas)));
+                filters.put("mv_all", new JSONArray()
+                        .put(new JSONObject().put("key", "area").put("name", "地区").put("value", areas))
+                        .put(new JSONObject().put("key", "type").put("name", "类型").put("value", types))
+                        .put(new JSONObject().put("key", "order").put("name", "排序").put("value", orders)));
+                result.put("filters", filters);
+            }
+            result.put("class", classes);
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("mvHomeContent FAIL : " + e);
+            return "";
+        }
+    }
+
+    /** MV 源 categoryContent：mv_rcmd(推荐，单页) / mv_top(排行榜，offset 翻页) / mv_first(最新，单页 60) / mv_all(全部，tags 筛选 + offset 翻页)。 */
+    public static String mvCategoryContent(String tid, String pg, HashMap<String, String> extend) {
+        int page = pageSafe(pg);
+        String area = extend == null || extend.get("area") == null ? "" : extend.get("area").trim();
+        String type = extend == null || extend.get("type") == null ? "" : extend.get("type").trim();
+        String order = extend == null || extend.get("order") == null ? "" : extend.get("order").trim();
+        try {
+            if ("mv_rcmd".equals(tid)) {
+                JSONObject resp = getJson("https://music.163.com/api/personalized/mv", neHeaders());
+                JSONArray arr = resp.optJSONArray("result");
+                return arr == null ? pageDataEmpty(page) : mvPageData(arr, page, false);
+            }
+            if ("mv_top".equals(tid)) {
+                int limit = 30;
+                JSONObject resp = getJson("https://music.163.com/api/mv/toplist?area=" + enc(area)
+                        + "&limit=" + limit + "&offset=" + (page - 1) * limit + "&total=true", neHeaders());
+                JSONArray arr = resp.optJSONArray("data");
+                return arr == null ? pageDataEmpty(page) : mvPageData(arr, page, arr.length() >= limit);
+            }
+            if ("mv_first".equals(tid)) {
+                JSONObject resp = getJson("https://music.163.com/api/mv/first?area=" + enc(area)
+                        + "&limit=60&total=true", neHeaders());
+                JSONArray arr = resp.optJSONArray("data");
+                return arr == null ? pageDataEmpty(page) : mvPageData(arr, page, false);
+            }
+            if ("mv_all".equals(tid)) {
+                int limit = 30;
+                String tags = new JSONObject()
+                        .put("地区", area.isEmpty() ? "全部" : area)
+                        .put("类型", type.isEmpty() ? "全部" : type)
+                        .put("排序", order.isEmpty() ? "上升最快" : order).toString();
+                JSONObject resp = getJson("https://music.163.com/api/mv/all?tags=" + enc(tags)
+                        + "&limit=" + limit + "&offset=" + (page - 1) * limit + "&total=true", neHeaders());
+                JSONArray arr = resp.optJSONArray("data");
+                return arr == null ? pageDataEmpty(page)
+                        : mvPageData(arr, page, resp.optBoolean("hasMore", false));
+            }
+            return pageDataEmpty(page);
+        } catch (Exception e) {
+            fileLog("mvCategoryContent FAIL tid=" + tid + " pg=" + pg + " : " + e);
+            return pageDataEmpty(page);
+        }
+    }
+
+    /** MV 源 searchContent：weapi search/get type=1004（linux/forward 与老公网搜索均拒 1004）。 */
+    public static String mvSearchContent(String kw, String pg) {
+        String keyword = kw == null ? "" : kw.trim();
+        int page = pageSafe(pg);
+        if (keyword.isEmpty() || keyword.length() > 60) return pageDataEmpty(page);
+        try {
+            String[] encArr = weapi(new JSONObject()
+                    .put("s", keyword).put("type", 1004)
+                    .put("limit", 30).put("offset", (page - 1) * 30)
+                    .put("csrf_token", "").toString());
+            JSONObject resp = postJson("https://music.163.com/weapi/search/get", neHeaders(),
+                    "params=" + enc(encArr[0]) + "&encSecKey=" + enc(encArr[1]));
+            JSONObject result = resp.optJSONObject("result");
+            JSONArray arr = result == null ? null : result.optJSONArray("mvs");
+            if (arr == null) {
+                fileLog("mvSearchContent empty kw=" + keyword);
+                return pageDataEmpty(page);
+            }
+            return mvPageData(arr, page, arr.length() >= 30);
+        } catch (Exception e) {
+            fileLog("mvSearchContent FAIL kw=" + keyword + " : " + e);
+            return pageDataEmpty(page);
+        }
+    }
+
+    /** MV 源 detailContent：mv/detail 补全（壳音乐链路按 2 段 uid 直播，此处兜底）。 */
+    public static String mvDetailContent(List<String> ids) {
+        if (ids == null || ids.isEmpty()) return "";
+        String[] parts = splitUid(ids.get(0));
+        if (parts == null || !"mv".equals(parts[0])) return "";
+        try {
+            JSONObject resp = getJson("https://music.163.com/api/mv/detail?id=" + enc(parts[1]), neHeaders());
+            JSONObject data = resp.optJSONObject("data");
+            if (data == null) return "";
+            JSONObject v = mvItem(data);
+            if (v == null) return "";
+            JSONObject result = new JSONObject();
+            result.put("list", new JSONArray().put(v));
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("mvDetailContent FAIL id=" + ids.get(0) + " : " + e);
+            return "";
+        }
     }
 
     // ============================ QQ 音乐（qq） ============================
@@ -2305,6 +2481,34 @@ public final class MusicCore {
         String[] parts = splitUid(id);
         if (parts == null) return "";
         String platform = parts[0], songId = parts[1];
+        if ("mv".equals(platform)) {
+            // MV 站点源条目（芸映）：mp4 直链即内容本身——音频态出声、MV 态铺视频（同一直链，切态零二次取流）
+            String url;
+            try {
+                url = neMvUrl(songId);
+            } catch (Exception e) {
+                url = "";
+            }
+            if (url.isEmpty()) {
+                fileLog("playerContent mv unavailable id=" + id
+                        + " cost=" + (System.currentTimeMillis() - t0) + "ms");
+                return "";
+            }
+            try {
+                JSONObject result = new JSONObject();
+                result.put("parse", 0);
+                result.put("playUrl", "");
+                result.put("header", new JSONObject());
+                result.put("flag", "MV".equals(flag) ? "MV" : PLAY_FLAG);
+                result.put("url", url);
+                result.put("mv", url);
+                fileLog("playerContent mv done id=" + id + " cost=" + (System.currentTimeMillis() - t0) + "ms");
+                return result.toString();
+            } catch (Exception e) {
+                fileLog("playerContent mv FAIL id=" + id + " : " + e);
+                return "";
+            }
+        }
         try {
             JSONObject result = new JSONObject();
             result.put("parse", 0);
@@ -2357,6 +2561,12 @@ public final class MusicCore {
         if ("qq".equals(platform)) {
             String[] meta = qqSongMeta(songId);
             return new String[]{meta[0]};
+        }
+        if ("netease".equals(platform)) {
+            // 搜索/榜单/歌单链路已在 SONG_CACHE 落 mvid（neParseSongs），反查零额外请求；
+            // 未命中（缓存淘汰/直入 uid）留空即可，MV 按钮降级隐藏
+            Song cached = songByUid(platform + "_" + songId);
+            return new String[]{cached == null ? "" : cached.mvid};
         }
         return new String[]{""};
     }

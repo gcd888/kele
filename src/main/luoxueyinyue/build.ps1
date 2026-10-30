@@ -10,6 +10,7 @@ $outDir = Join-Path $root "build"
 $androidJar = $null
 $sdks = @()
 if ($env:ANDROID_HOME -and (Test-Path $env:ANDROID_HOME)) { $sdks += $env:ANDROID_HOME }
+if (Test-Path "D:\Tool\Android") { $sdks += "D:\Tool\Android" }
 if (Test-Path "D:\Tool") { $sdks += "D:\Tool" }
 foreach ($sdk in $sdks) {
     $platforms = Join-Path $sdk "platforms"
@@ -29,8 +30,12 @@ if (-not $androidJar) { throw "android.jar not found (set ANDROID_HOME or check 
 Write-Host "android.jar: $androidJar"
 
 # 2. locate r8.jar (obfuscator + dexer)
-$r8Jar = "D:\Tool\cmdline-tools\latest\lib\r8.jar"
-if (-not (Test-Path $r8Jar)) { throw "r8.jar not found (check D:\Tool\cmdline-tools)" }
+$r8Candidates = @(
+    "D:\Tool\Android\cmdline-tools\latest\lib\r8.jar",
+    "D:\Tool\cmdline-tools\latest\lib\r8.jar"
+)
+$r8Jar = $r8Candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $r8Jar) { throw "r8.jar not found (check D:\Tool\Android\cmdline-tools)" }
 Write-Host "r8.jar: $r8Jar"
 
 # 3. clean + compile
@@ -42,8 +47,10 @@ New-Item -ItemType Directory -Path $classes | Out-Null
 $sources = Get-ChildItem -Path $srcDirs -Recurse -Filter *.java | ForEach-Object { $_.FullName }
 Write-Host "compiling $($sources.Count) source files"
 $wrapperJar = Join-Path $root "libs\wrapper-java.jar"
-$lambdaStubs = "D:\Tool\build-tools\35.0.0\core-lambda-stubs.jar"
-if (-not (Test-Path $lambdaStubs)) { $lambdaStubs = "D:\Tool\build-tools\36.0.0\core-lambda-stubs.jar" }
+$lambdaStubs = @("D:\Tool\Android\build-tools\35.0.0\core-lambda-stubs.jar",
+    "D:\Tool\Android\build-tools\36.0.0\core-lambda-stubs.jar",
+    "D:\Tool\build-tools\35.0.0\core-lambda-stubs.jar",
+    "D:\Tool\build-tools\36.0.0\core-lambda-stubs.jar") | Where-Object { Test-Path $_ } | Select-Object -First 1
 $cpArgs = @()
 if (Test-Path $lambdaStubs) { $cpArgs += @("-bootclasspath", "$androidJar$([System.IO.Path]::PathSeparator)$lambdaStubs"); Write-Host "lambda stubs: $lambdaStubs" }
 if (Test-Path $wrapperJar) { $cpArgs += @("-classpath", "$wrapperJar"); Write-Host "wrapper jar: $wrapperJar" }
