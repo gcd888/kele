@@ -1312,8 +1312,13 @@ public final class MusicCore {
         }
         if (name.isEmpty()) return null;
         String album = s.optString("album_name", s.optString("AlbumName", "")).trim();
+        // rank/song 条目无 ori_img_url，封面在 album_sizable_cover / trans_param.union_cover（嵌套，optString 点号路径取不到）
         String img = firstNonEmpty(s.optString("ori_img_url", ""), s.optString("Image", ""),
-                s.optString("trans_param.union_cover", ""));
+                s.optString("album_sizable_cover", ""), s.optString("imgurl", ""));
+        if (img.isEmpty()) {
+            JSONObject tp = s.optJSONObject("trans_param");
+            if (tp != null) img = tp.optString("union_cover", "");
+        }
         img = img.replace("{size}", "240");
         int duration = s.optInt("duration", s.optInt("Duration", 0));
         if (duration > 10000) duration /= 1000;
@@ -1868,8 +1873,11 @@ public final class MusicCore {
             String name = item.optString("name", "").trim();
             if (rid.isEmpty() || "0".equals(rid) || name.isEmpty()) continue;
             int duration = item.optInt("song_duration", item.optInt("duration", 0));
+            // ksong.s 无封面字段，用 albumid 拼官方专辑封面
+            String albumid = item.optString("albumid", "").trim();
+            String cover = albumid.isEmpty() ? "" : "http://img4.kuwo.cn/star/albumcover/500/" + albumid + ".jpg";
             out.add(new Song("kuwo", rid, name, item.optString("artist", "").trim(),
-                    item.optString("album", "").trim(), "", duration));
+                    item.optString("album", "").trim(), cover, duration));
         }
         return out;
     }
