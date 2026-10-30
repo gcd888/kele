@@ -750,14 +750,19 @@ public final class MusicCore {
         return new String[]{lrc, yrc};
     }
 
-    /** 网易云 MV 地址（weapi song/enhance/play/mv/url，r=1080；旧公网 api/mv/url 已 404 下线）。 */
+    /** 网易云 MV 地址（weapi song/enhance/play/mv/url；1080 无档降级 720/480）。
+     *  坑：请求档位不存在时响应 url 为 JSON null，optString 会得到字面量 "null"，必须判掉防下发坏地址。 */
     private static String neMvUrl(String mvid) throws Exception {
-        String[] encArr = weapi(new JSONObject()
-                .put("id", mvid).put("r", 1080).put("csrf_token", "").toString());
-        JSONObject resp = postJson("https://music.163.com/weapi/song/enhance/play/mv/url", neHeaders(),
-                "params=" + enc(encArr[0]) + "&encSecKey=" + enc(encArr[1]));
-        JSONObject data = resp.optJSONObject("data");
-        return data == null ? "" : data.optString("url", "");
+        for (int r : new int[]{1080, 720, 480}) {
+            String[] encArr = weapi(new JSONObject()
+                    .put("id", mvid).put("r", r).put("csrf_token", "").toString());
+            JSONObject resp = postJson("https://music.163.com/weapi/song/enhance/play/mv/url", neHeaders(),
+                    "params=" + enc(encArr[0]) + "&encSecKey=" + enc(encArr[1]));
+            JSONObject data = resp.optJSONObject("data");
+            String url = data == null ? "" : data.optString("url", "");
+            if (!url.isEmpty() && !"null".equals(url)) return url;
+        }
+        return "";
     }
 
     // ============================ 网易云 MV 源（csp_NeteaseMv，芸映） ============================
