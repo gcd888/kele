@@ -186,6 +186,52 @@ public class Huanlekge extends Spider {
         }
     }
 
+    // ============================ 跨源比选（action） ============================
+
+    /**
+     * 壳 MusicSession 的跨源比选：其它源的歌（如 netease_ 栈货架曲目）在本源取流失败时，
+     * 用 action(search:all:「歌名 歌手」) 在本源曲库找同曲替代。
+     * 返回格式与 luoxueyinyue MusicCore.action 对齐：{"songs":[{id,name,artist,duration}]}；
+     * 未实现时壳侧 raceCandidates 拿到空列表 → 静默失败（点货架歌无反应）。
+     */
+    @Override
+    public String action(String action) {
+        if (action == null || !action.startsWith("search:all:")) return null;
+        String keyword = action.substring("search:all:".length()).trim();
+        try {
+            JSONArray arr = new JSONArray();
+            if (!keyword.isEmpty()) {
+                // K歌服务端只匹配歌名/拼音首字母，不含歌手名（PC 实测「歌名 歌手」合体词恒 0 命中）：
+                // 原词搜空时按空格逐级去尾重搜（天龙八部之宿敌 许嵩 → 天龙八部之宿敌），最多去 2 次
+                MuseApi.Song[] songs = api.getSongs(keyword, 1, PAGE_COUNT);
+                String kw = keyword;
+                for (int i = 0; i < 2 && songs.length == 0; i++) {
+                    int sp = kw.lastIndexOf(' ');
+                    if (sp <= 0) break;
+                    kw = kw.substring(0, sp).trim();
+                    if (kw.isEmpty()) break;
+                    songs = api.getSongs(kw, 1, PAGE_COUNT);
+                }
+                Log.i(TAG, "action search kw=" + keyword + " -> " + songs.length + " songs");
+                cacheSongs(songs);
+                for (MuseApi.Song s : songs) {
+                    JSONObject o = new JSONObject();
+                    o.put("id", s.tid);
+                    o.put("name", s.name);
+                    o.put("artist", s.singer);
+                    o.put("duration", 0L); // K歌接口无时长字段：交由壳实测探测判定
+                    arr.put(o);
+                }
+            }
+            JSONObject root = new JSONObject();
+            root.put("songs", arr);
+            return root.toString();
+        } catch (Exception e) {
+            Log.e(TAG, "action FAIL " + action + ": " + e);
+            return "{\"songs\":[]}";
+        }
+    }
+
     // ============================ 详情 ============================
 
     @Override
@@ -264,6 +310,17 @@ public class Huanlekge extends Spider {
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
+            // K歌 tid 为纯数字；其它源 uid（netease_xxx 等）在切源重取当前歌时可能串进来，
+            // 直接报错返回，避免拿异源 id 白打一趟登录+取流接口
+            if (id == null || !id.matches("\\d+")) {
+                Log.w(TAG, "playerContent skip foreign id=" + id);
+                JSONObject err = new JSONObject();
+                err.put("msg", "非欢唱K歌曲目");
+                err.put("flag", flag == null || flag.isEmpty() ? "欢唱K歌" : flag);
+                err.put("url", "");
+                err.put("parse", 0);
+                return err.toString();
+            }
             // 预取 StreamInfo（触发登录 + 取流），确保 proxy 时缓存命中
             getStreamInfo(id);
             JSONObject result = new JSONObject();

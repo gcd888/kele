@@ -79,8 +79,13 @@ public final class MuseApi {
     // ============================ 会话管理 ============================
 
     private Session session() {
+        // 会话对象必须跨调用持久：登录链 post() 收集的 Set-Cookie 与 deviceId 都落在
+        // session() 返回的同一对象上。旧判据 expireAt=0 时恒「过期」→ 每次调用都换新
+        // 对象 → Cookie 永远攒不住 → 取流代理（cherry_proxy.php 校验
+        // muse-portal-connector Cookie）收不到会话直接回 "Unauthorized"。
+        // 过期重登交给 ensureLogin 判定（expireAt!=0 且已到期才清空重建）。
         Session s = sessRef.get();
-        if (s == null || System.currentTimeMillis() > s.expireAt) {
+        if (s == null) {
             s = new Session();
             sessRef.set(s);
         }
@@ -186,7 +191,8 @@ public final class MuseApi {
 
     /**
      * 分页获取歌曲列表，keyword 非空时为搜索。
-     * 服务端同时匹配歌名、拼音首字母（name_cap）、歌手名。
+     * 服务端只匹配歌名与拼音首字母（name_cap）的子串，不匹配歌手名
+     * （实测「歌名 歌手」合体词恒 0 命中，纯歌名才命中；传歌手名时改走 getSingers）。
      */
     public Song[] getSongs(String keyword, int pageIndex, int pageCount) throws Exception {
         ensureLogin();
