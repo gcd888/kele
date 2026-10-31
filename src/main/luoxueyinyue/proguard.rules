@@ -3,6 +3,8 @@
 # Luoxueyinyue* 通配覆盖聚合源 + 六平台独立源（聚合+五平台洛雪取流+汽水官方）
 -keep public class com.github.catvod.spider.Luoxueyinyue* { public *; }
 -keep public class com.github.catvod.spider.LxSource { public *; }
+# 芸映（csp_NeteaseMv，网易云 MV 站点源）入口：类名被 R8 改名后壳反射加载 ClassNotFoundException → 全源空
+-keep public class com.github.catvod.spider.NeteaseMv { public *; }
 # 桩基类：运行时由壳 DexClassLoader 提供真类，壳还会反射访问 siteKey/empty 等 public 成员
 -keep public class com.github.catvod.crawler.Spider { public *; }
 -keepattributes Signature,InnerClasses,EnclosingMethod
