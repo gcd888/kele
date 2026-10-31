@@ -29,8 +29,16 @@ if (-not $androidJar) { throw "android.jar not found (set ANDROID_HOME or check 
 Write-Host "android.jar: $androidJar"
 
 # 2. locate r8.jar (obfuscator + dexer)
-$r8Jar = "D:\Tool\cmdline-tools\latest\lib\r8.jar"
-if (-not (Test-Path $r8Jar)) { throw "r8.jar not found (check D:\Tool\cmdline-tools)" }
+$r8Jar = $null
+foreach ($cand in @(
+    (Join-Path $androidJar "..\..\cmdline-tools\latest\lib\r8.jar"),
+    "D:\Tool\Android\cmdline-tools\latest\lib\r8.jar",
+    "D:\Tool\cmdline-tools\latest\lib\r8.jar"
+)) {
+    $full = [System.IO.Path]::GetFullPath($cand)
+    if (Test-Path $full) { $r8Jar = $full; break }
+}
+if (-not $r8Jar) { throw "r8.jar not found" }
 Write-Host "r8.jar: $r8Jar"
 
 # 3. clean + compile

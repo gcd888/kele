@@ -563,6 +563,22 @@ public class Xihongshiduanju extends Spider {
         }
     }
 
+    /**
+     * 设备软拒（取流持续 200 空响应）自愈：清存档后重新注册匿名设备并持久化。
+     * 对齐青果 Qingguoduanju.rotatePlayerDevice（tsukiyo PR#30 思路）。
+     */
+    private static void rotateDevice() {
+        try {
+            if (mContext != null) {
+                mContext.getSharedPreferences("xhs_duanju", 0).edit().remove("device").apply();
+            }
+            JSONObject dev = device(); // 存档已清，触发重注册并持久化
+            fileLog("rotateDevice 已重注册 device_id=" + dev.optString("device_id"));
+        } catch (Throwable t) {
+            fileLog("rotateDevice FAIL: " + t);
+        }
+    }
+
     /** 匿名设备注册（reg-fq-test.py 1:1：ttEncrypt(gzip(注册JSON))，x-ss-stub=md5(body)大写） */
     private static JSONObject registerDevice() {
         try {
@@ -1059,13 +1075,6 @@ public class Xihongshiduanju extends Spider {
             if (cached != null && System.currentTimeMillis() - at < STREAM_TTL) {
                 return cached;
             }
-            JSONObject dev = device();
-            String query = "iid=" + dev.optString("install_id")
-                    + "&device_id=" + dev.optString("device_id")
-                    + "&aid=1967&app_name=novelapp&version_code=72132"
-                    + "&version_name=7.2.1.32&device_platform=android&device_brand=Xiaomi"
-                    + "&os_version=13&cdid=" + dev.optString("cdid")
-                    + "&_rticket=" + System.currentTimeMillis();
             JSONObject bodyObj = new JSONObject();
             bodyObj.put("video_id", vid);
             bodyObj.put("content_type", 1004);
@@ -1083,14 +1092,46 @@ public class Xihongshiduanju extends Spider {
             biz.put("video_platform", 3);
             bodyObj.put("biz_param", biz);
             byte[] body = bodyObj.toString().getBytes(StandardCharsets.UTF_8);
-            // 取流口径实测：免签请求返回空 body（2026-10-29 起），必须 551 签名才有数据
-            Map<String, String> headers = new LinkedHashMap<>();
-            headers.put("User-Agent", STREAM_UA);
-            headers.put("Content-Type", "application/json; charset=utf-8");
-            headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
-            headers.put("Accept-Encoding", "identity");
-            headers.putAll(playerHeaders(query, body, System.currentTimeMillis() / 1000));
-            String resp = text(STREAM_API + "?" + query, "POST", body, headers);
+            // 取流口径实测：免签请求返回空 body（2026-10-29 起），必须 551 签名才有数据。
+            // 200 空响应=设备软拒特征：首次空响应保持同一身份重试，再次空响应重注册设备自愈
+            // （对齐青果 Qingguoduanju.stream 重试口径；总重试窗口约 4s < 壳 15s 播放超时）。
+            String resp = null;
+            String lastErr = null;
+            for (int attempt = 1; attempt <= 5 && resp == null; attempt++) {
+                if (attempt > 1) {
+                    long backoff = attempt == 2 ? 600 : attempt == 3 ? 900 : attempt == 4 ? 900 : 1200;
+                    try {
+                        Thread.sleep(backoff);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+                JSONObject dev = device();
+                String query = "iid=" + dev.optString("install_id")
+                        + "&device_id=" + dev.optString("device_id")
+                        + "&aid=1967&app_name=novelapp&version_code=72132"
+                        + "&version_name=7.2.1.32&device_platform=android&device_brand=Xiaomi"
+                        + "&os_version=13&cdid=" + dev.optString("cdid")
+                        + "&_rticket=" + System.currentTimeMillis();
+                Map<String, String> headers = new LinkedHashMap<>();
+                headers.put("User-Agent", STREAM_UA);
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+                headers.put("Accept-Encoding", "identity");
+                headers.putAll(playerHeaders(query, body, System.currentTimeMillis() / 1000));
+                String r = text(STREAM_API + "?" + query, "POST", body, headers).trim();
+                fileLog("v1 attempt#" + attempt + " respLen=" + r.length());
+                if (r.isEmpty()) {
+                    lastErr = "播放接口返回空响应";
+                    if (attempt == 2) rotateDevice();
+                    continue;
+                }
+                resp = r;
+            }
+            if (resp == null) {
+                throw new RuntimeException(lastErr == null ? "播放接口无响应" : lastErr + "（已重试）");
+            }
             StreamInfo si = pickStream(resp);
             STREAM_CACHE.put(vid, si);
             STREAM_CACHE_AT.put(vid, System.currentTimeMillis());
