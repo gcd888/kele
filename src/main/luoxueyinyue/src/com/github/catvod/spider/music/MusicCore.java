@@ -3771,9 +3771,10 @@ public final class MusicCore {
             if ("qq".equals(platformOfTid) || "kuwo".equals(platformOfTid) || "migu".equals(platformOfTid)) {
                 return rankPage(platformOfTid);
             }
-            // MV 站源页签（聚合主页并入的 mv_/mvq_/mvk_/mvmv_ tid）路由回各 MV 分类链路
+            // MV 站源页签（聚合主页并入的 mv_/mvq_/kgmv_/mvmv_ tid）路由回各 MV 分类链路
+            // 注意分类 tid 前缀是 kgmv_（kgmv_hot 等），条目 uid 才是 mvk_ 前缀
             if (platformOfTid.startsWith("mvq_")) return qqMvCategoryContent(platformOfTid, pg, extend);
-            if (platformOfTid.startsWith("mvk_")) return kgMvCategoryContent(platformOfTid, pg, extend);
+            if (platformOfTid.startsWith("kgmv_")) return kgMvCategoryContent(platformOfTid, pg, extend);
             if (platformOfTid.startsWith("mvmv_")) return mgMvCategoryContent(platformOfTid, pg, extend);
             if (platformOfTid.startsWith("mv_")) return mvCategoryContent(platformOfTid, pg, extend);
             return pageDataEmpty(1);
