@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -39,7 +40,7 @@ import javax.crypto.spec.SecretKeySpec;
  * 数据蓝本：music-lib（多平台 provider）+ 新增 kuwo/migu（music-lib 同构端点移植）。
  *
  * 平台：netease(芸)/ qq(秋) / kugou(枸) / soda(水) / kuwo(蜗) / migu(蜜) —— 内部平台代码，展示名见 platformName。
- * 歌曲统一 uid = {platform}_{songid}（kugou=hash、soda=trackid、kuwo=rid、migu=contentId）。
+ * 歌曲统一 uid = {platform}_{songid}（kugou=hash_albumAudioId、soda=trackid、kuwo=rid、migu=contentId）。
  *
  * 协议（对壳端 SourceViewModel / MusicSession 透明复用）：
  *  - homeContent：平台分类 + 榜单/歌单 tabs（聚合源=all 六平台搜索；独立源=本平台内容）
@@ -533,7 +534,7 @@ public final class MusicCore {
 
     public static final class Song {
         public final String platform;
-        public final String id;        // 平台内原始 id（netease 数字 / qq songmid / kugou hash / soda trackid / kuwo rid / migu contentId）
+        public final String id;        // 平台内原始 id（netease 数字 / qq songmid / kugou hash_albumAudioId / soda trackid / kuwo rid / migu contentId）
         public String name;
         public String artist;
         public final String album;
@@ -1236,32 +1237,36 @@ public final class MusicCore {
         return sb.toString();
     }
 
-    /** QQ MV 地址（mv.GetMvUrl/GetMvUrls）。 */
+    /** QQ MV 地址（gosrf.Stream.MvUrlProxy.GetMvUrls；旧 mv.GetMvUrl module 已下线实测 500003）。
+     *  坑：mp4 数组多档（filetype 10/20/30 清晰度递增），code!=0 的档 url 为空数组，取最后一个有效档；
+     *  freeflow_url 为 [http, https] 两项，取末项 https。 */
     private static String qqMvUrl(String vid) throws Exception {
         JSONObject payload = new JSONObject()
                 .put("comm", qqComm())
                 .put("req", new JSONObject()
-                        .put("module", "mv.GetMvUrl")
+                        .put("module", "gosrf.Stream.MvUrlProxy")
                         .put("method", "GetMvUrls")
                         .put("param", new JSONObject()
                                 .put("vids", new JSONArray().put(vid))
-                                .put("request_type", 10001)));
+                                .put("request_typet", 10001)));
         JSONObject resp = qqFcgPost(payload);
         JSONObject req = resp.optJSONObject("req");
         JSONObject data = req == null ? null : req.optJSONObject("data");
         JSONObject perVid = data == null ? null : data.optJSONObject(vid);
         if (perVid == null) return "";
-        for (String key : new String[]{"mp4", "hls"}) {
-            JSONArray arr = perVid.optJSONArray(key);
-            if (arr == null) continue;
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject item = arr.optJSONObject(i);
-                if (item == null) continue;
-                String u = item.optString("freeenc_url", item.optString("url", ""));
-                if (!u.isEmpty()) return u;
+        JSONArray mp4 = perVid.optJSONArray("mp4");
+        String url = "";
+        if (mp4 != null) {
+            for (int i = 0; i < mp4.length(); i++) {
+                JSONObject item = mp4.optJSONObject(i);
+                if (item == null || item.optInt("code", -1) != 0) continue;
+                JSONArray urls = item.optJSONArray("freeflow_url");
+                if (urls == null || urls.length() == 0) continue;
+                String u = urls.optString(urls.length() - 1, "");
+                if (!u.isEmpty()) url = u;
             }
         }
-        return "";
+        return url;
     }
 
     /** QQ 歌曲 songmid→[mvid, songid] 元数据缓存。 */
@@ -1287,6 +1292,581 @@ public final class MusicCore {
         } catch (Exception ignore) {
         }
         return new String[]{"", ""};
+    }
+
+    // ============================ QQ MV 站源（csp_QqMv，秋映） ============================
+
+    /** QQ MV 条目 → vod JSON（uid=mvq_{vid}；列表 title/picurl、搜索 mv_name/mv_pic_url/v_id、
+     *  详情 name/cover_pic/singers 三种结构双兼容，http 封面升 https）。 */
+    private static JSONObject qqMvItem(JSONObject m) throws Exception {
+        String vid = firstNonEmpty(m.optString("vid", "").trim(), m.optString("v_id", "").trim());
+        String name = firstNonEmpty(m.optString("title", "").trim(), m.optString("name", "").trim(),
+                m.optString("mv_name", "").trim());
+        String cover = firstNonEmpty(m.optString("picurl", ""), m.optString("cover_pic", ""),
+                m.optString("mv_pic_url", ""));
+        if (vid.isEmpty() || name.isEmpty()) return null;
+        if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
+        JSONArray singers = m.optJSONArray("singers");
+        if (singers == null) singers = m.optJSONArray("singer_list");
+        String artist = m.optString("singer_name", "").trim();
+        if (singers != null) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < singers.length() && i < 5; i++) {
+                JSONObject a = singers.optJSONObject(i);
+                if (a == null) continue;
+                String n = a.optString("name", "").trim();
+                if (n.isEmpty()) continue;
+                if (sb.length() > 0) sb.append("、");
+                sb.append(n);
+            }
+            if (sb.length() > 0) artist = sb.toString();
+        }
+        JSONObject v = new JSONObject();
+        v.put("vod_id", "mvq_" + vid);
+        v.put("vod_name", name);
+        v.put("vod_pic", cover);
+        v.put("vod_remarks", artist);
+        v.put("vod_actor", artist);
+        v.put("vod_content", m.optString("desc", "").trim());
+        return v;
+    }
+
+    /** QQ MV 列表 → 分页 JSON（结构同网易云 mvPageData，hasMore 时 pagecount=pg+1）。 */
+    private static String qqMvPage(JSONArray data, int pg, boolean hasMore) throws Exception {
+        JSONArray list = new JSONArray();
+        for (int i = 0; i < data.length(); i++) {
+            JSONObject item = data.optJSONObject(i);
+            if (item == null) continue;
+            JSONObject v = qqMvItem(item);
+            if (v != null) list.put(v);
+        }
+        JSONObject result = new JSONObject();
+        result.put("list", list);
+        result.put("page", pg);
+        result.put("pagecount", hasMore ? pg + 1 : pg);
+        result.put("limit", Math.max(data.length(), 1));
+        result.put("total", list.length());
+        return result.toString();
+    }
+
+    /** QQ MV 源 homeContent：MV 库单分类 + 地区/版本筛选（GetAllocTag 动态拉取，失败落内置默认）。 */
+    public static String qqMvHomeContent(boolean filter) {
+        try {
+            JSONObject result = new JSONObject();
+            JSONArray classes = new JSONArray();
+            classes.put(new JSONObject().put("type_id", "mvq_all").put("type_name", "MV库"));
+            if (filter) {
+                JSONArray areas = filterValues("全部", "内地", "港台", "欧美", "韩国", "日本");
+                JSONArray versions = filterValues("全部", "MV", "现场", "翻唱", "舞蹈", "影视", "综艺", "儿歌");
+                try {
+                    JSONObject payload = new JSONObject()
+                            .put("comm", new JSONObject().put("ct", 24))
+                            .put("mv_tag", new JSONObject()
+                                    .put("module", "MvService.MvInfoProServer")
+                                    .put("method", "GetAllocTag")
+                                    .put("param", new JSONObject()));
+                    JSONObject tag = qqFcgPost(payload).optJSONObject("mv_tag");
+                    JSONObject data = tag == null ? null : tag.optJSONObject("data");
+                    JSONArray areaArr = data == null ? null : data.optJSONArray("area");
+                    JSONArray verArr = data == null ? null : data.optJSONArray("version");
+                    if (areaArr != null && areaArr.length() > 0) {
+                        JSONArray arr = new JSONArray();
+                        for (int i = 0; i < areaArr.length(); i++) {
+                            JSONObject t = areaArr.optJSONObject(i);
+                            if (t == null || t.optString("name", "").trim().isEmpty()) continue;
+                            arr.put(new JSONObject().put("n", t.optString("name").trim())
+                                    .put("v", String.valueOf(t.optInt("id", 0))));
+                        }
+                        if (arr.length() > 0) areas = arr;
+                    }
+                    if (verArr != null && verArr.length() > 0) {
+                        JSONArray arr = new JSONArray();
+                        for (int i = 0; i < verArr.length(); i++) {
+                            JSONObject t = verArr.optJSONObject(i);
+                            if (t == null || t.optString("name", "").trim().isEmpty()) continue;
+                            arr.put(new JSONObject().put("n", t.optString("name").trim())
+                                    .put("v", String.valueOf(t.optInt("id", 0))));
+                        }
+                        if (arr.length() > 0) versions = arr;
+                    }
+                } catch (Exception ignore) {
+                }
+                JSONObject filters = new JSONObject();
+                filters.put("mvq_all", new JSONArray()
+                        .put(new JSONObject().put("key", "area").put("name", "地区").put("value", areas))
+                        .put(new JSONObject().put("key", "version").put("name", "版本").put("value", versions)));
+                result.put("filters", filters);
+            }
+            result.put("class", classes);
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("qqMvHomeContent FAIL : " + e);
+            return "";
+        }
+    }
+
+    /** QQ MV 源 categoryContent：GetAllocMvInfo offset 翻页（area_id=15/version_id=7 即官方「全部」；
+     *  order 参数实测无效固定 1；id 不存在时接口 code=0 + 空列表，无需特判）。 */
+    public static String qqMvCategoryContent(String tid, String pg, HashMap<String, String> extend) {
+        int page = pageSafe(pg);
+        if (!"mvq_all".equals(tid)) return pageDataEmpty(page);
+        String area = extend == null || extend.get("area") == null ? "" : extend.get("area").trim();
+        String version = extend == null || extend.get("version") == null ? "" : extend.get("version").trim();
+        int limit = 30;
+        try {
+            int areaId = area.isEmpty() ? 15 : Integer.parseInt(area);
+            int verId = version.isEmpty() ? 7 : Integer.parseInt(version);
+            JSONObject payload = new JSONObject()
+                    .put("comm", new JSONObject().put("ct", 24))
+                    .put("mv_list", new JSONObject()
+                            .put("module", "MvService.MvInfoProServer")
+                            .put("method", "GetAllocMvInfo")
+                            .put("param", new JSONObject()
+                                    .put("start", (page - 1) * limit).put("size", limit)
+                                    .put("version_id", verId).put("area_id", areaId)
+                                    .put("order", 1)));
+            JSONObject resp = qqFcgPost(payload);
+            JSONObject mvList = resp.optJSONObject("mv_list");
+            JSONObject data = mvList == null ? null : mvList.optJSONObject("data");
+            JSONArray arr = data == null ? null : data.optJSONArray("list");
+            return arr == null ? pageDataEmpty(page) : qqMvPage(arr, page, arr.length() >= limit);
+        } catch (NumberFormatException e) {
+            return pageDataEmpty(page);
+        } catch (Exception e) {
+            fileLog("qqMvCategoryContent FAIL tid=" + tid + " pg=" + pg + " : " + e);
+            return pageDataEmpty(page);
+        }
+    }
+
+    /** QQ MV 源 searchContent：client_search_cp t=12（data.mv.list，totalnum 判断翻页）。 */
+    public static String qqMvSearchContent(String kw, String pg) {
+        String keyword = kw == null ? "" : kw.trim();
+        int page = pageSafe(pg);
+        if (keyword.isEmpty() || keyword.length() > 60) return pageDataEmpty(page);
+        int limit = 30;
+        try {
+            JSONObject resp = getJson("https://c.y.qq.com/soso/fcgi-bin/client_search_cp?format=json&cr=1&g_tk=5381"
+                            + "&t=12&w=" + enc(keyword) + "&p=" + page + "&n=" + limit,
+                    withRandomIp(headers("Referer", QQ_REFERER, "User-Agent", KG_UA)));
+            JSONObject data = resp.optJSONObject("data");
+            JSONObject mv = data == null ? null : data.optJSONObject("mv");
+            JSONArray arr = mv == null ? null : mv.optJSONArray("list");
+            if (arr == null) {
+                fileLog("qqMvSearchContent empty kw=" + keyword);
+                return pageDataEmpty(page);
+            }
+            int total = mv.optInt("totalnum", 0);
+            boolean hasMore = (page - 1) * limit + arr.length() < total;
+            return qqMvPage(arr, page, hasMore);
+        } catch (Exception e) {
+            fileLog("qqMvSearchContent FAIL kw=" + keyword + " : " + e);
+            return pageDataEmpty(page);
+        }
+    }
+
+    /** QQ MV 源 detailContent：get_video_info_batch 补全 desc（列表/搜索条目无简介，进详情后补）。 */
+    public static String qqMvDetailContent(List<String> ids) {
+        if (ids == null || ids.isEmpty()) return "";
+        String[] parts = splitUid(ids.get(0));
+        if (parts == null || !"mvq".equals(parts[0])) return "";
+        try {
+            JSONObject payload = new JSONObject()
+                    .put("comm", new JSONObject().put("ct", 24).put("cv", 4747474))
+                    .put("mvinfo", new JSONObject()
+                            .put("module", "video.VideoDataServer")
+                            .put("method", "get_video_info_batch")
+                            .put("param", new JSONObject()
+                                    .put("vidlist", new JSONArray().put(parts[1]))
+                                    .put("required", new JSONArray().put("vid").put("cover_pic")
+                                            .put("duration").put("singers").put("name")
+                                            .put("desc").put("playcnt").put("pubdate"))));
+            JSONObject resp = qqFcgPost(payload);
+            JSONObject mvinfo = resp.optJSONObject("mvinfo");
+            JSONObject data = mvinfo == null ? null : mvinfo.optJSONObject("data");
+            JSONObject info = data == null ? null : data.optJSONObject(parts[1]);
+            if (info == null) {
+                fileLog("qqMvDetailContent empty id=" + ids.get(0));
+                return "";
+            }
+            JSONObject v = qqMvItem(info);
+            if (v == null) return "";
+            JSONObject result = new JSONObject();
+            result.put("list", new JSONArray().put(v));
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("qqMvDetailContent FAIL id=" + ids.get(0) + " : " + e);
+            return "";
+        }
+    }
+
+    // ============================ 酷狗 MV 源（csp_KugouMv，枸映） ============================
+
+    /** 酷狗 MV 分类：v3/search/mv 为关键词驱动，固定热词做分类（tid=kgmv_*）。 */
+    private static final String[][] KG_MV_CATS = {
+            {"kgmv_hot", "热门MV", "热门"},
+            {"kgmv_huayu", "华语MV", "华语"},
+            {"kgmv_oumei", "欧美MV", "欧美"},
+            {"kgmv_hanri", "日韩MV", "日韩"},
+    };
+
+    /** 酷狗 MV hash → 详情缓存（列表/搜索时填充；v3 无按 hash 查详情端点）。 */
+    private static final Map<String, JSONObject> KG_MV_CACHE = new ConcurrentHashMap<>();
+
+    /** 酷狗 MV 源 homeContent：四热词分类。 */
+    public static String kgMvHomeContent(boolean filter) {
+        try {
+            JSONObject result = new JSONObject();
+            JSONArray classes = new JSONArray();
+            for (String[] c : KG_MV_CATS) {
+                classes.put(new JSONObject().put("type_id", c[0]).put("type_name", c[1]));
+            }
+            result.put("class", classes);
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("kgMvHomeContent FAIL : " + e);
+            return "";
+        }
+    }
+
+    /** 酷狗 MV 源 categoryContent：tid 解码热词 → kgMvSearchContent。 */
+    public static String kgMvCategoryContent(String tid, String pg, HashMap<String, String> extend) {
+        int page = pageSafe(pg);
+        for (String[] c : KG_MV_CATS) {
+            if (c[0].equals(tid)) return kgMvSearchContent(c[2], pg);
+        }
+        return pageDataEmpty(page);
+    }
+
+    /** 酷狗 MV 源 searchContent：mobilecdn v3/search/mv（data.info[]，hash 即 MV 播放 hash）。 */
+    public static String kgMvSearchContent(String kw, String pg) {
+        String keyword = kw == null ? "" : kw.trim();
+        int page = pageSafe(pg);
+        if (keyword.isEmpty() || keyword.length() > 60) return pageDataEmpty(page);
+        int limit = 30;
+        try {
+            JSONObject resp = getJson("http://mobilecdn.kugou.com/api/v3/search/mv?format=json&keyword=" + enc(keyword)
+                    + "&page=" + page + "&pagesize=" + limit, kgHeaders());
+            JSONObject data = resp.optJSONObject("data");
+            JSONArray arr = data == null ? null : data.optJSONArray("info");
+            if (arr == null) {
+                fileLog("kgMvSearchContent empty kw=" + keyword);
+                return pageDataEmpty(page);
+            }
+            int total = data.optInt("total", 0);
+            boolean hasMore = (page - 1) * limit + arr.length() < total;
+            return kgMvPage(arr, page, hasMore);
+        } catch (Exception e) {
+            fileLog("kgMvSearchContent FAIL kw=" + keyword + " : " + e);
+            return pageDataEmpty(page);
+        }
+    }
+
+    /** 酷狗 MV 条目 → vod JSON（uid=mvk_{hash}；封面 {size}→240 并升 https）。 */
+    private static JSONObject kgMvItem(JSONObject m) throws Exception {
+        String hash = m.optString("hash", "").trim();
+        String name = m.optString("filename", "").trim();
+        if (hash.isEmpty() || name.isEmpty()) return null;
+        String cover = m.optString("imgurl", "").replace("{size}", "240");
+        if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
+        String singer = m.optString("singername", "").trim();
+        int duration = m.optInt("duration", 0);
+        String remarks = singer + (duration > 0 ? " · " + duration / 60 + ":" + String.format("%02d", duration % 60) : "");
+        JSONObject info = new JSONObject();
+        info.put("name", name);
+        info.put("singer", singer);
+        KG_MV_CACHE.put(hash, info);
+        JSONObject v = new JSONObject();
+        v.put("vod_id", "mvk_" + hash);
+        v.put("vod_name", name);
+        v.put("vod_pic", cover);
+        v.put("vod_remarks", remarks);
+        v.put("vod_actor", singer);
+        v.put("vod_content", name + " - " + singer + "（酷狗 MV）");
+        return v;
+    }
+
+    private static String kgMvPage(JSONArray arr, int pg, boolean hasMore) throws Exception {
+        JSONArray list = new JSONArray();
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item = arr.optJSONObject(i);
+            if (item == null) continue;
+            JSONObject v = kgMvItem(item);
+            if (v != null) list.put(v);
+        }
+        JSONObject result = new JSONObject();
+        result.put("list", list);
+        result.put("page", pg);
+        result.put("pagecount", hasMore ? pg + 1 : pg);
+        result.put("limit", Math.max(arr.length(), 1));
+        result.put("total", list.length());
+        return result.toString();
+    }
+
+    /** 酷狗 MV 源 detailContent：hash → 列表缓存（冷直链未命中返回空，壳显示已缓存详情）。 */
+    public static String kgMvDetailContent(List<String> ids) {
+        if (ids == null || ids.isEmpty()) return "";
+        String[] parts = splitUid(ids.get(0));
+        if (parts == null || !"mvk".equals(parts[0])) return "";
+        JSONObject info = KG_MV_CACHE.get(parts[1]);
+        if (info == null) {
+            fileLog("kgMvDetailContent cache miss hash=" + parts[1]);
+            return "";
+        }
+        try {
+            String singer = info.optString("singer", "");
+            JSONObject v = new JSONObject();
+            v.put("vod_id", ids.get(0));
+            v.put("vod_name", info.optString("name", ""));
+            v.put("vod_actor", singer);
+            v.put("vod_content", info.optString("name", "") + " - " + singer + "（酷狗 MV）");
+            JSONObject result = new JSONObject();
+            result.put("list", new JSONArray().put(v));
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("kgMvDetailContent FAIL id=" + ids.get(0) + " : " + e);
+            return "";
+        }
+    }
+
+    /**
+     * 酷狗 MV 取流（gateway + x-router=trackermv.kugou.com，KuGouMusicApi video_url.js 蓝本）：
+     * signature=salt+sorted(k=v)+salt（android 族）+ key=MD5(hash+KEYSALT+appid+mid+userid)，
+     * 实测 key 必须参与签名排序；返回 mkv 容器（H.264+AAC，ExoPlayer MatroskaExtractor 可播）。
+     */
+    private static String kgMvUrl(String hash) throws Exception {
+        String mid = kgMid();
+        String clienttime = String.valueOf(System.currentTimeMillis() / 1000);
+        // LinkedHashMap 按 ASCII 序写死（key 排 ismp3 与 mid 之间），kv 供签名、qs 供请求
+        Map<String, String> p = new LinkedHashMap<>();
+        p.put("appid", "1005");
+        p.put("backupdomain", "1");
+        p.put("clienttime", clienttime);
+        p.put("clientver", "11430");
+        p.put("cmd", "123");
+        p.put("ext", "mp4");
+        p.put("hash", hash);
+        p.put("ismp3", "0");
+        p.put("key", kgMd5(hash + "57ae12eb6890223e355ccfcb74edf70d" + "1005" + mid + "0"));
+        p.put("mid", mid);
+        p.put("pid", "1");
+        p.put("type", "1");
+        p.put("uuid", "-");
+        StringBuilder kv = new StringBuilder();
+        StringBuilder qs = new StringBuilder();
+        for (Map.Entry<String, String> e : p.entrySet()) {
+            // 签名 kv 串无分隔符直连（kugou android 族 signature=md5(salt+kv+salt)），qs 仍按 &拼接
+            kv.append(e.getKey()).append('=').append(e.getValue());
+            if (qs.length() > 0) qs.append('&');
+            qs.append(enc(e.getKey())).append('=').append(enc(e.getValue()));
+        }
+        String signature = kgMd5("OIlwieks28dk2k092lksi2UIkp" + kv + "OIlwieks28dk2k092lksi2UIkp");
+        JSONObject resp = getJson("https://gateway.kugou.com/v2/interface/index?" + qs + "&signature=" + signature,
+                headers("User-Agent", "Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi",
+                        "x-router", "trackermv.kugou.com",
+                        "clienttime", clienttime, "mid", mid, "dfid", "-",
+                        "kg-rc", "1", "kg-thash", "5d816a0", "kg-rec", "1",
+                        "kg-rf", "B9EDA08A64250DEFFBCADDEE00F8F25F"));
+        if (resp.optInt("status", -1) != 1) {
+            fileLog("kgMvUrl status=" + resp.opt("status") + " err=" + resp.opt("error") + " hash=" + hash);
+            return "";
+        }
+        JSONObject data = resp.optJSONObject("data");
+        JSONObject entry = data == null ? null : data.optJSONObject(hash);
+        if (entry == null) return "";
+        String url = entry.optString("downurl", "");
+        if (url.isEmpty()) {
+            JSONArray ba = entry.optJSONArray("backupdownurl");
+            if (ba != null && ba.length() > 0) url = ba.optString(0);
+        }
+        return url.trim();
+    }
+
+    // ============================ 咪咕 MV 源（csp_MiguMv，蜜映） ============================
+
+    /** 咪咕 MV mp4 相对路径的宿主（miguMusic-api-enhanced mv.md：freevod.nf.migu.cn）。 */
+    private static final String MG_MV_HOST = "https://freevod.nf.migu.cn";
+    /** 推荐页种子 MV（recommend-mv 需要一个 resourceId 驱动翻页；长期有效热门 MV）。 */
+    private static final String MG_MV_SEED = "600906000000423829";
+
+    /** 咪咕 MV 分类：推荐（recommend-mv 翻页）+ 热词（bmw/search/video）。 */
+    private static final String[][] MG_MV_CATS = {
+            {"mvmv_rcmd", "推荐MV", ""},
+            {"mvmv_huayu", "华语MV", "华语"},
+            {"mvmv_oumei", "欧美MV", "欧美"},
+            {"mvmv_hanri", "日韩MV", "日韩"},
+    };
+
+    private static Map<String, String> mgMvHeaders() {
+        return headers("User-Agent", "Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36");
+    }
+
+    /** 咪咕 MV 源 homeContent：推荐 + 三热词分类。 */
+    public static String mgMvHomeContent(boolean filter) {
+        try {
+            JSONObject result = new JSONObject();
+            JSONArray classes = new JSONArray();
+            for (String[] c : MG_MV_CATS) {
+                classes.put(new JSONObject().put("type_id", c[0]).put("type_name", c[1]));
+            }
+            result.put("class", classes);
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("mgMvHomeContent FAIL : " + e);
+            return "";
+        }
+    }
+
+    /** 咪咕 MV 源 categoryContent：推荐走 recommend-mv（pageNumber 翻页），热词走 bmw 搜索。 */
+    public static String mgMvCategoryContent(String tid, String pg, HashMap<String, String> extend) {
+        int page = pageSafe(pg);
+        for (String[] c : MG_MV_CATS) {
+            if (!c[0].equals(tid)) continue;
+            try {
+                if (c[2].isEmpty()) {
+                    JSONObject resp = getJson("https://c.musicapp.migu.cn/MIGUM3.0/v3.0/content/recommend-mv?resourceId="
+                            + MG_MV_SEED + "&pageNumber=" + page + "&resourceType=D", mgMvHeaders());
+                    JSONArray arr = resp.optJSONArray("data");
+                    return arr == null ? pageDataEmpty(page) : mgMvPage(arr, page, arr.length() >= 10);
+                }
+                return mgMvSearchContent(c[2], pg);
+            } catch (Exception e) {
+                fileLog("mgMvCategoryContent FAIL tid=" + tid + " : " + e);
+                return pageDataEmpty(page);
+            }
+        }
+        return pageDataEmpty(page);
+    }
+
+    /** 咪咕 MV 源 searchContent：bmw/search/video v1.0（data.items[].video，直连可用）。 */
+    public static String mgMvSearchContent(String kw, String pg) {
+        String keyword = kw == null ? "" : kw.trim();
+        int page = pageSafe(pg);
+        if (keyword.isEmpty() || keyword.length() > 60) return pageDataEmpty(page);
+        try {
+            JSONObject resp = getJson("https://app.c.nf.migu.cn/bmw/search/video/v1.0?pageNo=" + page
+                    + "&text=" + enc(keyword) + "&typeOrder=0", mgMvHeaders());
+            JSONObject data = resp.optJSONObject("data");
+            JSONArray items = data == null ? null : data.optJSONArray("items");
+            JSONArray list = new JSONArray();
+            if (items != null) {
+                for (int i = 0; i < items.length(); i++) {
+                    JSONObject wrapper = items.optJSONObject(i);
+                    JSONObject video = wrapper == null ? null : wrapper.optJSONObject("video");
+                    if (video == null) continue;
+                    JSONObject v = mgMvItem(video);
+                    if (v != null) list.put(v);
+                }
+            }
+            JSONObject result = new JSONObject();
+            result.put("list", list);
+            result.put("page", page);
+            result.put("pagecount", list.length() >= 20 ? page + 1 : page);
+            result.put("limit", Math.max(list.length(), 1));
+            result.put("total", list.length());
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("mgMvSearchContent FAIL kw=" + keyword + " : " + e);
+            return pageDataEmpty(page);
+        }
+    }
+
+    /** 咪咕 MV 条目 → vod JSON（uid=mvm_{contentId}；歌手在 user[].nickName）。 */
+    private static JSONObject mgMvItem(JSONObject m) throws Exception {
+        String id = m.optString("contentId", "").trim();
+        String name = m.optString("title", "").trim();
+        if (id.isEmpty() || name.isEmpty()) return null;
+        String singer = "";
+        JSONArray users = m.optJSONArray("user");
+        if (users != null && users.length() > 0 && users.optJSONObject(0) != null) {
+            singer = users.optJSONObject(0).optString("nickName", "").trim();
+        }
+        long dur = m.optLong("duration", 0);
+        String remarks = singer + (dur >= 60000 ? " · " + dur / 60000 + ":" + String.format("%02d", dur / 1000 % 60) : "");
+        JSONObject v = new JSONObject();
+        v.put("vod_id", "mvm_" + id);
+        v.put("vod_name", name);
+        v.put("vod_pic", m.optString("showImg", ""));
+        v.put("vod_remarks", remarks);
+        v.put("vod_actor", singer);
+        v.put("vod_content", name + " - " + singer + "（咪咕 MV）");
+        return v;
+    }
+
+    private static String mgMvPage(JSONArray arr, int pg, boolean hasMore) throws Exception {
+        JSONArray list = new JSONArray();
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item = arr.optJSONObject(i);
+            if (item == null) continue;
+            JSONObject v = mgMvItem(item);
+            if (v != null) list.put(v);
+        }
+        JSONObject result = new JSONObject();
+        result.put("list", list);
+        result.put("page", pg);
+        result.put("pagecount", hasMore ? pg + 1 : pg);
+        result.put("limit", Math.max(arr.length(), 1));
+        result.put("total", list.length());
+        return result.toString();
+    }
+
+    /** 咪咕 MV 源 detailContent：resourceinfo.do resourceType=D 现查（songName/singer/imgs）。 */
+    public static String mgMvDetailContent(List<String> ids) {
+        if (ids == null || ids.isEmpty()) return "";
+        String[] parts = splitUid(ids.get(0));
+        if (parts == null || !"mvm".equals(parts[0])) return "";
+        try {
+            JSONObject resp = getJson("https://c.musicapp.migu.cn/MIGUM2.0/v1.0/content/resourceinfo.do?resourceId="
+                    + enc(parts[1]) + "&resourceType=D&needSimple=01", mgMvHeaders());
+            JSONArray resource = resp.optJSONArray("resource");
+            JSONObject r = resource == null ? null : resource.optJSONObject(0);
+            if (r == null) return "";
+            String name = r.optString("songName", "").trim();
+            if (name.isEmpty()) return "";
+            JSONObject v = new JSONObject();
+            v.put("vod_id", ids.get(0));
+            v.put("vod_name", name);
+            v.put("vod_actor", r.optString("singer", "").trim());
+            v.put("vod_content", name + " - " + r.optString("singer", "").trim() + "（咪咕 MV）");
+            JSONObject result = new JSONObject();
+            result.put("list", new JSONArray().put(v));
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("mgMvDetailContent FAIL id=" + ids.get(0) + " : " + e);
+            return "";
+        }
+    }
+
+    /**
+     * 咪咕 MV 取流（miguMusic-api-enhanced mv_info 蓝本）：resourceinfo.do resourceType=D →
+     * resource[].rateFormats[].url（相对路径）拼 freevod.nf.migu.cn；画质 HQ(050012) 优先，无则逐级兜底。
+     */
+    public static String mgMvUrl(String contentId) {
+        try {
+            JSONObject resp = getJson("https://c.musicapp.migu.cn/MIGUM2.0/v1.0/content/resourceinfo.do?resourceId="
+                    + enc(contentId) + "&resourceType=D&needSimple=01", mgMvHeaders());
+            JSONArray resource = resp.optJSONArray("resource");
+            JSONObject r = resource == null ? null : resource.optJSONObject(0);
+            JSONArray formats = r == null ? null : r.optJSONArray("rateFormats");
+            if (formats == null) {
+                fileLog("mgMvUrl no rateFormats id=" + contentId);
+                return "";
+            }
+            String hq = "", fallback = "";
+            for (int i = 0; i < formats.length(); i++) {
+                JSONObject f = formats.optJSONObject(i);
+                if (f == null) continue;
+                String url = f.optString("url", "").trim();
+                if (url.isEmpty()) continue;
+                if (fallback.isEmpty()) fallback = url;
+                if ("HQ".equals(f.optString("formatType", ""))) hq = url;
+            }
+            String url = hq.isEmpty() ? fallback : hq;
+            if (url.isEmpty()) return "";
+            return url.startsWith("http") ? url : MG_MV_HOST + url;
+        } catch (Exception e) {
+            fileLog("mgMvUrl FAIL id=" + contentId + " : " + e);
+            return "";
+        }
     }
 
     // ============================ 酷狗（kugou） ============================
@@ -1327,7 +1907,10 @@ public final class MusicCore {
         img = img.replace("{size}", "240");
         int duration = s.optInt("duration", s.optInt("Duration", 0));
         if (duration > 10000) duration /= 1000;
-        return new Song("kugou", hash, name, singer, album, img, duration);
+        // v5/url 取流需要 album_audio_id（KuGouMusicApi song_url.js 蓝本），编码进 id：hash_albumAudioId
+        long aaId = s.optLong("album_audio_id", s.optLong("AlbumAudioID", 0));
+        String id = aaId > 0 ? hash + "_" + aaId : hash;
+        return new Song("kugou", id, name, singer, album, img, duration);
     }
 
     static List<Song> kgParseInfoList(JSONArray info) {
@@ -1350,10 +1933,10 @@ public final class MusicCore {
         return kgParseInfoList(data == null ? null : data.optJSONArray("info"));
     }
 
-    /** 酷狗榜单目录（mobilecdn rank/list，动态；失败回退内置 TOP 榜）。 */
+    /** 酷狗榜单目录（mobilecdn rank/list，动态；该域名 https 证书 SNI 不匹配必须 http；失败回退内置 TOP 榜）。 */
     public static List<String[]> kgRankList() {
         try {
-            JSONObject resp = getJson("https://mobilecdn.kugou.com/api/v3/rank/list?version=9108&area_code=1", kgHeaders());
+            JSONObject resp = getJson("http://mobilecdn.kugou.com/api/v3/rank/list?version=9108&area_code=1", kgHeaders());
             JSONObject data = resp.optJSONObject("data");
             JSONArray info = data == null ? null : data.optJSONArray("info");
             List<String[]> out = new ArrayList<>();
@@ -1407,15 +1990,142 @@ public final class MusicCore {
         return kgParseInfoList(data == null ? null : data.optJSONArray("info"));
     }
 
-    /** 酷狗取流（m.kugou.com getSongInfo.php）。 */
-    private static String kgStream(String hash) throws Exception {
+    /** 酷狗取流：v5/url（gateway + Android 签名族，KuGouMusicApi 蓝本）→ 旧 m.kugou 兜底。 */
+    private static String kgStream(String songId) throws Exception {
+        String[] ids = kgSplitId(songId);
+        String hash = ids[0].toLowerCase();
+        try {
+            String url = kgV5Url(hash, ids[1]);
+            if (!url.isEmpty()) return url;
+        } catch (Exception e) {
+            fileLog("kgStream v5 FAIL hash=" + hash + " : " + e);
+        }
+        try {
+            return kgStreamLegacy(hash);
+        } catch (Exception e) {
+            // 旧通道网络异常不外抛（降级链终点回 LX/官方聚合，空串即失败）
+            fileLog("kgStream legacy FAIL hash=" + hash + " : " + e);
+            return "";
+        }
+    }
+
+    /** kugou 内部 id 切分：hash_albumAudioId → [hash, albumAudioId]（旧格式纯 hash 兼容）。 */
+    public static String[] kgSplitId(String songId) {
+        if (songId == null) return new String[]{"", "0"};
+        int i = songId.indexOf('_');
+        if (i <= 0) return new String[]{songId, "0"};
+        return new String[]{songId.substring(0, i), songId.substring(i + 1)};
+    }
+
+    private static volatile String kgMid = "";
+
+    /** 设备 MID（KuGouMusicApi calculateMid 蓝本）：随机 GUID 的 MD5 hex 视为 16 进制大整数转十进制串。 */
+    private static String kgMid() {
+        if (kgMid.isEmpty()) {
+            synchronized (MusicCore.class) {
+                if (kgMid.isEmpty()) {
+                    byte[] b = new byte[16];
+                    new Random().nextBytes(b);
+                    StringBuilder hex = new StringBuilder(32);
+                    for (byte x : b) hex.append(String.format("%02x", x));
+                    kgMid = new BigInteger(hex.toString(), 16).toString();
+                }
+            }
+        }
+        return kgMid;
+    }
+
+    private static String kgMd5(String s) throws Exception {
+        byte[] d = MessageDigest.getInstance("MD5").digest(s.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hex = new StringBuilder(32);
+        for (byte b : d) hex.append(String.format("%02x", b));
+        return hex.toString();
+    }
+
+    /**
+     * 酷狗 v5/url 取流（gateway.kugou.com + x-router=trackercdn.kugou.com）。
+     * 参考项目 song_url.js：该端点只带 signKey（key）不带 signature（notSign）；
+     * key = MD5(hash + '57ae12eb6890223e355ccfcb74edf70d' + appid + mid + userid)。
+     */
+    private static String kgV5Url(String hash, String aaId) throws Exception {
+        String mid = kgMid();
+        String dfid = kgRandom(24);
+        String clienttime = String.valueOf(System.currentTimeMillis() / 1000);
+        Map<String, String> p = new LinkedHashMap<>();
+        p.put("dfid", dfid);
+        p.put("mid", mid);
+        p.put("uuid", "-");
+        p.put("appid", "1005");
+        p.put("clientver", "11430");
+        p.put("clienttime", clienttime);
+        p.put("album_id", "0");
+        p.put("area_code", "1");
+        p.put("hash", hash);
+        p.put("ssa_flag", "is_fromtrack");
+        p.put("version", "11430");
+        p.put("page_id", "151369488");
+        p.put("quality", "128");
+        p.put("album_audio_id", aaId == null || aaId.isEmpty() ? "0" : aaId);
+        p.put("behavior", "play");
+        p.put("pid", "2");
+        p.put("cmd", "26");
+        p.put("pidversion", "3001");
+        p.put("IsFreePart", "0");
+        p.put("ppage_id", "463467626,350369493,788954147");
+        p.put("cdnBackup", "1");
+        p.put("module", "");
+        p.put("key", kgMd5(hash + "57ae12eb6890223e355ccfcb74edf70d" + "1005" + mid + "0"));
+        StringBuilder qs = new StringBuilder();
+        for (Map.Entry<String, String> e : p.entrySet()) {
+            if (qs.length() > 0) qs.append('&');
+            qs.append(enc(e.getKey())).append('=').append(enc(e.getValue()));
+        }
+        JSONObject resp = getJson("https://gateway.kugou.com/v5/url?" + qs,
+                headers("User-Agent", "Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi",
+                        "x-router", "trackercdn.kugou.com",
+                        "dfid", dfid, "clienttime", clienttime, "mid", mid,
+                        "kg-rc", "1", "kg-thash", "5d816a0", "kg-rec", "1",
+                        "kg-rf", "B9EDA08A64250DEFFBCADDEE00F8F25F"));
+        if (resp.optInt("status", -1) != 1) {
+            fileLog("kgV5Url status=" + resp.opt("status") + " err=" + resp.opt("error_code") + " hash=" + hash);
+            return "";
+        }
+        JSONObject data = resp.optJSONObject("data");
+        if (data == null) {
+            JSONArray arr = resp.optJSONArray("data");
+            if (arr != null && arr.length() > 0) data = arr.optJSONObject(0);
+        }
+        if (data == null) return "";
+        String u = data.optString("url", "");
+        if (u.isEmpty()) {
+            JSONArray ua = data.optJSONArray("url");
+            if (ua != null && ua.length() > 0) u = ua.optString(0);
+        }
+        if (u.isEmpty()) {
+            JSONArray ba = data.optJSONArray("backupUrl");
+            if (ba != null && ba.length() > 0) u = ba.optString(0);
+        }
+        return u.trim();
+    }
+
+    private static String kgRandom(int len) {
+        String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random r = new Random();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) sb.append(alphabet.charAt(r.nextInt(alphabet.length())));
+        return sb.toString();
+    }
+
+    /** 酷狗旧取流通道（m.kugou.com getSongInfo.php，国内网络可用，作 v5/url 兜底）。 */
+    private static String kgStreamLegacy(String hash) throws Exception {
         JSONObject resp = getJson("https://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo&hash=" + enc(hash), kgHeaders());
         if (resp.optInt("errcode", 0) != 0) return "";
         return resp.optString("url", "");
     }
 
     /** 酷狗歌词（krcs search + download fmt=krc）：[LRC, 逐词KRC]。 */
-    private static String[] kgLyric(String hash, int duration) throws Exception {
+    private static String[] kgLyric(String songId, int duration) throws Exception {
+        String hash = kgSplitId(songId)[0];
         JSONObject search = getJson("https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&keyword=" +
                 "&duration=" + (duration * 1000) + "&hash=" + enc(hash) + "&album_audio_id=", kgHeaders());
         JSONArray candidates = search.optJSONArray("candidates");
@@ -2063,11 +2773,25 @@ public final class MusicCore {
         return out;
     }
 
-    /** 咪咕榜单目录（bmw rank-index v2.0，动态；失败回退内置热歌榜）。 */
+    /** 咪咕榜单目录（pc/bmw rank-index v1.0 主通道 + bmw v2.0 回退，动态；失败回退内置热歌榜）。 */
     public static List<String[]> mgRankList() {
+        // miguMusic-api-enhanced rank_index.ts 蓝本：app.c.nf.migu.cn/pc/bmw（实测可达）
+        List<String[]> out = mgRankIndex("https://app.c.nf.migu.cn/pc/bmw/rank/rank-index/v1.0");
+        if (!out.isEmpty()) return out;
+        // 旧 app.u.nf.migu.cn v2.0 回退
+        out = mgRankIndex("https://app.u.nf.migu.cn/bmw/rank/rank-index/v2.0");
+        if (!out.isEmpty()) return out;
+        return Collections.singletonList(new String[]{"83048887", "咪咕全网热歌榜", ""});
+    }
+
+    /** 咪咕榜单目录拉取（data.contents[].contents[]，rankId/rankName/imageUrl；两组端点同构）。 */
+    private static List<String[]> mgRankIndex(String url) {
         try {
-            JSONObject resp = getJson("https://app.u.nf.migu.cn/bmw/rank/rank-index/v2.0", mgHeaders());
-            if (!"000000".equals(resp.optString("code", "000000"))) throw new RuntimeException(resp.optString("info", ""));
+            JSONObject resp = getJson(url, mgHeaders());
+            if (!"000000".equals(resp.optString("code", "000000"))) {
+                fileLog("mgRankIndex " + url + " code=" + resp.opt("code"));
+                return new ArrayList<>();
+            }
             JSONObject data = resp.optJSONObject("data");
             JSONArray contents = data == null ? null : data.optJSONArray("contents");
             List<String[]> out = new ArrayList<>();
@@ -2087,15 +2811,34 @@ public final class MusicCore {
                     }
                 }
             }
-            if (!out.isEmpty()) return out;
+            return out;
         } catch (Exception e) {
-            fileLog("mgRankList FAIL: " + e);
+            fileLog("mgRankIndex FAIL " + url + " : " + e);
+            return new ArrayList<>();
         }
-        return Collections.singletonList(new String[]{"83048887", "咪咕全网热歌榜", ""});
     }
 
-    /** 咪咕搜索（search_all.do，song:1）。 */
+    /** 咪咕搜索（bmw search/song v1.0，items[].song 含 lrcUrl/copyrightId；miguMusic-api-enhanced 蓝本，失败回退 search_all.do）。 */
     public static List<Song> mgSearch(String kw) throws Exception {
+        try {
+            JSONObject resp = getJson("https://app.c.nf.migu.cn/bmw/search/song/v1.0?pageNo=1&text=" + enc(kw), mgHeaders());
+            if ("000000".equals(resp.optString("code", ""))) {
+                JSONObject data = resp.optJSONObject("data");
+                JSONArray items = data == null ? null : data.optJSONArray("items");
+                List<Song> out = new ArrayList<>();
+                if (items != null) {
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject it = items.optJSONObject(i);
+                        Song s = it == null ? null : mgConvertItem(it.optJSONObject("song"));
+                        if (s != null) out.add(s);
+                    }
+                }
+                if (!out.isEmpty()) return out;
+            }
+            fileLog("mgSearch bmw status=" + resp.opt("code") + " kw=" + kw);
+        } catch (Exception e) {
+            fileLog("mgSearch bmw FAIL kw=" + kw + " : " + e);
+        }
         String url = "http://pd.musicapp.migu.cn/MIGUM2.0/v1.0/content/search_all.do?" +
                 "ua=Android_migu&version=5.0.1&text=" + enc(kw) + "&pageNo=1&pageSize=20" +
                 "&searchSwitch=" + enc("{\"song\":1,\"album\":0,\"singer\":0,\"tagSong\":0,\"mvSong\":0,\"songlist\":0,\"bestShow\":1}");
@@ -2213,10 +2956,10 @@ public final class MusicCore {
         return "";
     }
 
-    /** 咪咕歌词：resourceinfo.do → lrcUrl → 下载 LRC（无逐词）。 */
+    /** 咪咕歌词（resourceinfo.do → lrcUrl → 下载 LRC，miguMusic-api-enhanced lyric.ts 端点；无逐词）。 */
     private static String[] mgLyric(String contentId) {
         try {
-            JSONObject resp = getJson("http://c.musicapp.migu.cn/MIGUM2.0/v1.0/content/resourceinfo.do?" +
+            JSONObject resp = getJson("https://app.u.nf.migu.cn/MIGUM2.0/v1.0/content/resourceinfo.do?" +
                     "resourceId=" + enc(contentId) + "&resourceType=2", mgHeaders());
             JSONArray resource = resp.optJSONArray("resource");
             if (resource == null || resource.length() == 0) return new String[]{"", ""};
@@ -2412,6 +3155,7 @@ public final class MusicCore {
      * 平台映射 wy/tx/kg/kw/qishui/mg，128k。兜底解 VIP/版权限制。
      */
     private static String lxStream(String platform, String songId) {
+        if ("kugou".equals(platform)) songId = kgSplitId(songId)[0]; // LX 音乐源 musicId 需纯 hash
         String source;
         switch (platform) {
             case "netease":
@@ -2494,11 +3238,25 @@ public final class MusicCore {
         String[] parts = splitUid(id);
         if (parts == null) return "";
         String platform = parts[0], songId = parts[1];
-        if ("mv".equals(platform)) {
-            // MV 站点源条目（芸映）：mp4 直链即内容本身——音频态出声、MV 态铺视频（同一直链，切态零二次取流）
+        if ("mv".equals(platform) || "mvq".equals(platform)
+                || "mvk".equals(platform) || "mvm".equals(platform)) {
+            // MV 站点源条目（芸映/秋映/枸映/蜜映）：mp4 直链即内容本身——音频态出声、MV 态铺视频（同一直链，切态零二次取流）
             String url;
             try {
-                url = neMvUrl(songId);
+                switch (platform) {
+                    case "mvq":
+                        url = qqMvUrl(songId);
+                        break;
+                    case "mvk":
+                        url = kgMvUrl(songId);
+                        break;
+                    case "mvm":
+                        url = mgMvUrl(songId);
+                        break;
+                    default:
+                        url = neMvUrl(songId);
+                        break;
+                }
             } catch (Exception e) {
                 url = "";
             }
@@ -2681,6 +3439,11 @@ public final class MusicCore {
         String id = ids.get(0);
         String[] parts = id.split("_", 3);
         if (parts.length == 2) {
+            // MV 条目（2 段 uid：mv_/mvq_/mvk_/mvm_）路由回各 MV 详情链路，避免被单曲详情误吃
+            if (id.startsWith("mvq_")) return qqMvDetailContent(ids);
+            if (id.startsWith("mvk_")) return kgMvDetailContent(ids);
+            if (id.startsWith("mvm_")) return mgMvDetailContent(ids);
+            if (id.startsWith("mv_")) return mvDetailContent(ids);
             return singleDetail(id, t0);
         }
         if (parts.length != 3) {
@@ -2900,6 +3663,12 @@ public final class MusicCore {
                 classes.put(new JSONObject().put("type_id", "qq").put("type_name", platformName("qq") + "榜单"));
                 classes.put(new JSONObject().put("type_id", "kuwo").put("type_name", platformName("kuwo") + "榜单"));
                 classes.put(new JSONObject().put("type_id", "migu").put("type_name", platformName("migu") + "榜单"));
+                // MV 站源并入主页 tab（一源一页签）：MV 房间 tid 由 categoryContent 前缀路由回各 MV 链路，
+                // 听歌主页无需切到 MV 源即可达 MV 内容（MV 源仅搜索兜底入口）
+                classes.put(new JSONObject().put("type_id", "mv_rcmd").put("type_name", "芸映MV"));
+                classes.put(new JSONObject().put("type_id", "mvq_all").put("type_name", "秋映MV"));
+                classes.put(new JSONObject().put("type_id", "kgmv_hot").put("type_name", "枸映MV"));
+                classes.put(new JSONObject().put("type_id", "mvmv_rcmd").put("type_name", "蜜映MV"));
                 if (filter) {
                     JSONArray cats = new JSONArray();
                     cats.put(new JSONObject().put("n", "全部").put("v", ""));
@@ -3002,6 +3771,11 @@ public final class MusicCore {
             if ("qq".equals(platformOfTid) || "kuwo".equals(platformOfTid) || "migu".equals(platformOfTid)) {
                 return rankPage(platformOfTid);
             }
+            // MV 站源页签（聚合主页并入的 mv_/mvq_/mvk_/mvmv_ tid）路由回各 MV 分类链路
+            if (platformOfTid.startsWith("mvq_")) return qqMvCategoryContent(platformOfTid, pg, extend);
+            if (platformOfTid.startsWith("mvk_")) return kgMvCategoryContent(platformOfTid, pg, extend);
+            if (platformOfTid.startsWith("mvmv_")) return mgMvCategoryContent(platformOfTid, pg, extend);
+            if (platformOfTid.startsWith("mv_")) return mvCategoryContent(platformOfTid, pg, extend);
             return pageDataEmpty(1);
         } catch (Exception e) {
             fileLog("categoryContent FAIL tid=" + tid + " : " + e);

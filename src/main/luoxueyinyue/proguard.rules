@@ -5,6 +5,12 @@
 -keep public class com.github.catvod.spider.LxSource { public *; }
 # 芸映（csp_NeteaseMv，网易云 MV 站点源）入口：类名被 R8 改名后壳反射加载 ClassNotFoundException → 全源空
 -keep public class com.github.catvod.spider.NeteaseMv { public *; }
+# 秋映（csp_QqMv，QQ MV 站点源）入口：同上，漏 keep 会被 R8 shrink 裁掉（壳加载 ClassNotFoundException）
+-keep public class com.github.catvod.spider.QqMv { public *; }
+# 枸映（csp_KugouMv，酷狗 MV 站点源）入口：同上
+-keep public class com.github.catvod.spider.KugouMv { public *; }
+# 蜜映（csp_MiguMv，咪咕 MV 站点源）入口：同上
+-keep public class com.github.catvod.spider.MiguMv { public *; }
 # 桩基类：运行时由壳 DexClassLoader 提供真类，壳还会反射访问 siteKey/empty 等 public 成员
 -keep public class com.github.catvod.crawler.Spider { public *; }
 -keepattributes Signature,InnerClasses,EnclosingMethod
