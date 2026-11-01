@@ -3678,9 +3678,17 @@ public final class MusicCore {
                     for (String c : neCatlist()) {
                         cats.put(new JSONObject().put("n", c).put("v", c));
                     }
+                    // 酷狗歌单分类（动态 get_tags_by_type 优先，兜底内置表）
+                    JSONArray kgCats = new JSONArray();
+                    kgCats.put(new JSONObject().put("n", "全部").put("v", ""));
+                    for (String[] c : kgPlaylistCats()) {
+                        kgCats.put(new JSONObject().put("n", c[0]).put("v", c[0]));
+                    }
                     JSONObject filters = new JSONObject();
                     filters.put("netease", new JSONArray().put(new JSONObject()
                             .put("key", "cat").put("name", "分类").put("value", cats)));
+                    filters.put("kugou", new JSONArray().put(new JSONObject()
+                            .put("key", "cat").put("name", "分类").put("value", kgCats)));
                     result.put("filters", filters);
                 }
             } else {
@@ -3690,15 +3698,26 @@ public final class MusicCore {
                 }
                 classes.put(new JSONObject().put("type_id", "hot").put("type_name", pn + "热歌"));
                 classes.put(new JSONObject().put("type_id", platform + "_rank").put("type_name", pn + "榜单"));
-                if (filter && "netease".equals(platform)) {
-                    JSONArray cats = new JSONArray();
-                    cats.put(new JSONObject().put("n", "全部").put("v", ""));
-                    for (String c : neCatlist()) {
-                        cats.put(new JSONObject().put("n", c).put("v", c));
-                    }
+                if (filter && ("netease".equals(platform) || "kugou".equals(platform))) {
                     JSONObject filters = new JSONObject();
-                    filters.put("netease", new JSONArray().put(new JSONObject()
-                            .put("key", "cat").put("name", "分类").put("value", cats)));
+                    if ("netease".equals(platform)) {
+                        JSONArray cats = new JSONArray();
+                        cats.put(new JSONObject().put("n", "全部").put("v", ""));
+                        for (String c : neCatlist()) {
+                            cats.put(new JSONObject().put("n", c).put("v", c));
+                        }
+                        filters.put("netease", new JSONArray().put(new JSONObject()
+                                .put("key", "cat").put("name", "分类").put("value", cats)));
+                    }
+                    if ("kugou".equals(platform)) {
+                        JSONArray kgCats = new JSONArray();
+                        kgCats.put(new JSONObject().put("n", "全部").put("v", ""));
+                        for (String[] c : kgPlaylistCats()) {
+                            kgCats.put(new JSONObject().put("n", c[0]).put("v", c[0]));
+                        }
+                        filters.put("kugou", new JSONArray().put(new JSONObject()
+                                .put("key", "cat").put("name", "分类").put("value", kgCats)));
+                    }
                     result.put("filters", filters);
                 }
             }
@@ -3769,7 +3788,7 @@ public final class MusicCore {
                 return nePlaylistPage(pg, extend);
             }
             if ("kugou".equals(platformOfTid)) {
-                return kgPlaylistPage(pg);
+                return kgPlaylistPage(pg, extend);
             }
             if ("qq".equals(platformOfTid) || "kuwo".equals(platformOfTid) || "migu".equals(platformOfTid)) {
                 return rankPage(platformOfTid);
@@ -3875,15 +3894,31 @@ public final class MusicCore {
      * 小枸歌单列表页（gateway special_recommend，KuGouMusicApi top_playlist.js 蓝本）。
      * mobilecdn v3/playlist/list 与 v3/playlist/detail 已被服务端 WAF 封（Access Deny，
      * 同族 rank/search/special-song 仍活——勿回退 v3 歌单路径）。
+     * 分类：extend.cat（分类名）→ categoryid（kgPlaylistCats 动态拉取，兜底内置表），
+     * 0=推荐（蓝本注释：categoryid 0=推荐 11292=HI-RES）。
      * 签名：signature = MD5(SALT + sorted(query k=v) + body原文 + SALT)（android 族带 body）；
      * key = MD5(appid + SALT + clientver + clienttime)（signParamsKey 蓝本）。
      * http 优先（明文通道避开部分网络对 kugou https 的 SNI 干扰），https 兜底。
      */
-    private static String kgPlaylistPage(String pg) {
+    private static String kgPlaylistPage(String pg, HashMap<String, String> extend) {
         int page = 1;
         try {
             page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
         } catch (Exception ignored) {
+        }
+        // 分类名 → categoryid（「全部」/未选 = 0 推荐）
+        int categoryid = 0;
+        String cat = extend != null && extend.get("cat") != null ? extend.get("cat").trim() : "";
+        if (!cat.isEmpty() && !"全部".equals(cat)) {
+            for (String[] c : kgPlaylistCats()) {
+                if (c[0].equals(cat)) {
+                    try {
+                        categoryid = Integer.parseInt(c[1]);
+                    } catch (Exception ignored) {
+                    }
+                    break;
+                }
+            }
         }
         String bodyStr = "";
         try {
@@ -3903,7 +3938,7 @@ public final class MusicCore {
                     .put("special_recommend", new JSONObject()
                             .put("withtag", 1).put("withsong", 1).put("sort", 1).put("ugc", 1)
                             .put("is_selected", 0).put("withrecommend", 1).put("area_code", 1)
-                            .put("categoryid", 0))
+                            .put("categoryid", categoryid))
                     .put("req_multi", 1)
                     .put("retrun_min", 5)
                     .put("return_special_falg", 1);
@@ -3987,6 +4022,113 @@ public final class MusicCore {
         } catch (Exception e) {
             fileLog("kgPlaylistPage FAIL : " + e);
             return pageDataEmpty(page);
+        }
+    }
+
+    /** 酷狗歌单分类内置兜底表（categoryid 蓝本 top_playlist.js 注释确认项；动态分类拉取失败时使用）。 */
+    private static final String[][] KG_PLAYLIST_CATS_FALLBACK = {
+            {"推荐", "0"}, {"HI-RES 无损", "11292"},
+    };
+    /** 酷狗歌单动态分类缓存（get_tags_by_type 拉取成功后驻留进程）。 */
+    private static volatile String[][] kgPlaylistCatsCache;
+    /** 动态分类拉取失败标记（负缓存：失败后本进程不再重试，避免翻页反复打失败请求）。 */
+    private static volatile boolean kgPlaylistCatsFailed;
+
+    /**
+     * 酷狗歌单分类表：动态拉 get_tags_by_type（KuGouMusicApi playlist_tags.js 蓝本，
+     * POST /pubsongs/v1/get_tags_by_type，android 签名族；蓝本无 x-router，pubsongs 服务路由兜底），
+     * 失败回退内置表。tag_id 直接用作 special_recommend 的 categoryid。
+     * 响应结构无蓝本样例，按多候选键解析并把原文截断写日志（真机核实后收敛）。
+     */
+    private static String[][] kgPlaylistCats() {
+        String[][] cache = kgPlaylistCatsCache;
+        if (cache != null) return cache;
+        if (kgPlaylistCatsFailed) return KG_PLAYLIST_CATS_FALLBACK;
+        try {
+            String mid = kgMid();
+            String clienttime = String.valueOf(System.currentTimeMillis() / 1000);
+            String bodyStr = new JSONObject()
+                    .put("tag_type", "collection").put("tag_id", 0).put("source", 3)
+                    .put("appid", 1005).put("mid", mid).put("clientver", 20489)
+                    .put("platform", "android").put("clienttime", clienttime).put("userid", 0)
+                    .put("key", kgMd5("1005" + KG_SALT + "20489" + clienttime))
+                    .toString();
+            StringBuilder kv = new StringBuilder();
+            StringBuilder qs = new StringBuilder();
+            java.util.TreeMap<String, String> q = new java.util.TreeMap<>();
+            q.put("appid", "1005");
+            q.put("clienttime", clienttime);
+            q.put("clientver", "20489");
+            q.put("dfid", "-");
+            q.put("mid", mid);
+            q.put("uuid", "-");
+            for (Map.Entry<String, String> e : q.entrySet()) {
+                kv.append(e.getKey()).append('=').append(e.getValue());
+                if (qs.length() > 0) qs.append('&');
+                qs.append(enc(e.getKey())).append('=').append(enc(e.getValue()));
+            }
+            String signature = kgMd5(KG_SALT + kv + bodyStr + KG_SALT);
+            Map<String, String> h = headers("User-Agent", KG_APP_UA,
+                    "clienttime", clienttime, "mid", mid, "dfid", "-",
+                    "kg-rc", "1", "kg-thash", "5d816a0", "kg-rec", "1",
+                    "kg-rf", "B9EDA08A64250DEFFBCADDEE00F8F25F",
+                    "Content-Type", "application/json");
+            String path = "/pubsongs/v1/get_tags_by_type?" + qs + "&signature=" + signature;
+            JSONObject resp = null;
+            try {
+                resp = postJson("http://gateway.kugou.com" + path, h, bodyStr);
+            } catch (Exception he) {
+                resp = postJson("http://gateway.kugou.com" + path,
+                        headers("User-Agent", KG_APP_UA, "x-router", "pubsongs.service.kugou.com",
+                                "clienttime", clienttime, "mid", mid, "dfid", "-",
+                                "kg-rc", "1", "kg-thash", "5d816a0", "kg-rec", "1",
+                                "kg-rf", "B9EDA08A64250DEFFBCADDEE00F8F25F",
+                                "Content-Type", "application/json"), bodyStr);
+            }
+            if (resp.optInt("status", -1) != 1) {
+                fileLog("kgPlaylistCats status=" + resp.opt("status") + " err=" + resp.opt("error"));
+                kgPlaylistCatsFailed = true;
+                return KG_PLAYLIST_CATS_FALLBACK;
+            }
+            // 多候选解析：data.{tags/tag_list/list/info/categories/tag}（字段 tag_id/tag_name 优先，id/name 兼容）
+            JSONObject data = resp.optJSONObject("data");
+            JSONArray tags = null;
+            if (data != null) {
+                tags = data.optJSONArray("tags");
+                if (tags == null) tags = data.optJSONArray("tag_list");
+                if (tags == null) tags = data.optJSONArray("list");
+                if (tags == null) tags = data.optJSONArray("info");
+                if (tags == null) tags = data.optJSONArray("categories");
+                if (tags == null) tags = data.optJSONArray("tag");
+            }
+            if (tags == null || tags.length() == 0) {
+                fileLog("kgPlaylistCats no-tags data=" + (data == null ? "null"
+                        : data.toString().substring(0, Math.min(800, data.toString().length()))));
+                kgPlaylistCatsFailed = true;
+                return KG_PLAYLIST_CATS_FALLBACK;
+            }
+            List<String[]> out = new java.util.ArrayList<>();
+            for (int k = 0; k < tags.length(); k++) {
+                JSONObject t = tags.optJSONObject(k);
+                if (t == null) continue;
+                String id = firstNonEmpty(t.optString("tag_id", ""), t.optString("id", ""));
+                String name = firstNonEmpty(t.optString("tag_name", ""), t.optString("name", "")).trim();
+                if (id.isEmpty() || name.isEmpty()) continue;
+                out.add(new String[]{name, id});
+            }
+            if (out.isEmpty()) {
+                fileLog("kgPlaylistCats tags-empty raw=" + tags.toString().substring(0, Math.min(800, tags.toString().length())));
+                kgPlaylistCatsFailed = true;
+                return KG_PLAYLIST_CATS_FALLBACK;
+            }
+            String[][] arr = out.toArray(new String[0][]);
+            kgPlaylistCatsCache = arr;
+            fileLog("kgPlaylistCats ok size=" + arr.length);
+            return arr;
+        } catch (Exception e) {
+            fileLog("kgPlaylistCats FAIL : " + e);
+            kgPlaylistCatsFailed = true;
+            return KG_PLAYLIST_CATS_FALLBACK;
         }
     }
 
