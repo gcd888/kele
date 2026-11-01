@@ -4025,9 +4025,39 @@ public final class MusicCore {
         }
     }
 
-    /** 酷狗歌单分类内置兜底表（categoryid 蓝本 top_playlist.js 注释确认项；动态分类拉取失败时使用）。 */
+    /**
+     * 酷狗歌单分类内置兜底表（2026-11-02 gateway get_tags_by_type 实测全量：一级+二级展平；
+     * tag_id 即 special_recommend.categoryid，酷狗文档实锤；HI-RES 11292 来自 top_playlist.js 注释）。
+     * 动态分类拉取失败时使用，动态成功时结构与本表一致（树展平 + 尾部 HI-RES）。
+     */
     private static final String[][] KG_PLAYLIST_CATS_FALLBACK = {
-            {"推荐", "0"}, {"HI-RES 无损", "11292"},
+            {"场景", "5"},
+            {"学习", "587"}, {"工作", "660"}, {"通勤", "1104"}, {"运动", "69"}, {"校园", "67"},
+            {"旅途", "585"}, {"咖啡厅", "61"}, {"店铺", "581"}, {"清晨", "668"}, {"下午茶", "670"},
+            {"夜晚", "1105"}, {"睡前", "583"}, {"派对", "586"}, {"宅家", "1106"}, {"车载", "63"},
+            {"夜店", "64"}, {"婚礼", "88"}, {"瑜伽", "678"}, {"做家务", "664"}, {"公共交通", "580"},
+            {"茶馆", "11219"}, {"露营", "11296"}, {"酷狗铃声", "11414"},
+            {"主题", "1"},
+            {"精选", "1084"}, {"经典", "12"}, {"网络", "35"}, {"游戏", "74"}, {"DJ热碟", "17"},
+            {"情歌对唱", "68"}, {"舞曲", "10"}, {"KTV", "72"}, {"影视", "79"}, {"翻唱", "638"},
+            {"ACG", "77"}, {"现场", "680"}, {"综艺", "80"}, {"厂牌音乐", "1111"}, {"BGM", "1112"},
+            {"儿童", "1110"}, {"器乐演奏", "682"}, {"官方歌单", "1085"}, {"草原风", "605"},
+            {"广场舞", "628"}, {"铃声", "629"},
+            {"语种", "2"},
+            {"国语", "84"}, {"英语", "20"}, {"粤语", "19"}, {"日语", "21"}, {"韩语", "23"},
+            {"闽南语", "22"}, {"小语种", "24"}, {"法语", "570"},
+            {"风格", "8"},
+            {"流行", "9"}, {"古风", "574"}, {"电子", "33"}, {"民谣", "83"}, {"摇滚", "27"},
+            {"说唱", "31"}, {"后摇", "1079"}, {"中国风", "11"}, {"R&B", "30"}, {"古典", "28"},
+            {"乡村", "15"}, {"爵士", "32"}, {"新世纪", "650"}, {"布鲁斯", "94"}, {"拉丁", "1057"},
+            {"轻音乐", "34"}, {"中国传统", "1108"}, {"金属", "29"}, {"雷鬼", "92"}, {"另类独立", "1078"},
+            {"心情", "4"},
+            {"怀旧", "1107"}, {"伤感", "578"}, {"安静", "44"}, {"兴奋", "50"}, {"轻松", "577"},
+            {"治愈", "780"}, {"快乐", "49"}, {"甜蜜", "47"}, {"寂寞", "42"}, {"感动", "48"},
+            {"小清新", "642"}, {"励志", "81"}, {"减压", "643"}, {"失恋", "684"},
+            {"年代", "7"},
+            {"70后", "13"}, {"80后", "14"}, {"90后", "76"}, {"00后", "571"},
+            {"HI-RES 无损", "11292"},
     };
     /** 酷狗歌单动态分类缓存（get_tags_by_type 拉取成功后驻留进程）。 */
     private static volatile String[][] kgPlaylistCatsCache;
@@ -4090,37 +4120,36 @@ public final class MusicCore {
                 kgPlaylistCatsFailed = true;
                 return KG_PLAYLIST_CATS_FALLBACK;
             }
-            // 多候选解析：data.{tags/tag_list/list/info/categories/tag}（字段 tag_id/tag_name 优先，id/name 兼容）
-            JSONObject data = resp.optJSONObject("data");
-            JSONArray tags = null;
-            if (data != null) {
-                tags = data.optJSONArray("tags");
-                if (tags == null) tags = data.optJSONArray("tag_list");
-                if (tags == null) tags = data.optJSONArray("list");
-                if (tags == null) tags = data.optJSONArray("info");
-                if (tags == null) tags = data.optJSONArray("categories");
-                if (tags == null) tags = data.optJSONArray("tag");
+            // 实测结构（2026-11-02 gateway 对拍）：{"data":[{tag_id,tag_name,son:[...]}],"status":1}
+            // data 为数组：一级分类与其 son 二级子分类全展平（酷狗文档：tag_id 即 categoryid）
+            JSONArray tags = resp.optJSONArray("data");
+            if (tags == null) {
+                // 兼容变体：data 为对象时按多候选键取数组
+                JSONObject dataObj = resp.optJSONObject("data");
+                if (dataObj != null) {
+                    tags = dataObj.optJSONArray("tags");
+                    if (tags == null) tags = dataObj.optJSONArray("tag_list");
+                    if (tags == null) tags = dataObj.optJSONArray("list");
+                    if (tags == null) tags = dataObj.optJSONArray("info");
+                }
             }
             if (tags == null || tags.length() == 0) {
-                fileLog("kgPlaylistCats no-tags data=" + (data == null ? "null"
-                        : data.toString().substring(0, Math.min(800, data.toString().length()))));
+                fileLog("kgPlaylistCats no-tags data=" + (resp.opt("data") == null ? "null"
+                        : resp.opt("data").toString().substring(0, Math.min(800, resp.opt("data").toString().length()))));
                 kgPlaylistCatsFailed = true;
                 return KG_PLAYLIST_CATS_FALLBACK;
             }
             List<String[]> out = new java.util.ArrayList<>();
-            for (int k = 0; k < tags.length(); k++) {
-                JSONObject t = tags.optJSONObject(k);
-                if (t == null) continue;
-                String id = firstNonEmpty(t.optString("tag_id", ""), t.optString("id", ""));
-                String name = firstNonEmpty(t.optString("tag_name", ""), t.optString("name", "")).trim();
-                if (id.isEmpty() || name.isEmpty()) continue;
-                out.add(new String[]{name, id});
-            }
+            kgCollectTags(tags, out);
             if (out.isEmpty()) {
                 fileLog("kgPlaylistCats tags-empty raw=" + tags.toString().substring(0, Math.min(800, tags.toString().length())));
                 kgPlaylistCatsFailed = true;
                 return KG_PLAYLIST_CATS_FALLBACK;
             }
+            // HI-RES 无损(11292)不在 tags 树内，单独补齐（top_playlist.js 蓝本注释项）
+            boolean hasHires = false;
+            for (String[] c : out) if ("11292".equals(c[1])) { hasHires = true; break; }
+            if (!hasHires) out.add(new String[]{"HI-RES 无损", "11292"});
             String[][] arr = out.toArray(new String[0][]);
             kgPlaylistCatsCache = arr;
             fileLog("kgPlaylistCats ok size=" + arr.length);
@@ -4129,6 +4158,19 @@ public final class MusicCore {
             fileLog("kgPlaylistCats FAIL : " + e);
             kgPlaylistCatsFailed = true;
             return KG_PLAYLIST_CATS_FALLBACK;
+        }
+    }
+
+    /** 分类树递归展平：一级 + son 二级（字段 tag_id/tag_name 优先，id/name 兼容）。 */
+    private static void kgCollectTags(JSONArray arr, List<String[]> out) {
+        if (arr == null) return;
+        for (int k = 0; k < arr.length(); k++) {
+            JSONObject t = arr.optJSONObject(k);
+            if (t == null) continue;
+            String id = firstNonEmpty(t.optString("tag_id", ""), t.optString("id", ""));
+            String name = firstNonEmpty(t.optString("tag_name", ""), t.optString("name", "")).trim();
+            if (!id.isEmpty() && !name.isEmpty()) out.add(new String[]{name, id});
+            kgCollectTags(t.optJSONArray("son"), out);
         }
     }
 
