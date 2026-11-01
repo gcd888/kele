@@ -1873,6 +1873,9 @@ public final class MusicCore {
 
     private static final String KG_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
     private static final String KG_REFERER = "http://m.kugou.com";
+    /** 酷狗 android 签名族：盐值 + gateway 网关 UA（kgV5Url/kgMvUrl/kgPlaylistPage 共用）。 */
+    private static final String KG_SALT = "OIlwieks28dk2k092lksi2UIkp";
+    private static final String KG_APP_UA = "Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi";
 
     private static Map<String, String> kgHeaders() {
         return headers("User-Agent", KG_UA, "Referer", KG_REFERER);
@@ -3868,17 +3871,85 @@ public final class MusicCore {
         return String.valueOf(n);
     }
 
-    /** 小枸歌单列表页（酷狗 v3 公开歌单 API）。 */
+    /**
+     * 小枸歌单列表页（gateway special_recommend，KuGouMusicApi top_playlist.js 蓝本）。
+     * mobilecdn v3/playlist/list 与 v3/playlist/detail 已被服务端 WAF 封（Access Deny，
+     * 同族 rank/search/special-song 仍活——勿回退 v3 歌单路径）。
+     * 签名：signature = MD5(SALT + sorted(query k=v) + body原文 + SALT)（android 族带 body）；
+     * key = MD5(appid + SALT + clientver + clienttime)（signParamsKey 蓝本）。
+     * http 优先（明文通道避开部分网络对 kugou https 的 SNI 干扰），https 兜底。
+     */
     private static String kgPlaylistPage(String pg) {
+        int page = 1;
         try {
-            int page = 1;
-            try {
-                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
-            } catch (Exception ignored) {
+            page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+        } catch (Exception ignored) {
+        }
+        String bodyStr = "";
+        try {
+            String mid = kgMid();
+            String clienttime = String.valueOf(System.currentTimeMillis() / 1000);
+            JSONObject body = new JSONObject()
+                    .put("appid", 1005)
+                    .put("mid", mid)
+                    .put("clientver", 20489)
+                    .put("platform", "android")
+                    .put("clienttime", clienttime)
+                    .put("userid", 0)
+                    .put("module_id", 1)
+                    .put("page", page)
+                    .put("pagesize", 30)
+                    .put("key", kgMd5("1005" + KG_SALT + "20489" + clienttime))
+                    .put("special_recommend", new JSONObject()
+                            .put("withtag", 1).put("withsong", 1).put("sort", 1).put("ugc", 1)
+                            .put("is_selected", 0).put("withrecommend", 1).put("area_code", 1)
+                            .put("categoryid", 0))
+                    .put("req_multi", 1)
+                    .put("retrun_min", 5)
+                    .put("return_special_falg", 1);
+            bodyStr = body.toString();
+            // query 参数 ASCII 排序 k=v 无分隔直连（蓝本 signatureAndroidParams），qs 供请求
+            StringBuilder kv = new StringBuilder();
+            StringBuilder qs = new StringBuilder();
+            java.util.TreeMap<String, String> q = new java.util.TreeMap<>();
+            q.put("appid", "1005");
+            q.put("clienttime", clienttime);
+            q.put("clientver", "20489");
+            q.put("dfid", "-");
+            q.put("mid", mid);
+            q.put("uuid", "-");
+            for (Map.Entry<String, String> e : q.entrySet()) {
+                kv.append(e.getKey()).append('=').append(e.getValue());
+                if (qs.length() > 0) qs.append('&');
+                qs.append(enc(e.getKey())).append('=').append(enc(e.getValue()));
             }
-            JSONObject resp = getJson("http://mobilecdn.kugou.com/api/v3/playlist/list?page=" + page + "&pagesize=30", kgHeaders());
+            String signature = kgMd5(KG_SALT + kv + bodyStr + KG_SALT);
+            Map<String, String> h = headers("User-Agent", KG_APP_UA,
+                    "x-router", "specialrec.service.kugou.com",
+                    "clienttime", clienttime, "mid", mid, "dfid", "-",
+                    "kg-rc", "1", "kg-thash", "5d816a0", "kg-rec", "1",
+                    "kg-rf", "B9EDA08A64250DEFFBCADDEE00F8F25F",
+                    "Content-Type", "application/json");
+            String path = "/v2/special_recommend?" + qs + "&signature=" + signature;
+            JSONObject resp;
+            try {
+                resp = postJson("http://gateway.kugou.com" + path, h, bodyStr);
+            } catch (Exception he) {
+                resp = postJson("https://gateway.kugou.com" + path, h, bodyStr);
+            }
+            if (resp.optInt("status", -1) != 1) {
+                fileLog("kgPlaylistPage status=" + resp.opt("status") + " err=" + resp.opt("error"));
+                return pageDataEmpty(page);
+            }
             JSONObject data = resp.optJSONObject("data");
-            JSONArray specials = data == null ? null : data.optJSONArray("specials");
+            // 实测（gateway http 通道）：data.special_list[]（has_next 分页）；候选兼容 specials/info
+            JSONArray specials = data == null ? null : data.optJSONArray("special_list");
+            if (specials == null && data != null) {
+                JSONObject sr = data.optJSONObject("special_recommend");
+                specials = sr == null ? null : sr.optJSONArray("specials");
+                if (specials == null) specials = data.optJSONArray("specials");
+                if (specials == null) specials = data.optJSONArray("info");
+            }
             JSONObject result = new JSONObject();
             JSONArray list = new JSONArray();
             int i = 0;
@@ -3886,23 +3957,26 @@ public final class MusicCore {
                 for (int k = 0; k < specials.length(); k++) {
                     JSONObject p = specials.optJSONObject(k);
                     if (p == null) continue;
-                    String id = p.optString("specialid", "");
-                    String name = p.optString("specialname", "").trim();
-                    if (id.isEmpty() || name.isEmpty()) continue;
+                    String id = firstNonEmpty(p.optString("specialid", ""), p.optString("special_id", ""),
+                            String.valueOf(p.optLong("id", 0)));
+                    String name = firstNonEmpty(p.optString("specialname", ""), p.optString("name", "")).trim();
+                    if (id.isEmpty() || "0".equals(id) || name.isEmpty()) continue;
+                    String cover = firstNonEmpty(p.optString("imgurl", ""), p.optString("imgurl_i", ""),
+                            p.optString("img", ""), p.optString("cover", "")).replace("{size}", "240");
+                    if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
                     JSONObject v = new JSONObject();
                     v.put("vod_id", "kugou_playlist_" + id);
                     v.put("vod_name", name);
-                    String cover = p.optString("imgurl", "").replace("{size}", "240");
-                    if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
                     v.put("vod_pic", cover);
-                    v.put("vod_remarks", playCountText(p.optLong("play_count", p.optLong("playcount", 0))));
+                    v.put("vod_remarks", playCountText(p.optLong("play_count", p.optLong("playcount",
+                            p.optLong("play_cnt", p.optLong("count", 0))))));
                     v.put("vod_actor", platformName("kugou"));
                     v.put("vod_content", platformName("kugou") + " · " + name);
                     list.put(v);
                     i++;
                 }
             }
-            boolean more = i >= 30;
+            boolean more = i >= 30 || (data != null && data.optInt("has_next", 0) == 1);
             result.put("list", list);
             result.put("page", page);
             result.put("pagecount", more ? page + 1 : page);
@@ -3912,7 +3986,7 @@ public final class MusicCore {
             return result.toString();
         } catch (Exception e) {
             fileLog("kgPlaylistPage FAIL : " + e);
-            return pageDataEmpty(1);
+            return pageDataEmpty(page);
         }
     }
 
