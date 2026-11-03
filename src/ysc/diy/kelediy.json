@@ -13,7 +13,7 @@
       "name": "🍚饭太硬"
     },
     {
-      "url": "https://gcd888.github.io/kele/src/ysc/diy/摸鱼儿/我不是.摸鱼儿.json",
+      "url": "https://gcd888.github.io/kele/src/ysc/diy/摸鱼儿/fish.y456y.json",
       "name": "🐟摸鱼儿"
     },
     {
@@ -21,7 +21,7 @@
       "name": "🐱肥猫"
     },
 	{
-      "url": "https://gcd888.github.io/kele/src/ysc/diy/王小二/new.王二小放牛娃.json",
+      "url": "https://gcd888.github.io/kele/src/ysc/diy/王小二/tvbox.王二小放牛娃.json",
       "name": "🐄王小二"
     },
     {
@@ -44,7 +44,10 @@
       "url": "https://gcd888.github.io/kele/src/ysc/diy/短剧狗/duanjugou.json",
       "name": "📺短剧狗"
     },
-    
+    {
+      "url": "https://gcd888.github.io/kele/src/ysc/diy/短剧/api.json",
+      "name": "📺短剧"
+    },
     {
       "url": "https://gcd888.github.io/kele/src/ysc/diy/儿童堡/儿童堡.json",
       "name": "👦🏻儿童堡"

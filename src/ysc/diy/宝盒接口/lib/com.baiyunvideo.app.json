@@ -3,13 +3,13 @@
     "name": "云帧享",
     "packageName": "com.baiyunvideo.app",
     "officialWebsite": "https://www.yunman.vip",
-    "latestApkURL": "https://p1-ad.adukwai.com/bs2/ad-app/YWQtYXBwOmFkX2RzcF9hcHA6MjU4NzI3NzQxODpNRVJDSEFOVDpbQkAyODA4OTIyYzoyMzQ1NDYxMzczNzQxOA%3D%3D.apk",
-    "latestVersion": "2.8.0",
+    "latestApkURL": "https://p1-ad.adukwai.com/bs2/ad-app/YWQtYXBwOmFkX2RzcF9hcHA6MjU4NzI3NzQxODpNRVJDSEFOVDpbQkAyNjM0N2NjNDoyNDYxODE4MDA0MjQxOA%3D%3D.apk",
+    "latestVersion": "3.3.0",
     "textURL": "https://js.trgfd.cn",
     "otherURL": "https://js.trgfd.cn",
     "resourceURL": "https://img.zqykfz.cn",
     "feedbackURL": "https://js.trgfd.cn",
-    "danmuURL": "https://js.trgfd.cn",
+    "danmuURL": "https://tm.trgfd.cn",
     "adFreeVersion": "",
     "adFreeChannel": "",
     "isForceUpdate": 1,
@@ -22,7 +22,7 @@
       "content": "",
       "footer": ""
     },
-    "bofangyeguanggaotishi": "",
+    "bofangyeguanggaotishi": "推荐解锁全天免广特权@观看激励视频，解锁当天APP无广体验",
     "xiazaixiancheng": 4,
     "xiazaishuliang": 4,
     "aiurl": "",
@@ -30,13 +30,18 @@
       ""
     ],
     "csjad": "0",
-    "adyujiazai": 0,
+    "csjCallbackStrategyAdId": 0,
+    "clientReportCheckStrategyAdId": 0,
+    "adyujiazai": 1,
     "withoutads": 2,
-    "withoutadsshijian": 600,
+    "withoutadsshijian": 3600,
     "uaprefix": "baiyunvideo-",
     "shebeimingxianzhi": 2,
     "bofangyetubili": 0,
-    "alluseryincangvidlist": ""
+    "videoCacheBeforeTime": 60,
+    "videoPreloadTime": 120,
+    "alluseryincangvidlist": "",
+    "taskjumpurl": ""
   },
   "channels": [
     "首页",
@@ -198,20 +203,57 @@
       "playViewInterval": 0,
       "created_at": "0001-01-01T00:00:00Z",
       "updated_at": "0001-01-01T00:00:00Z",
-      "tuiguangmiantian": 0,
-      "tuiguangmiaoshu": "",
-      "tuiguangGuizeTitle": "",
-      "tuiguangGuizeContent": "",
-      "jili": [],
+      "tuiguangmiantian": 5,
+      "tuiguangmiaoshu": "每成功邀请1人，送5天免广告\n累计邀请3人，额外送5天免广告\n累计邀请10人，额外送30天免广告\n累计邀请30人，送永久免广告特权",
+      "tuiguangGuizeTitle": "邀新有礼｜双方享免广告福利！",
+      "tuiguangGuizeContent": "邀请好友下载 APP，好友（新用户）24 小时内填写你的邀请码，邀请成功！\n你：获得免广告会员5天  多邀多得 !\n好友（新用户）：直接领取 3 天免广告权益",
+      "jili": [
+        {
+          "tishi": "第一个广告",
+          "shijian": 3600
+        },
+        {
+          "tishi": "第二个广告",
+          "shijian": 3600
+        },
+        {
+          "tishi": "第三个广告",
+          "shijian": 3600
+        },
+        {
+          "tishi": "第四个广告",
+          "shijian": 7200
+        },
+        {
+          "tishi": "第五个广告",
+          "shijian": 7200
+        }
+      ],
       "jilixiazaici": 3,
       "jilizuixiaojiange": 8,
       "xiazaizuixiaojiange": 8
     }
   ],
   "huancun": 863000,
-  "tishi": "",
+  "tishi": "新版本更新啦！\n1. 修复跳过片头片尾功能\n2. 新增设备管理，优化设备限制规则\n3. 修复缓存影片，离线无网也能看\n4. 登录会员，解锁更多专属福利！",
+  "xinGengxingtishi": "新版本更新啦！\n1. 修复跳过片头片尾功能\n2. 新增设备管理，优化设备限制规则\n3. 修复缓存影片，离线无网也能看\n4. 登录会员，解锁更多专属福利！",
   "qiangzhi": 1,
-  "qudao": [],
+  "qudao": [
+    {
+      "qudaoming": "baidutuiguang",
+      "banben": "3.3.0",
+      "qiangzhi": 1,
+      "apk": "https://p5-ad.adukwai.com/bs2/ad-app/YWQtYXBwOmFkX2RzcF9hcHA6NTU0OTkwMTA5NjpNRVJDSEFOVDpbQkAyYmIzYzg2YToyNDYxNTk4NTU0NTA5Ng%3D%3D.apk",
+      "yanchijiancha": "0"
+    },
+    {
+      "qudaoming": "fenxiang",
+      "banben": "3.3.0",
+      "qiangzhi": 1,
+      "apk": "https://p1-ad.adukwai.com/bs2/ad-app/YWQtYXBwOmFkX2RzcF9hcHA6MjU4NzI3NzQxODpNRVJDSEFOVDpbQkAyNjM0N2NjNDoyNDYxODE4MDA0MjQxOA%3D%3D.apk",
+      "yanchijiancha": "0"
+    }
+  ],
   "color": {
     "morenzhuti": 0,
     "homeHeadColor": [

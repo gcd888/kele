@@ -1,10 +1,10 @@
 {
-  "spider": "./fty.jar;md5;c9024ccf34209d26eb556c728c3f07fa",
+  "spider": "./fty.jar;md5;d2a33b53d09ec59c4cb7e3f482ef3907",
   "wallpaper": "https://动态壁纸.饭.eu.org/",
   "sites": [
     {
       "key": "点我切源",
-      "name": "豆豆┃片单",
+      "name": "豆豆┃片单<修复所有>",
       "type": 3,
       "api": "csp_DouDouGuard",
       "indexs": 1,
@@ -85,23 +85,23 @@
       "ext": "rfOIzPkSUkANv6AT2prC8en3+Trbx4j10CIoZMv3Ag4bdEYQqTMqu/Z3YPtC2NJv6n6YeZdgyWlo4WJjBL5gUt6B7LvCEDT4CLrWka31GRq7jwVkfQRB/Jy9HkG7E8xUBIJi5DdVFk3qAuGnwUWqQNRblRxzHW+tdSm6zoFcG/QkZ97bzWOXn0fzbgwjBDkBHgcPIYjlULlctCNKgJ9DzGNSl+zMZDZgmxczsZeeahRS38Cst3qvaHn1T2lmLBGVGXPaRovi77LPRRDOJSNRrdpvCHdRikYwgar0MU56hXMGeGBiKp/OmGTIYR8dFRGvZ/m8xGOqs8U13h6wvADOGlYoP9VaQBqTcDnz9Q0Urhw3oFXWyvIlUrDhX9la5L2NYzagbyk3afqhxeSXXp07nAFsNy2CojHRTbmz4eohLoIJTSi2DzPpheVx1DAapfgRdTc7Ax5ddYpN338GiDAa0GnEgLe04a1pZ5jF+/Q7HJswqlSO+DXCQ3FjRbb/ZPQcozcCWwzhUHE1QUAt799V9DPMuiHGyudIcZarGQmezB+Lb45RdHIRy0PXD+NRVPJlfDFD5FMGSqsiVklibvuwlVHT8J5vHgh/1nEZoI1RlYYLrkjTts2EeQmrpB/sgLyo1vnjFw=="
     },
     {
-      "key": "原创",
-      "name": "👒原创┃不卡",
-      "type": 3,
-      "api": "csp_YCyzGuard",
-      "timeout": 15,
-      "playerType": 2,
-      "searchable": 1,
-      "quickSearch": 1,
-      "changeable": 1
-    },
-    {
       "key": "厂长",
       "name": "📔厂长┃不卡",
       "type": 3,
       "api": "csp_NewCzGuard",
       "timeout": 10,
       "playerType": 2,
+      "searchable": 1,
+      "quickSearch": 1,
+      "changeable": 1
+    },
+    {
+      "key": "海绵",
+      "name": "🐬海绵┃不卡",
+      "type": 3,
+      "api": "csp_HmysGuard",
+      "timeout": 10,
+      "playerType": "2",
       "searchable": 1,
       "quickSearch": 1,
       "changeable": 1
@@ -185,6 +185,19 @@
       "ext": "uqGL1bNENExT7/hGxpSE5qU="
     },
     {
+      "key": "风云",
+      "name": "☁️风云┃多线",
+      "type": 3,
+      "api": "csp_FyGuard",
+      "ext": {
+        "type": "video",
+        "name": "Fy"
+      },
+      "quickSearch": 1,
+      "searchable": 1,
+      "changeable": 1
+    },
+    {
       "key": "视界",
       "name": "🌸茉莉┃多线",
       "type": 3,
@@ -246,23 +259,12 @@
       "ext": {
         "type": "video",
         "name": "短剧",
-        "DanMu": false
+        "danMu": false
       },
       "indexs": 0,
       "quickSearch": 1,
       "searchable": 1,
       "changeable": 0
-    },
-    {
-      "key": "咕咕",
-      "name": "🦉咕咕┃动漫",
-      "type": 3,
-      "api": "csp_AppSxGuard",
-      "timeout": 10,
-      "searchable": 1,
-      "quickSearch": 1,
-      "changeable": 1,
-      "ext": "rfOX1voDIQhH8epBwpmIsuS/sSCZxc/l0mxkeoroQVYOelMAvX1kuYptSLB36YxEjVawS9p37Cgo"
     },
     {
       "key": "Dm84",
@@ -351,7 +353,7 @@
         "type": "rect",
         "ratio": 1
       },
-      "searchable": 0,
+      "searchable": 1,
       "quickSearch": 0,
       "changeable": 0
     },
@@ -608,9 +610,9 @@
   ],
   "logo": "https://bdcache1-f1.v3mh.com/image/25-12-16/6941612717007.gif",
   "hosts": [
-    "img1.wsyzy.org=fan.cloudflare.182682.xyz",
-    "fiizvfck.top=fan.cloudflare.182682.xyz",
-    "images.67c6c7a.com=fan.cloudflare.182682.xyz"
+    "img1.wsyzy.org=cmcc.vvvv.ee",
+    "fiizvfck.top=cmcc.vvvv.ee",
+    "images.67c6c7a.com=cmcc.vvvv.ee"
   ],
   "lives": [
     {
@@ -621,15 +623,14 @@
       "playerType": 2
     },
     {
+      "name": "牛播一",
+      "url": "http://127.0.0.1:9978/proxy?do=cctva",
+      "timeZone": "Asia/Shanghai"
+    },
+    {
       "name": "Kimentanm",
       "type": 0,
       "url": "./lib/iptv.m3u",
-      "playerType": 2
-    },
-    {
-      "name": "范明明（需开启V6网络）",
-      "type": 0,
-      "url": "./lib/3d75a78a0fc7ede372c03598d6d10367.m3u",
       "playerType": 2
     },
     {
