@@ -1,0 +1,5 @@
+build/
+pctest/classes/
+pctest/json.jar
+pctest/sample.ts
+pctest/*.wav

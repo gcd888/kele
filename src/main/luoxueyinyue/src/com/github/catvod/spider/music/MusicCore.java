@@ -44,7 +44,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * 协议（对壳端 SourceViewModel / MusicSession 透明复用）：
  *  - homeContent：平台分类 + 榜单/歌单 tabs（聚合源=all 六平台搜索；独立源=本平台内容）
- *  - categoryContent：热歌榜（聚合源=六平台合并去重）/ 榜单目录（{p}_rank）/ 歌单列表（netease/kugou）/ 榜单目录（qq/kuwo/migu）
+ *  - categoryContent：热歌榜（聚合源=六平台合并去重）/ 榜单目录（{p}_rank）/ 歌单列表（六平台：netease/kugou/qq/kuwo/migu，qq/kw/mg 按 lx-music songList.js 蓝本）/ 榜单目录（qq/kuwo/migu）
  *  - detailContent({p}_toplist_{id} | {p}_playlist_{id})：榜内/歌单内歌曲 = 播放集
  *  - searchContent：独立源仅本平台；聚合源六平台并行交错
  *  - playerContent(flag="果剧音乐")：音频直链 + lyric(LRC)/klyric(逐词)/accompany/trackMode/mv
@@ -1053,14 +1053,51 @@ public final class MusicCore {
         return out;
     }
 
-    /** QQ 歌单歌曲（fcg_ucc_getcdinfo_byids_cp disstid）。 */
+    /** QQ 歌单歌曲（fcg_ucc_getcdinfo_byids_cp disstid；lx tx/songList getListDetail 蓝本，失败回退 aiDissInfo POST）。 */
     public static List<Song> qqPlaylistSongs(String disstid) throws Exception {
+        // lx getListDetail：new_format=1 + loginUin=0 + platform=yqq.json + Origin/Referer y.qq.com
         String url = "https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?" +
-                "type=1&json=1&utf8=1&onlysong=0&disstid=" + enc(disstid) + "&format=json&g_tk=5381";
-        JSONObject resp = getJson(url, headers("Referer", QQ_REFERER, "User-Agent", WEB_UA));
-        JSONArray cdlist = resp.optJSONArray("cdlist");
-        if (cdlist == null || cdlist.length() == 0) return new ArrayList<>();
-        return qqParseSongList(cdlist.optJSONObject(0) == null ? null : cdlist.getJSONObject(0).optJSONArray("songlist"));
+                "type=1&json=1&utf8=1&onlysong=0&new_format=1&disstid=" + enc(disstid) +
+                "&loginUin=0&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=0";
+        Map<String, String> hd = headers("Referer", "https://y.qq.com/n/yqq/playsquare/" + disstid + ".html",
+                "Origin", "https://y.qq.com", "User-Agent", WEB_UA);
+        JSONArray songlist = null;
+        try {
+            JSONObject resp = getJson(url, hd);
+            JSONArray cdlist = resp.optJSONArray("cdlist");
+            if (cdlist != null && cdlist.length() > 0 && resp.optInt("code", -1) == 0 && resp.optInt("subcode", -1) == 0) {
+                songlist = cdlist.optJSONObject(0) == null ? null : cdlist.getJSONObject(0).optJSONArray("songlist");
+            }
+        } catch (Exception e) {
+            fileLog("qqPlaylistSongs fcg FAIL id=" + disstid + " : " + e);
+        }
+        // 回退：lx getListDetail2（music.srfDissInfo.aiDissInfo.uniform_get_Dissinfo POST）
+        if (songlist == null || songlist.length() == 0) {
+            try {
+                JSONObject payload = new JSONObject()
+                        .put("comm", new JSONObject()
+                                .put("cv", 4747474).put("ct", 24).put("format", "json")
+                                .put("inCharset", "utf-8").put("outCharset", "utf-8")
+                                .put("platform", "yqq.json").put("needNewCode", 1).put("uin", 0))
+                        .put("req_1", new JSONObject()
+                                .put("module", "music.srfDissInfo.aiDissInfo")
+                                .put("method", "uniform_get_Dissinfo")
+                                .put("param", new JSONObject()
+                                        .put("disstid", Long.parseLong(disstid.replaceAll("\\D", "")))
+                                        .put("userinfo", 1).put("tag", 1).put("orderlist", 1)
+                                        .put("song_begin", 0).put("song_num", 100000)
+                                        .put("onlysonglist", 0).put("enc_host_uin", "")));
+                JSONObject resp = qqFcgPost(payload);
+                JSONObject req1 = resp.optJSONObject("req_1");
+                JSONObject data = req1 == null ? null : req1.optJSONObject("data");
+                if (req1 != null && req1.optInt("code", -1) == 0 && data != null) {
+                    songlist = data.optJSONArray("songlist");
+                }
+            } catch (Exception e) {
+                fileLog("qqPlaylistSongs aiDissInfo FAIL id=" + disstid + " : " + e);
+            }
+        }
+        return qqParseSongList(songlist);
     }
 
     /** QQ 取流（music.vkey.GetVkey，M800/M500 mp3）。 */
@@ -3663,9 +3700,9 @@ public final class MusicCore {
                 classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热歌榜"));
                 classes.put(new JSONObject().put("type_id", "netease").put("type_name", platformName("netease") + "歌单"));
                 classes.put(new JSONObject().put("type_id", "kugou").put("type_name", platformName("kugou") + "歌单"));
-                classes.put(new JSONObject().put("type_id", "qq").put("type_name", platformName("qq") + "榜单"));
-                classes.put(new JSONObject().put("type_id", "kuwo").put("type_name", platformName("kuwo") + "榜单"));
-                classes.put(new JSONObject().put("type_id", "migu").put("type_name", platformName("migu") + "榜单"));
+                classes.put(new JSONObject().put("type_id", "qq").put("type_name", platformName("qq") + "歌单"));
+                classes.put(new JSONObject().put("type_id", "kuwo").put("type_name", platformName("kuwo") + "歌单"));
+                classes.put(new JSONObject().put("type_id", "migu").put("type_name", platformName("migu") + "歌单"));
                 // MV 站源并入主页 tab（一源一页签）：MV 房间 tid 由 categoryContent 前缀路由回各 MV 链路，
                 // 听歌主页无需切到 MV 源即可达 MV 内容（MV 源仅搜索兜底入口）
                 classes.put(new JSONObject().put("type_id", "mv_rcmd").put("type_name", "芸映MV"));
@@ -3678,27 +3715,31 @@ public final class MusicCore {
                     for (String c : neCatlist()) {
                         cats.put(new JSONObject().put("n", c).put("v", c));
                     }
-                    // 酷狗歌单分类（动态 get_tags_by_type 优先，兜底内置表）
-                    JSONArray kgCats = new JSONArray();
-                    kgCats.put(new JSONObject().put("n", "全部").put("v", ""));
-                    for (String[] c : kgPlaylistCats()) {
-                        kgCats.put(new JSONObject().put("n", c[0]).put("v", c[0]));
-                    }
+                    // 酷狗歌单分类（v9 getSpecial tagids 动态拉取，lx getTags 蓝本；失败仅「全部」）
+                    JSONArray kgCats = catsJson(kgV9Cats());
                     JSONObject filters = new JSONObject();
                     filters.put("netease", new JSONArray().put(new JSONObject()
                             .put("key", "cat").put("name", "分类").put("value", cats)));
                     filters.put("kugou", new JSONArray().put(new JSONObject()
                             .put("key", "cat").put("name", "分类").put("value", kgCats)));
+                    // 秋秋/蜗牛/小蜜 歌单分类（lx songList.js 动态 tags，失败仅「全部」=推荐流）
+                    filters.put("qq", new JSONArray().put(new JSONObject()
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(qqPlaylistCats()))));
+                    filters.put("kuwo", new JSONArray().put(new JSONObject()
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(kwPlaylistCats()))));
+                    filters.put("migu", new JSONArray().put(new JSONObject()
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(mgPlaylistCats()))));
                     result.put("filters", filters);
                 }
             } else {
                 String pn = platformName(platform);
-                if ("netease".equals(platform)) {
-                    classes.put(new JSONObject().put("type_id", "netease").put("type_name", pn + "歌单"));
+                if ("netease".equals(platform) || "kugou".equals(platform)
+                        || "qq".equals(platform) || "kuwo".equals(platform) || "migu".equals(platform)) {
+                    classes.put(new JSONObject().put("type_id", platform).put("type_name", pn + "歌单"));
                 }
                 classes.put(new JSONObject().put("type_id", "hot").put("type_name", pn + "热歌"));
                 classes.put(new JSONObject().put("type_id", platform + "_rank").put("type_name", pn + "榜单"));
-                if (filter && ("netease".equals(platform) || "kugou".equals(platform))) {
+                if (filter) {
                     JSONObject filters = new JSONObject();
                     if ("netease".equals(platform)) {
                         JSONArray cats = new JSONArray();
@@ -3710,13 +3751,21 @@ public final class MusicCore {
                                 .put("key", "cat").put("name", "分类").put("value", cats)));
                     }
                     if ("kugou".equals(platform)) {
-                        JSONArray kgCats = new JSONArray();
-                        kgCats.put(new JSONObject().put("n", "全部").put("v", ""));
-                        for (String[] c : kgPlaylistCats()) {
-                            kgCats.put(new JSONObject().put("n", c[0]).put("v", c[0]));
-                        }
+                        JSONArray kgCats = catsJson(kgV9Cats());
                         filters.put("kugou", new JSONArray().put(new JSONObject()
                                 .put("key", "cat").put("name", "分类").put("value", kgCats)));
+                    }
+                    if ("qq".equals(platform)) {
+                        filters.put("qq", new JSONArray().put(new JSONObject()
+                                .put("key", "cat").put("name", "分类").put("value", catsJson(qqPlaylistCats()))));
+                    }
+                    if ("kuwo".equals(platform)) {
+                        filters.put("kuwo", new JSONArray().put(new JSONObject()
+                                .put("key", "cat").put("name", "分类").put("value", catsJson(kwPlaylistCats()))));
+                    }
+                    if ("migu".equals(platform)) {
+                        filters.put("migu", new JSONArray().put(new JSONObject()
+                                .put("key", "cat").put("name", "分类").put("value", catsJson(mgPlaylistCats()))));
                     }
                     result.put("filters", filters);
                 }
@@ -3770,7 +3819,7 @@ public final class MusicCore {
      *  - hot：聚合源=六平台热歌合并去重；独立源=本平台热歌榜歌曲直出
      *  - {p}_rank：榜单卡片目录（点击进 detailContent({p}_toplist_{id})）
      *  - netease / kugou：歌单列表（netease 支持 cat 筛选）
-     *  - qq / kuwo / migu：榜单目录（QQ 歌单聚合 API 匿名已关闭；酷我需 JS 种 cookie，均退回内置榜单）
+     *  - qq / kuwo / migu：歌单列表（lx-music songList.js 蓝本：qq=wk_v15 musicu.fcg、kuwo=wapi、migu=pc bmw；cat 筛选）
      */
     public static String categoryContent(String platform, String tid, String pg, boolean filter, HashMap<String, String> extend) {
         String platformOfTid = tid == null ? "" : tid.trim();
@@ -3790,8 +3839,14 @@ public final class MusicCore {
             if ("kugou".equals(platformOfTid)) {
                 return kgPlaylistPage(pg, extend);
             }
-            if ("qq".equals(platformOfTid) || "kuwo".equals(platformOfTid) || "migu".equals(platformOfTid)) {
-                return rankPage(platformOfTid);
+            if ("qq".equals(platformOfTid)) {
+                return qqPlaylistPage(pg, extend);
+            }
+            if ("kuwo".equals(platformOfTid)) {
+                return kwPlaylistPage(pg, extend);
+            }
+            if ("migu".equals(platformOfTid)) {
+                return mgPlaylistPage(pg, extend);
             }
             // MV 站源页签（聚合主页并入的 mv_/mvq_/kgmv_/mvmv_ tid）路由回各 MV 分类链路
             // 注意分类 tid 前缀是 kgmv_（kgmv_hot 等），条目 uid 才是 mvk_ 前缀
@@ -3891,138 +3946,82 @@ public final class MusicCore {
     }
 
     /**
-     * 小枸歌单列表页（gateway special_recommend，KuGouMusicApi top_playlist.js 蓝本）。
-     * mobilecdn v3/playlist/list 与 v3/playlist/detail 已被服务端 WAF 封（Access Deny，
-     * 同族 rank/search/special-song 仍活——勿回退 v3 歌单路径）。
-     * 分类：extend.cat（分类名）→ categoryid（kgPlaylistCats 动态拉取，兜底内置表），
-     * 0=推荐（蓝本注释：categoryid 0=推荐 11292=HI-RES）。
-     * 签名：signature = MD5(SALT + sorted(query k=v) + body原文 + SALT)（android 族带 body）；
-     * key = MD5(appid + SALT + clientver + clienttime)（signParamsKey 蓝本）。
-     * http 优先（明文通道避开部分网络对 kugou https 的 SNI 干扰），https 兜底。
+     * 小枸歌单列表页（lx-music kg/songList.js 蓝本：www2.kugou.kugou.com yueku/v9/special/getSpecial，
+     * 匿名无签名，2026-11-03 经 VPN 实测可用）。旧 gateway special_recommend 通道已废（实测 502）。
+     * cat 筛选值=v9 tag id（kgV9Cats 动态拉取 data.tagids），空=推荐流（t=5&c=空）。
+     * 详情走 kgPlaylistSongs（mobilecdn v3 special/song，经 VPN 实测仍活）。
      */
     private static String kgPlaylistPage(String pg, HashMap<String, String> extend) {
-        int page = 1;
         try {
-            page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
-        } catch (Exception ignored) {
-        }
-        // 分类名 → categoryid（「全部」/未选 = 0 推荐）
-        int categoryid = 0;
-        String cat = extend != null && extend.get("cat") != null ? extend.get("cat").trim() : "";
-        if (!cat.isEmpty() && !"全部".equals(cat)) {
-            for (String[] c : kgPlaylistCats()) {
-                if (c[0].equals(cat)) {
-                    try {
-                        categoryid = Integer.parseInt(c[1]);
-                    } catch (Exception ignored) {
-                    }
-                    break;
-                }
-            }
-        }
-        String bodyStr = "";
-        try {
-            String mid = kgMid();
-            String clienttime = String.valueOf(System.currentTimeMillis() / 1000);
-            JSONObject body = new JSONObject()
-                    .put("appid", 1005)
-                    .put("mid", mid)
-                    .put("clientver", 20489)
-                    .put("platform", "android")
-                    .put("clienttime", clienttime)
-                    .put("userid", 0)
-                    .put("module_id", 1)
-                    .put("page", page)
-                    .put("pagesize", 30)
-                    .put("key", kgMd5("1005" + KG_SALT + "20489" + clienttime))
-                    .put("special_recommend", new JSONObject()
-                            .put("withtag", 1).put("withsong", 1).put("sort", 1).put("ugc", 1)
-                            .put("is_selected", 0).put("withrecommend", 1).put("area_code", 1)
-                            .put("categoryid", categoryid))
-                    .put("req_multi", 1)
-                    .put("retrun_min", 5)
-                    .put("return_special_falg", 1);
-            bodyStr = body.toString();
-            // query 参数 ASCII 排序 k=v 无分隔直连（蓝本 signatureAndroidParams），qs 供请求
-            StringBuilder kv = new StringBuilder();
-            StringBuilder qs = new StringBuilder();
-            java.util.TreeMap<String, String> q = new java.util.TreeMap<>();
-            q.put("appid", "1005");
-            q.put("clienttime", clienttime);
-            q.put("clientver", "20489");
-            q.put("dfid", "-");
-            q.put("mid", mid);
-            q.put("uuid", "-");
-            for (Map.Entry<String, String> e : q.entrySet()) {
-                kv.append(e.getKey()).append('=').append(e.getValue());
-                if (qs.length() > 0) qs.append('&');
-                qs.append(enc(e.getKey())).append('=').append(enc(e.getValue()));
-            }
-            String signature = kgMd5(KG_SALT + kv + bodyStr + KG_SALT);
-            Map<String, String> h = headers("User-Agent", KG_APP_UA,
-                    "x-router", "specialrec.service.kugou.com",
-                    "clienttime", clienttime, "mid", mid, "dfid", "-",
-                    "kg-rc", "1", "kg-thash", "5d816a0", "kg-rec", "1",
-                    "kg-rf", "B9EDA08A64250DEFFBCADDEE00F8F25F",
-                    "Content-Type", "application/json");
-            String path = "/v2/special_recommend?" + qs + "&signature=" + signature;
-            JSONObject resp;
+            String catId = extend != null && extend.get("cat") != null ? extend.get("cat").trim() : "";
+            int page = 1;
             try {
-                resp = postJson("http://gateway.kugou.com" + path, h, bodyStr);
-            } catch (Exception he) {
-                resp = postJson("https://gateway.kugou.com" + path, h, bodyStr);
+                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+            } catch (Exception ignored) {
             }
-            if (resp.optInt("status", -1) != 1) {
-                fileLog("kgPlaylistPage status=" + resp.opt("status") + " err=" + resp.opt("error"));
-                return pageDataEmpty(page);
-            }
-            JSONObject data = resp.optJSONObject("data");
-            // 实测（gateway http 通道）：data.special_list[]（has_next 分页）；候选兼容 specials/info
-            JSONArray specials = data == null ? null : data.optJSONArray("special_list");
-            if (specials == null && data != null) {
-                JSONObject sr = data.optJSONObject("special_recommend");
-                specials = sr == null ? null : sr.optJSONArray("specials");
-                if (specials == null) specials = data.optJSONArray("specials");
-                if (specials == null) specials = data.optJSONArray("info");
-            }
-            JSONObject result = new JSONObject();
-            JSONArray list = new JSONArray();
-            int i = 0;
-            if (specials != null) {
-                for (int k = 0; k < specials.length(); k++) {
-                    JSONObject p = specials.optJSONObject(k);
-                    if (p == null) continue;
-                    String id = firstNonEmpty(p.optString("specialid", ""), p.optString("special_id", ""),
-                            String.valueOf(p.optLong("id", 0)));
-                    String name = firstNonEmpty(p.optString("specialname", ""), p.optString("name", "")).trim();
-                    if (id.isEmpty() || "0".equals(id) || name.isEmpty()) continue;
-                    String cover = firstNonEmpty(p.optString("imgurl", ""), p.optString("imgurl_i", ""),
-                            p.optString("img", ""), p.optString("cover", "")).replace("{size}", "240");
-                    if (cover.startsWith("http://")) cover = "https://" + cover.substring(7);
-                    JSONObject v = new JSONObject();
-                    v.put("vod_id", "kugou_playlist_" + id);
-                    v.put("vod_name", name);
-                    v.put("vod_pic", cover);
-                    v.put("vod_remarks", playCountText(p.optLong("play_count", p.optLong("playcount",
-                            p.optLong("play_cnt", p.optLong("count", 0))))));
-                    v.put("vod_actor", platformName("kugou"));
-                    v.put("vod_content", platformName("kugou") + " · " + name);
-                    list.put(v);
-                    i++;
-                }
-            }
-            boolean more = i >= 30 || (data != null && data.optInt("has_next", 0) == 1);
-            result.put("list", list);
-            result.put("page", page);
-            result.put("pagecount", more ? page + 1 : page);
-            result.put("limit", 30);
-            result.put("total", more ? -1 : i);
-            fileLog("kgPlaylistPage done pg=" + page + " items=" + i);
-            return result.toString();
+            List<JSONObject> items = kgV9Playlists(catId, page);
+            return playlistEntriesPage("kugou", items, page, items.size() >= 20);
         } catch (Exception e) {
             fileLog("kgPlaylistPage FAIL : " + e);
-            return pageDataEmpty(page);
+            return pageDataEmpty(1);
         }
+    }
+
+    /** 酷狗 v9 歌单列表抓取（lx getSongList/filterList 蓝本）：tagId 空=推荐流，非空=分类。 */
+    private static List<JSONObject> kgV9Playlists(String tagId, int page) throws Exception {
+        String url = "http://www2.kugou.kugou.com/yueku/v9/special/getSpecial?is_ajax=1&cdn=cdn&t=5"
+                + "&c=" + enc(tagId) + "&p=" + page;
+        JSONObject resp = getJson(url, headers("User-Agent", WEB_UA, "Referer", "http://www2.kugou.kugou.com/"));
+        List<JSONObject> out = new ArrayList<>();
+        if (resp.optInt("status", -1) != 1) return out;
+        JSONArray specials = resp.optJSONArray("special_db");
+        if (specials == null) return out;
+        for (int i = 0; i < specials.length(); i++) {
+            JSONObject p = specials.optJSONObject(i);
+            if (p == null) continue;
+            String id = String.valueOf(p.opt("specialid"));
+            String name = p.optString("specialname", "").trim();
+            if (id.isEmpty() || "0".equals(id) || name.isEmpty()) continue;
+            // lx filterList：total_play_count（服务端已格式化字符串如"1718.4万"）优先，否则格式化 play_count
+            String tpc = p.optString("total_play_count", "").trim();
+            String remarks = tpc.isEmpty() || "0".equals(tpc) ? playCountText(p.optLong("play_count", 0)) : tpc;
+            JSONObject o = new JSONObject();
+            o.put("id", id).put("name", name)
+                    .put("cover", firstNonEmpty(p.optString("img", ""), p.optString("imgurl", "")).replace("{size}", "240"))
+                    .put("remarks", remarks)
+                    .put("content", p.optString("intro", "").trim());
+            out.add(o);
+        }
+        return out;
+    }
+
+    /** 酷狗 v9 歌单分类（lx getTags 蓝本：getSpecial?is_smarty=1 data.tagids 分组平铺 [tagId, name]）。 */
+    private static List<String[]> kgV9Cats() {
+        List<String[]> out = new ArrayList<>();
+        try {
+            JSONObject resp = getJson("http://www2.kugou.kugou.com/yueku/v9/special/getSpecial?is_smarty=1&cdn=cdn&t=5&c=",
+                    headers("User-Agent", WEB_UA, "Referer", "http://www2.kugou.kugou.com/"));
+            if (resp.optInt("status", -1) != 1) return out;
+            JSONObject data = resp.optJSONObject("data");
+            JSONObject tags = data == null ? null : data.optJSONObject("tagids");
+            if (tags == null) return out;
+            java.util.Iterator<String> keys = tags.keys();
+            while (keys.hasNext() && out.size() < 40) {
+                JSONObject grp = tags.optJSONObject(keys.next());
+                JSONArray items = grp == null ? null : grp.optJSONArray("data");
+                if (items == null) continue;
+                for (int i = 0; i < items.length() && out.size() < 40; i++) {
+                    JSONObject t = items.optJSONObject(i);
+                    if (t == null) continue;
+                    String id = String.valueOf(t.opt("id"));
+                    String name = t.optString("name", "").trim();
+                    if (!id.isEmpty() && !name.isEmpty() && !"0".equals(id)) out.add(new String[]{id, name});
+                }
+            }
+        } catch (Exception e) {
+            fileLog("kgV9Cats FAIL : " + e);
+        }
+        return out;
     }
 
     /**
@@ -4054,6 +4053,11 @@ public final class MusicCore {
             {"70后", "13"}, {"80后", "14"}, {"90后", "76"}, {"00后", "571"},
             {"HI-RES 无损", "11292"},
     };
+    /**
+     * @deprecated gateway 族端点已废（2026-11-03 实测 502），歌单分类/列表改走 v9 getSpecial
+     * （kgV9Cats/kgPlaylistPage）。本方法及缓存、兜底表保留备用（kgPlaylistSongs 相关链路未依赖）。
+     */
+    @Deprecated
     /** 酷狗歌单动态分类缓存（get_tags_by_type 拉取成功后驻留进程）。 */
     private static volatile String[][] kgPlaylistCatsCache;
     /** 动态分类拉取失败标记（负缓存：失败后本进程不再重试，避免翻页反复打失败请求）。 */
@@ -4214,6 +4218,355 @@ public final class MusicCore {
             return result.toString();
         } catch (Exception e) {
             fileLog("nePlaylistPage FAIL : " + e);
+            return pageDataEmpty(1);
+        }
+    }
+
+    // ============================ 秋秋/蜗牛/小蜜 歌单列表（lx-music-mobile songList.js 蓝本） ============================
+
+    /** 歌单列表页统一渲染：items 元素含 id/name/cover/remarks/content，vod_id={p}_playlist_{id}。 */
+    private static String playlistEntriesPage(String platform, List<JSONObject> items, int page, boolean more) {
+        try {
+            JSONObject result = new JSONObject();
+            JSONArray list = new JSONArray();
+            int i = 0;
+            for (JSONObject p : items) {
+                String id = p.optString("id", "").trim();
+                String name = p.optString("name", "").trim();
+                if (id.isEmpty() || name.isEmpty()) continue;
+                JSONObject v = new JSONObject();
+                v.put("vod_id", platform + "_playlist_" + id);
+                v.put("vod_name", name);
+                v.put("vod_pic", p.optString("cover", ""));
+                v.put("vod_remarks", p.optString("remarks", ""));
+                v.put("vod_actor", platformName(platform));
+                v.put("vod_content", p.optString("content", ""));
+                list.put(v);
+                i++;
+            }
+            result.put("list", list);
+            result.put("page", page);
+            result.put("pagecount", more ? page + 1 : page);
+            result.put("limit", Math.max(items.size(), 1));
+            result.put("total", more ? -1 : i);
+            fileLog("categoryContent done tid=" + platform + " pg=" + page + " items=" + i);
+            return result.toString();
+        } catch (Exception e) {
+            fileLog("playlistEntriesPage FAIL p=" + platform + " : " + e);
+            return pageDataEmpty(1);
+        }
+    }
+
+    /** 分类筛选 JSONArray（n=名称 v=cat 值），首项固定「全部」。 */
+    private static JSONArray catsJson(List<String[]> cats) {
+        JSONArray arr = new JSONArray();
+        try {
+            arr.put(new JSONObject().put("n", "全部").put("v", ""));
+            for (String[] c : cats) {
+                if (c == null || c.length < 2 || c[0].isEmpty() || c[1].isEmpty()) continue;
+                arr.put(new JSONObject().put("n", c[1]).put("v", c[0]));
+            }
+        } catch (Exception ignore) {
+        }
+        return arr;
+    }
+
+    /** QQ 歌单分类（musicu.fcg playlist.PlaylistAllCategoriesServer，lx getTag 蓝本；动态失败回退空=仅推荐）。 */
+    private static List<String[]> qqPlaylistCats() {
+        List<String[]> out = new ArrayList<>();
+        try {
+            JSONObject data = new JSONObject().put("tags", new JSONObject()
+                    .put("method", "get_all_categories")
+                    .put("param", new JSONObject().put("qq", ""))
+                    .put("module", "playlist.PlaylistAllCategoriesServer"));
+            String url = "https://u.y.qq.com/cgi-bin/musicu.fcg?loginUin=0&hostUin=0&format=json" +
+                    "&inCharset=utf-8&outCharset=utf-8&notice=0&platform=wk_v15.json&needNewCode=0&data=" + enc(data.toString());
+            JSONObject resp = getJson(url, headers("Referer", "https://c.y.qq.com/", "User-Agent", WEB_UA));
+            JSONObject tags = resp.optJSONObject("tags");
+            JSONObject tdata = tags == null ? null : tags.optJSONObject("data");
+            JSONArray groups = tdata == null ? null : tdata.optJSONArray("v_group");
+            if (groups == null) return out;
+            for (int g = 0; g < groups.length() && out.size() < 40; g++) {
+                JSONObject grp = groups.optJSONObject(g);
+                JSONArray items = grp == null ? null : grp.optJSONArray("v_item");
+                if (items == null) continue;
+                for (int i = 0; i < items.length() && out.size() < 40; i++) {
+                    JSONObject t = items.optJSONObject(i);
+                    if (t == null) continue;
+                    String id = String.valueOf(t.opt("id"));
+                    String name = t.optString("name", "").trim();
+                    if (!id.isEmpty() && !name.isEmpty() && !"0".equals(id)) out.add(new String[]{id, name});
+                }
+            }
+        } catch (Exception e) {
+            fileLog("qqPlaylistCats FAIL : " + e);
+        }
+        return out;
+    }
+
+    /** QQ 歌单列表抓取：分类空时回退推荐流（PlayListCategoryServer 实测间歇返回空，推荐流稳定）。 */
+    private static List<JSONObject> qqPlaylists(String catId, int page) throws Exception {
+        List<JSONObject> out = catId.isEmpty() ? new ArrayList<JSONObject>() : qqPlaylistsByModule(catId, page);
+        if (out.isEmpty()) {
+            if (!catId.isEmpty()) fileLog("qqPlaylists category empty cat=" + catId + " -> fallback recommend");
+            out = qqPlaylistsByModule("", page);
+        }
+        return out;
+    }
+
+    /** QQ 歌单列表（lx getList 蓝本）：catId 空=推荐流(PlaylistSquare.GetRecommendWhole)，非空=分类(PlayListCategoryServer)。 */
+    private static List<JSONObject> qqPlaylistsByModule(String catId, int page) throws Exception {
+        boolean recommend = catId.isEmpty();
+        JSONObject playlist = new JSONObject();
+        if (recommend) {
+            playlist.put("module", "music.playlist.PlaylistSquare")
+                    .put("method", "GetRecommendWhole")
+                    .put("param", new JSONObject().put("IsReqFeed", true)
+                            .put("FeedReq", new JSONObject().put("From", (page - 1) * 30).put("Size", 30)));
+        } else {
+            playlist.put("module", "playlist.PlayListCategoryServer")
+                    .put("method", "get_category_content")
+                    .put("param", new JSONObject().put("titleid", catId).put("caller", "0")
+                            .put("category_id", catId).put("size", 30).put("page", page - 1).put("use_page", 1));
+        }
+        JSONObject data = new JSONObject().put("comm", new JSONObject().put("cv", 1602).put("ct", 20)).put("playlist", playlist);
+        String url = "https://u.y.qq.com/cgi-bin/musicu.fcg?loginUin=0&hostUin=0&format=json" +
+                "&inCharset=utf-8&outCharset=utf-8&notice=0&platform=wk_v15.json&needNewCode=0&data=" + enc(data.toString());
+        JSONObject resp = getJson(url, headers("Referer", "https://c.y.qq.com/", "User-Agent", WEB_UA));
+        JSONObject pl = resp.optJSONObject("playlist");
+        JSONObject pdata = pl == null ? null : pl.optJSONObject("data");
+        List<JSONObject> out = new ArrayList<>();
+        if (pdata == null) return out;
+        JSONArray entries;
+        if (recommend) {
+            JSONObject feed = pdata.optJSONObject("FeedRsp");
+            entries = feed == null ? null : feed.optJSONArray("List");
+        } else {
+            JSONObject content = pdata.optJSONObject("content");
+            entries = content == null ? null : content.optJSONArray("v_item");
+        }
+        if (entries == null) return out;
+        for (int i = 0; i < entries.length(); i++) {
+            JSONObject wrap = entries.optJSONObject(i);
+            if (wrap == null) continue;
+            JSONObject basic = recommend ? wrap.optJSONObject("Playlist") : wrap;
+            if (recommend && basic != null) basic = basic.optJSONObject("basic");
+            if (basic == null) continue;
+            String tid = String.valueOf(basic.opt("tid"));
+            String title = basic.optString("title", "").trim();
+            if (tid.isEmpty() || "null".equals(tid) || title.isEmpty()) continue;
+            JSONObject coverObj = basic.optJSONObject("cover");
+            String cover = coverObj == null ? "" : firstNonEmpty(coverObj.optString("medium_url", ""), coverObj.optString("default_url", ""));
+            JSONObject o = new JSONObject();
+            o.put("id", tid).put("name", title).put("cover", cover)
+                    .put("remarks", playCountText(basic.optLong("play_cnt", 0)))
+                    .put("content", basic.optString("desc", "").replace("<br>", "\n").trim());
+            out.add(o);
+        }
+        return out;
+    }
+
+    /** 秋秋歌单列表页（cat 筛选值=分类 id，空=推荐流）。 */
+    private static String qqPlaylistPage(String pg, HashMap<String, String> extend) {
+        try {
+            String catId = extend != null && extend.get("cat") != null ? extend.get("cat").trim() : "";
+            int page = 1;
+            try {
+                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+            } catch (Exception ignored) {
+            }
+            List<JSONObject> items = qqPlaylists(catId, page);
+            return playlistEntriesPage("qq", items, page, items.size() >= 30);
+        } catch (Exception e) {
+            fileLog("qqPlaylistPage FAIL : " + e);
+            return pageDataEmpty(1);
+        }
+    }
+
+    /** 蜗牛歌单分类（lx kw getTag 蓝本：getTagList，值={id}-{digest}）。 */
+    private static List<String[]> kwPlaylistCats() {
+        List<String[]> out = new ArrayList<>();
+        try {
+            String url = "http://wapi.kuwo.cn/api/pc/classify/playlist/getTagList?cmd=rcm_keyword_playlist&user=0" +
+                    "&prod=kwplayer_pc_9.0.5.0&vipver=9.0.5.0&source=kwplayer_pc_9.0.5.0&loginUid=0&loginSid=0&appUid=76039576";
+            JSONObject resp = getJson(url, withRandomIp(headers("User-Agent", KW_UA)));
+            if (resp.optInt("code", -1) != 200) return out;
+            JSONArray groups = resp.optJSONArray("data");
+            if (groups == null) return out;
+            for (int g = 0; g < groups.length() && out.size() < 40; g++) {
+                JSONObject grp = groups.optJSONObject(g);
+                JSONArray items = grp == null ? null : grp.optJSONArray("data");
+                if (items == null) continue;
+                for (int i = 0; i < items.length() && out.size() < 40; i++) {
+                    JSONObject t = items.optJSONObject(i);
+                    if (t == null) continue;
+                    String id = t.optString("id", "").trim();
+                    String digest = t.optString("digest", "").trim();
+                    String name = t.optString("name", "").trim();
+                    if (id.isEmpty() || digest.isEmpty() || name.isEmpty()) continue;
+                    out.add(new String[]{id + "-" + digest, name});
+                }
+            }
+        } catch (Exception e) {
+            fileLog("kwPlaylistCats FAIL : " + e);
+        }
+        return out;
+    }
+
+    /** 蜗牛歌单列表抓取（lx kw getList 蓝本）：catId 空=getRcmPlayList(order=hot)，非空=getTagPlayList。 */
+    private static List<JSONObject> kwPlaylists(String catId, int page) throws Exception {
+        String common = "loginUid=0&loginSid=0&appUid=76039576";
+        String url;
+        if (catId.isEmpty()) {
+            url = "http://wapi.kuwo.cn/api/pc/classify/playlist/getRcmPlayList?" + common + "&pn=" + page + "&rn=30&order=hot";
+        } else {
+            String id = catId.contains("-") ? catId.substring(0, catId.indexOf('-')) : catId;
+            url = "http://wapi.kuwo.cn/api/pc/classify/playlist/getTagPlayList?" + common + "&pn=" + page + "&id=" + enc(id) + "&rn=30";
+        }
+        JSONObject resp = getJson(url, withRandomIp(headers("User-Agent", KW_UA)));
+        if (resp.optInt("code", -1) != 200) return new ArrayList<>();
+        JSONObject data = resp.optJSONObject("data");
+        JSONArray arr = data == null ? null : data.optJSONArray("data");
+        List<JSONObject> out = new ArrayList<>();
+        if (arr == null) return out;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item = arr.optJSONObject(i);
+            if (item == null) continue;
+            // digest 8=普通歌单（nplserver getlistinfo 直达，与 kwPlaylistSongs 对齐）；13=专辑 4=歌手不收
+            String digest = item.optString("digest", "8").trim();
+            String pid = item.optString("id", "").trim();
+            String name = item.optString("name", "").trim();
+            if (pid.isEmpty() || name.isEmpty()) continue;
+            if (!"8".equals(digest)) continue;
+            JSONObject o = new JSONObject();
+            o.put("id", pid).put("name", name).put("cover", item.optString("img", ""))
+                    .put("remarks", playCountText(item.optLong("listencnt", 0)))
+                    .put("content", item.optString("desc", "").trim());
+            out.add(o);
+        }
+        return out;
+    }
+
+    /** 蜗牛歌单列表页（cat 筛选值={id}-{digest}，空=推荐）。 */
+    private static String kwPlaylistPage(String pg, HashMap<String, String> extend) {
+        try {
+            String catId = extend != null && extend.get("cat") != null ? extend.get("cat").trim() : "";
+            int page = 1;
+            try {
+                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+            } catch (Exception ignored) {
+            }
+            List<JSONObject> items = kwPlaylists(catId, page);
+            return playlistEntriesPage("kuwo", items, page, items.size() >= 30);
+        } catch (Exception e) {
+            fileLog("kwPlaylistPage FAIL : " + e);
+            return pageDataEmpty(1);
+        }
+    }
+
+    /** 小蜜歌单分类（lx mg getTag 蓝本：musiclistplaza-taglist，texts=[name, id]）。 */
+    private static List<String[]> mgPlaylistCats() {
+        List<String[]> out = new ArrayList<>();
+        try {
+            JSONObject resp = getJson("https://app.c.nf.migu.cn/pc/v1.0/template/musiclistplaza-taglist/release", mgHeaders());
+            if (!"000000".equals(resp.optString("code", ""))) return out;
+            JSONArray data = resp.optJSONArray("data");
+            if (data == null) return out;
+            for (int g = 0; g < data.length() && out.size() < 40; g++) {
+                JSONObject grp = data.optJSONObject(g);
+                JSONArray content = grp == null ? null : grp.optJSONArray("content");
+                if (content == null) continue;
+                for (int i = 0; i < content.length() && out.size() < 40; i++) {
+                    JSONObject tag = content.optJSONObject(i);
+                    JSONArray texts = tag == null ? null : tag.optJSONArray("texts");
+                    if (texts == null || texts.length() < 2) continue;
+                    String name = texts.optString(0).trim();
+                    String id = texts.optString(1).trim();
+                    if (!name.isEmpty() && !id.isEmpty()) out.add(new String[]{id, name});
+                }
+            }
+        } catch (Exception e) {
+            fileLog("mgPlaylistCats FAIL : " + e);
+        }
+        return out;
+    }
+
+    /** 咪咕推荐流递归收集（lx filterList2 蓝本：contents 下钻，resType=2021 为歌单卡片）。 */
+    private static void mgCollectPlaylists(JSONArray arr, List<JSONObject> out, java.util.Set<String> ids) throws Exception {
+        if (arr == null) return;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item = arr.optJSONObject(i);
+            if (item == null) continue;
+            if (item.has("contents")) {
+                mgCollectPlaylists(item.optJSONArray("contents"), out, ids);
+                continue;
+            }
+            String resId = item.optString("resId", "").trim();
+            if ("2021".equals(item.optString("resType", "")) && !resId.isEmpty() && ids.add(resId)) {
+                JSONObject o = new JSONObject();
+                o.put("id", resId).put("name", item.optString("txt", "").trim())
+                        .put("cover", item.optString("img", "")).put("content", item.optString("txt2", ""));
+                out.add(o);
+            }
+        }
+    }
+
+    /** 小蜜歌单列表抓取（lx mg getList 蓝本）：catId 空=playlist-square-recommend，非空=musiclistplaza-listbytag。 */
+    private static List<JSONObject> mgPlaylists(String catId, int page) throws Exception {
+        JSONObject resp;
+        if (catId.isEmpty()) {
+            resp = getJson("https://app.c.nf.migu.cn/pc/bmw/page-data/playlist-square-recommend/v1.0" +
+                    "?templateVersion=2&pageNo=" + page, mgHeaders());
+        } else {
+            resp = getJson("https://app.c.nf.migu.cn/pc/v1.0/template/musiclistplaza-listbytag/release" +
+                    "?pageNumber=" + page + "&templateVersion=2&tagId=" + enc(catId), mgHeaders());
+        }
+        List<JSONObject> out = new ArrayList<>();
+        if (!"000000".equals(resp.optString("code", ""))) return out;
+        JSONObject data = resp.optJSONObject("data");
+        if (data == null) return out;
+        if (catId.isEmpty()) {
+            mgCollectPlaylists(data.optJSONArray("contents"), out, new java.util.HashSet<String>());
+            return out;
+        }
+        JSONArray cols = data.optJSONArray("contentItemList");
+        if (cols == null) return out;
+        // lx 取 contentItemList[1].itemList；防御式改为找第一个带 itemList 的列
+        for (int c = 0; c < cols.length(); c++) {
+            JSONObject col = cols.optJSONObject(c);
+            JSONArray items = col == null ? null : col.optJSONArray("itemList");
+            if (items == null) continue;
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject item = items.optJSONObject(i);
+                if (item == null) continue;
+                JSONObject logEvent = item.optJSONObject("logEvent");
+                String id = logEvent == null ? "" : logEvent.optString("contentId", "").trim();
+                String name = item.optString("title", "").trim();
+                if (id.isEmpty() || name.isEmpty()) continue;
+                JSONArray barList = item.optJSONArray("barList");
+                String play = barList == null ? "" : (barList.optJSONObject(0) == null ? "" : barList.optJSONObject(0).optString("title", ""));
+                JSONObject o = new JSONObject();
+                o.put("id", id).put("name", name).put("cover", item.optString("imageUrl", "")).put("remarks", play);
+                out.add(o);
+            }
+            if (!out.isEmpty()) break;
+        }
+        return out;
+    }
+
+    /** 小蜜歌单列表页（cat 筛选值=tagId，空=推荐）。 */
+    private static String mgPlaylistPage(String pg, HashMap<String, String> extend) {
+        try {
+            String catId = extend != null && extend.get("cat") != null ? extend.get("cat").trim() : "";
+            int page = 1;
+            try {
+                page = Math.max(1, Integer.parseInt(pg == null ? "1" : pg.trim()));
+            } catch (Exception ignored) {
+            }
+            List<JSONObject> items = mgPlaylists(catId, page);
+            return playlistEntriesPage("migu", items, page, items.size() >= 30);
+        } catch (Exception e) {
+            fileLog("mgPlaylistPage FAIL : " + e);
             return pageDataEmpty(1);
         }
     }
