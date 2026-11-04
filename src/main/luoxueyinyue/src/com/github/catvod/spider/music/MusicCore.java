@@ -3703,12 +3703,8 @@ public final class MusicCore {
                 classes.put(new JSONObject().put("type_id", "qq").put("type_name", platformName("qq") + "歌单"));
                 classes.put(new JSONObject().put("type_id", "kuwo").put("type_name", platformName("kuwo") + "歌单"));
                 classes.put(new JSONObject().put("type_id", "migu").put("type_name", platformName("migu") + "歌单"));
-                // MV 站源并入主页 tab（一源一页签）：MV 房间 tid 由 categoryContent 前缀路由回各 MV 链路，
-                // 听歌主页无需切到 MV 源即可达 MV 内容（MV 源仅搜索兜底入口）
-                classes.put(new JSONObject().put("type_id", "mv_rcmd").put("type_name", "芸映MV"));
-                classes.put(new JSONObject().put("type_id", "mvq_all").put("type_name", "秋映MV"));
-                classes.put(new JSONObject().put("type_id", "kgmv_hot").put("type_name", "枸映MV"));
-                classes.put(new JSONObject().put("type_id", "mvmv_rcmd").put("type_name", "蜜映MV"));
+                // MV 站源不再并入主页 tab（2026-11-04 去掉「xx映MV」页签）：MV 内容仍可经
+                // 聚合搜索 / 各独立 MV 源（style=mv）到达；categoryContent 对历史 tid 的路由保留
                 if (filter) {
                     JSONArray cats = new JSONArray();
                     cats.put(new JSONObject().put("n", "全部").put("v", ""));
