@@ -28,3 +28,4 @@ case/
 # 线路配置发布目录：凭证与打包产物不入库
 src/guoju-api/r2.env
 src/guoju-api/*.zip
+*.log
