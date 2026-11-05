@@ -96,10 +96,24 @@ try {
     $fs.Dispose()
 }
 
-# 6. md5
+# 6. md5 + 自动回填 果果短剧.json 的 dramas.jar 引用（bin 与 json md5 必须同步，否则 App 校验 FAIL）
 $md5 = (Get-FileHash $jarPath -Algorithm MD5).Hash.ToLower()
 $size = (Get-Item $jarPath).Length
 Write-Host ""
 Write-Host "BUILD OK: $jarPath ($size bytes)"
 Write-Host "MD5: $md5"
-Write-Host "果果短剧.json ref: ./lib/qingguoduanju-spider.bin;md5;$md5"
+$dramaJson = Join-Path $root "..\..\guoju-api\果果短剧\果果短剧.json"
+if (Test-Path $dramaJson) {
+    $content = Get-Content $dramaJson -Raw -Encoding UTF8
+    $updated = $content -replace 'qingguoduanju-spider\.bin;md5;[0-9a-f]{32}', "qingguoduanju-spider.bin;md5;$md5"
+    if ($updated -ne $content) {
+        Set-Content -Path $dramaJson -Value $updated -Encoding UTF8 -NoNewline
+        Write-Host "果果短剧.json 回填: ./lib/qingguoduanju-spider.bin;md5;$md5"
+    } elseif ($content -match "qingguoduanju-spider\.bin;md5;$md5") {
+        Write-Host "果果短剧.json 已是最新引用: $md5"
+    } else {
+        Write-Warning "果果短剧.json 未包含 qingguoduanju-spider.bin 引用，未回填"
+    }
+} else {
+    Write-Warning "未找到 $dramaJson，未回填"
+}
