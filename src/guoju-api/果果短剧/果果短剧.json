@@ -5,7 +5,7 @@
 			"name": "🍐青果短剧",
 			"type": 3,
 			"api": "csp_Qingguoduanju",
-			"jar": "./lib/qingguoduanju-spider.bin;md5;db5326b2c046a8e8decaa36f65f53af1",
+			"jar": "./lib/qingguoduanju-spider.bin;md5;f952528d79f4a13d5f607b0539a1683e",
 			"searchable": 1,
 			"quickSearch": 0,
 			"filterable": 1,

@@ -86,12 +86,17 @@ public class Qingguoduanju extends Spider {
         }
     }
     private static final String SITE = "https://hongguoduanju.com";
-    // 2026-10-23 风控升级后取流链路（对齐 tsukiyo/hongguoTV 实测可用实现，桌面已验证）：
-    // 旧 preload/v1 + legacyGorgon 0x401c 已被服务端软拒（200 空体，按设备放行）；
-    // 新链路 multi_video_model/v1 免签名头，但必须携带「已注册」匿名设备（未注册随机设备号被软拒
-    // 200 空体，tsukiyo 2026-10-27 PR#30 同因修复）。播放与搜索共享 appDevice() 注册身份并持久化。
+    // 2026-10-23 风控升级后取流链路（对齐 tsukiyo/hongguoTV）：旧 preload/v1 已软拒；
+    // 新链路 multi_video_model/v1 必须携带「已注册」匿名设备（未注册随机设备号被软拒 200 空体，
+    // tsukiyo 2026-10-27 PR#30 同因修复）。播放与搜索共享 appDevice() 注册身份并持久化。
+    // 2026-11-05 蓝图 PR#71（a5b2587）：上游再次收紧，v1 端点免签名口径失效（空响应），
+    // 播放请求需全套设备级签名（signPlayback 口径，绑定 query+body，每次重试重新签名）。
     private static final String V1_URL =
             "https://api5-normal-sinfonlineb.fqnovel.com/novel/player/multi_video_model/v1/";
+    /** 现行播放模型接口（蓝图 tabVideoModel 口径）：2026-11-02 起 /novel/player 族全域名废弃
+     * （对所有请求 200+0 字节，蓝图 2026-11-02 实测），官方 App 主通道已切 video_tab GET。 */
+    private static final String VIDEO_TAB_URL =
+            "https://api5-normal-sinfonlineb.fqnovel.com/reading/bookapi/video_tab/multi_video_model/v1/";
     // superguoguo 融合（2026-10-29）：详情换 H5 album-share SSR 主路（官网 SSR 兜底）。
     // 首页/分类实测维持官网主路：bookmall/tab 只回 tab 布局+找剧精选 6 卡（无分页，真人剧/漫剧
     // tab 为空壳、卡片走未知的 bookstore feed），bottom_video_feed recommend 对匿名设备软拒 42B。
@@ -104,10 +109,9 @@ public class Qingguoduanju extends Spider {
             "com.phoenix.read/73532 (Linux; U; Android 16; zh_CN; 25053RT47C; " +
             "Build/BP2A.250605.031.A3; Cronet/TTNetVersion:04657795 2026-01-23 " +
             "QuicVersion:c67e9834 2025-09-08)";
-    /** 播放接口 UA（注册设备 + 此 UA 实测免签名放行，对齐注册 payload 版本口径 72232） */
+    /** 播放接口 UA（蓝图 Signer.signPlayback 固定厂商 UA，签名不参与 UA 计算，照抄保兼容） */
     private static final String PLAYER_UA =
-            "com.phoenix.read/72232 (Linux; U; Android 16; zh_CN; 25053RT47C; " +
-            "Build/BP2A.250605.031.A3)";
+            "com.phoenix.read/71532 (Linux; U; Android 9; SM-N9860; Build/PQ3A.190705.10241111;tt-ok/3.12.13.20)";
     private static final int SEG_SIZE = 1048576;       // 1MB 分段
     private static final int HEADER_HINT = 8388608;    // moov 头部兜底抓取 8MB
 
@@ -721,6 +725,126 @@ public class Qingguoduanju extends Spider {
         fileLog("rotatePlayerDevice 已重注册播放设备 " + dev[0]);
     }
 
+    /** 播放查询参数集（蓝图 playbackRequest 口径：注册身份 + 版本覆盖 7.3.9.32(73932)）。 */
+    private static LinkedHashMap<String, String> playbackValues(String[] dev, String cdid) {
+        LinkedHashMap<String, String> values = new LinkedHashMap<>();
+        values.put("iid", dev[1]);
+        values.put("device_id", dev[0]);
+        values.put("ac", "wifi");
+        values.put("channel", "update_64");
+        values.put("aid", "8662");
+        values.put("app_name", "novelread");
+        values.put("version_code", "73932");
+        values.put("version_name", "7.3.9.32");
+        values.put("device_platform", "android");
+        values.put("os", "android");
+        values.put("ssmix", "a");
+        values.put("device_type", "25053RT47C");
+        values.put("device_brand", "Redmi");
+        values.put("language", "zh");
+        values.put("os_api", "36");
+        values.put("os_version", "16");
+        values.put("manifest_version_code", "73932");
+        values.put("resolution", "1280*2772");
+        values.put("dpi", "520");
+        values.put("update_version_code", "73932");
+        values.put("host_abi", "arm64-v8a");
+        values.put("dragon_device_type", "phone");
+        values.put("pv_player", "73932");
+        values.put("compliance_status", "0");
+        values.put("need_personal_recommend", "1");
+        values.put("player_so_load", "1");
+        values.put("is_android_pad_screen", "0");
+        values.put("cdid", cdid);
+        return values;
+    }
+
+    /** 签名播放请求头（蓝图 Signer.signPlayback 口径，body=null 为 GET 口径）。 */
+    private static LinkedHashMap<String, String> playbackHeaders(String query, byte[] body, int ts,
+                                                                 long ticket, String url, String deviceId) {
+        int random = (int) (RAND.next() * 65536);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put("User-Agent", PLAYER_UA);
+        headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+        headers.put("x-ss-req-ticket", String.valueOf(ticket));
+        headers.put("sdk-version", "2");
+        headers.put("x-xs-from-web", "0");
+        headers.put("x-khronos", String.valueOf(ts));
+        headers.put("x-ladon", Base64.encodeToString(be32(ts), Base64.NO_WRAP));
+        headers.put("x-argus", Base64.encodeToString(le32(ts), Base64.NO_WRAP));
+        headers.put("x-gorgon", xGorgon(query, body, ts, random));
+        headers.put("x-helios", helios(ts));
+        headers.put("x-medusa", buildMedusa(url, body, ts, deviceId));
+        if (body != null) {
+            headers.put("Content-Type", "application/json; charset=utf-8");
+            headers.put("x-ss-stub", md5HexUpper(body));
+        }
+        return headers;
+    }
+
+    /**
+     * video_tab 播放模型（官方 App 现行主通道，蓝图 ContentRepository.tabVideoModel 口径）。
+     * /novel/player 族自 2026-11-02 起在全部域名对所有请求返回 200+0 字节（服务端废弃），
+     * 本接口为 GET + 全套签名，video_id 等参数参与签名。响应 rows[vid].video_model 与
+     * 旧接口 entry 同构，返回含 video_model 的 entry JSON；失败返回 null。
+     */
+    private static JSONObject videoTabModel(String vid, String[] dev, String cdid) throws Exception {
+        LinkedHashMap<String, String> values = playbackValues(dev, cdid);
+        values.put("video_id", vid);
+        values.put("video_id_type", "0");
+        values.put("device_level", "1");
+        values.put("need_all_video_definition", "1");
+        values.put("need_mp4_align", "0");
+        values.put("use_os_player", "0");
+        values.put("video_platform", "1024");
+        values.put("source", "0");
+        values.put("from_video_id", "");
+        long now = CLOCK.now();
+        int ts = (int) (now / 1000);
+        String query = null;
+        long ticket = now;
+        for (int offset = 0; offset <= 127; offset++) {
+            ticket = now + offset;
+            LinkedHashMap<String, String> vals = new LinkedHashMap<>(values);
+            vals.put("_rticket", String.valueOf(ticket));
+            String q = encodeQuery(vals);
+            if (branchOf(q, null, ts) == 0) { query = q; break; }
+        }
+        if (query == null) throw new RuntimeException("video_tab 签名分支抖动失败（128 次）");
+        String url = VIDEO_TAB_URL + "?" + query;
+        LinkedHashMap<String, String> headers = playbackHeaders(query, null, ts, ticket, url, dev[0]);
+        if (dev.length > 2 && !dev[2].isEmpty()) headers.put("Cookie", dev[2]);
+        String respText = text(url, "GET", null, headers).trim();
+        fileLog("video_tab respLen=" + respText.length()
+                + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
+        if (respText.isEmpty()) return null;
+        JSONObject root = new JSONObject(respText);
+        if (!"0".equals(root.optString("code", root.optString("Code", "-1")))) return null;
+        JSONObject data = root.optJSONObject("data");
+        if (data == null) return null;
+        JSONObject rows = data.optJSONObject("video_model_data");
+        if (rows == null) rows = data;
+        JSONObject row = rows.optJSONObject(vid);
+        if (row == null) {
+            java.util.Iterator<String> it = rows.keys();
+            while (it.hasNext()) {
+                JSONObject cand = rows.optJSONObject(it.next());
+                if (cand != null) { row = cand; break; }
+            }
+        }
+        if (row == null) return null;
+        Object raw = row.opt("video_model");
+        JSONObject model = null;
+        if (raw instanceof JSONObject) {
+            model = (JSONObject) raw;
+        } else if (raw instanceof String) {
+            try { model = new JSONObject((String) raw); } catch (Exception e) { return null; }
+        }
+        if (model == null || model.optJSONArray("video_list") == null
+                || model.optJSONArray("video_list").length() == 0) return null;
+        return new JSONObject().put("video_model", model);
+    }
+
     private StreamInfo stream(String vid) {
         // 兼容旧配置里 proxy://do=play&...&vid=xxx 形式的分集 id：服务端只认纯数字 vid
         if (vid != null && vid.contains("vid=")) {
@@ -768,11 +892,33 @@ public class Qingguoduanju extends Spider {
         }
         byte[] body = payload.toString().getBytes(StandardCharsets.UTF_8);
 
-        // v1 端点参数集（对齐蓝本 VendorConstants.device + 覆盖项，桌面实测 200/code=0）：
-        // 版本口径 7.2.2.32(72232)、设备号取 appDevice() 注册身份（与搜索共享、持久化）、cdid 随机 UUID、免签名头。
-        // 服务端按需生成播放数据：首请求常返回 200 空体（桌面实证重试即成功），故首次空响应保持同一身份
-        // 重试、再次空响应重注册一次自愈；总重试窗口约 4s + 5 次请求 < 壳 15s 播放超时。
+        // v1 端点参数集（蓝图 PR#71 playbackRequest 口径）：版本 7.3.9.32(73932)、
+        // 设备号取 appDevice() 注册身份（与搜索共享、持久化）、cdid 随机 UUID、全套签名头。
+        // 主通道 video_tab（现行接口）；/novel/player POST 为遗留兑底（该族 2026-11-02 起
+        // 全域名 200+0 字节废弃，仅 video_tab 失败时兜底重试）。
         JSONObject resp = null;
+        JSONObject tabEntry = null;
+        JSONObject entry = null;
+        for (int attempt = 1; attempt <= 3 && tabEntry == null; attempt++) {
+            if (attempt > 1) {
+                try {
+                    Thread.sleep(600);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+            try {
+                tabEntry = videoTabModel(vid, appDevice(false), playerCdid);
+            } catch (Throwable t) {
+                fileLog("video_tab attempt#" + attempt + " FAIL : " + t);
+                if (attempt == 2) rotatePlayerDevice();
+            }
+        }
+        if (tabEntry != null) {
+            fileLog("video_tab OK vid=" + vid);
+            entry = tabEntry;
+        } else {
         String lastErr = null;
         for (int attempt = 1; attempt <= 5 && resp == null; attempt++) {
             if (attempt > 1) {
@@ -785,41 +931,25 @@ public class Qingguoduanju extends Spider {
                 }
             }
             String[] dev = appDevice(false);
-            LinkedHashMap<String, String> values = new LinkedHashMap<>();
-            values.put("iid", dev[1]);
-            values.put("device_id", dev[0]);
-            values.put("ac", "wifi");
-            values.put("channel", "update_64");
-            values.put("aid", "8662");
-            values.put("app_name", "novelread");
-            values.put("version_code", "72232");
-            values.put("version_name", "7.2.2.32");
-            values.put("device_platform", "android");
-            values.put("os", "android");
-            values.put("ssmix", "a");
-            values.put("device_type", "25053RT47C");
-            values.put("device_brand", "Redmi");
-            values.put("language", "zh");
-            values.put("os_api", "36");
-            values.put("os_version", "16");
-            values.put("manifest_version_code", "72232");
-            values.put("resolution", "1280*2772");
-            values.put("dpi", "520");
-            values.put("update_version_code", "72232");
-            values.put("host_abi", "arm64-v8a");
-            values.put("dragon_device_type", "phone");
-            values.put("pv_player", "72232");
-            values.put("compliance_status", "0");
-            values.put("need_personal_recommend", "1");
-            values.put("player_so_load", "1");
-            values.put("is_android_pad_screen", "0");
-            values.put("cdid", playerCdid);
-            values.put("_rticket", String.valueOf(System.currentTimeMillis()));
-            String query = encodeQuery(values);
-            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-            headers.put("User-Agent", PLAYER_UA);
-            headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
-            String respText = text(V1_URL + "?" + query, "POST", body, headers).trim();
+            LinkedHashMap<String, String> values = playbackValues(dev, playerCdid);
+            // 蓝图 PR#71 signPlayback：每次尝试重抖 _rticket 凑 branch 0（POST 分支带 body MD5），
+            // 全量签名头绑定最终 query+body+设备身份；重试即重新签名。
+            long now = CLOCK.now();
+            int ts = (int) (now / 1000);
+            String query = null;
+            long ticket = now;
+            for (int offset = 0; offset <= 127; offset++) {
+                ticket = now + offset;
+                LinkedHashMap<String, String> vals = new LinkedHashMap<>(values);
+                vals.put("_rticket", String.valueOf(ticket));
+                String q = encodeQuery(vals);
+                if (branchOf(q, body, ts) == 0) { query = q; break; }
+            }
+            if (query == null) throw new RuntimeException("播放签名分支抖动失败（128 次）");
+            String url = V1_URL + "?" + query;
+            LinkedHashMap<String, String> headers = playbackHeaders(query, body, ts, ticket, url, dev[0]);
+            if (dev.length > 2 && !dev[2].isEmpty()) headers.put("Cookie", dev[2]);
+            String respText = text(url, "POST", body, headers).trim();
             fileLog("v1 http attempt#" + attempt + " respLen=" + respText.length()
                     + " head=" + respText.substring(0, Math.min(120, respText.length())).replaceAll("\\s+", " "));
             if (respText.isEmpty()) {
@@ -841,8 +971,9 @@ public class Qingguoduanju extends Spider {
         if (!"0".equals(code)) throw new RuntimeException("播放接口 code=" + code);
         JSONObject data = resp.optJSONObject("data");
         if (data == null) throw new RuntimeException("播放信息 data missing");
-        JSONObject entry = data.optJSONObject(vid);
+        entry = data.optJSONObject(vid);
         if (entry == null) throw new RuntimeException("播放信息 entry missing: " + vid);
+        } // else（/novel/player 兜底）结束，entry 交由下方统一解析
 
         JSONObject videoModel;
         Object vm = entry.opt("video_model");
@@ -2199,7 +2330,28 @@ public class Qingguoduanju extends Spider {
             if (deviceId.isEmpty() || installId.isEmpty() || "0".equals(deviceId) || "0".equals(installId)) {
                 throw new RuntimeException("注册被拒 device_id=" + deviceId + " resp=" + resp);
             }
-            return new String[]{deviceId, installId};
+            // 捕获注册下发 Cookie（蓝图 PlaybackDeviceSession.toProfile 口径：install_id/ttreq/
+            // store-region/store-region-src），播放请求随 Cookie 头回传，缺失会导致播放接口 110001。
+            StringBuilder cookie = new StringBuilder();
+            try {
+                for (java.util.Map.Entry<String, java.util.List<String>> h : conn.getHeaderFields().entrySet()) {
+                    if (h.getKey() == null || !"set-cookie".equalsIgnoreCase(h.getKey())) continue;
+                    for (String v : h.getValue()) {
+                        int eq = v.indexOf('=');
+                        int sc = v.indexOf(';');
+                        if (eq <= 0) continue;
+                        String name = v.substring(0, eq).trim();
+                        String value = v.substring(eq + 1, sc > eq ? sc : v.length()).trim();
+                        if (name.equals("install_id") || name.equals("ttreq")
+                                || name.equals("store-region") || name.equals("store-region-src")) {
+                            if (cookie.length() > 0) cookie.append("; ");
+                            cookie.append(name).append('=').append(value);
+                        }
+                    }
+                }
+            } catch (Throwable ignore) {
+            }
+            return new String[]{deviceId, installId, cookie.toString()};
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -2241,7 +2393,7 @@ public class Qingguoduanju extends Spider {
                     String d = json.optString("device_id", "");
                     String i = json.optString("install_id", "");
                     if (!d.isEmpty() && !i.isEmpty()) {
-                        appDeviceIds = new String[]{d, i};
+                        appDeviceIds = new String[]{d, i, json.optString("cookie", "")};
                         return appDeviceIds;
                     }
                 }
@@ -2252,7 +2404,7 @@ public class Qingguoduanju extends Spider {
         appDeviceIds = reg;
         if (path != null) {
             try {
-                String json = new JSONObject().put("device_id", reg[0]).put("install_id", reg[1]).toString();
+                String json = new JSONObject().put("device_id", reg[0]).put("install_id", reg[1]).put("cookie", reg.length > 2 ? reg[2] : "").toString();
                 java.io.FileOutputStream fout = new java.io.FileOutputStream(path);
                 fout.write(json.getBytes(StandardCharsets.UTF_8));
                 fout.close();

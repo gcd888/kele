@@ -1,0 +1,9 @@
+11-06 01:00:11.136 searchContent enter kw=[完蛋！我被美女包围了] page=1 quick=false
+11-06 01:00:11.699 device_register http 200 len=384
+11-06 01:00:11.700 app search FAIL kw=[完蛋！我被美女包围了] page=1 → 官网 Web 兜底 : RuntimeException: 注册被拒 device_id= resp={"server_time":1793898011,"device_id":1606862345865831,"install_id":1606862345869927,"klink_egdi":"AAKb6-1rWBn73kjfHjFJsPH2ow9qU-bVXBxT_PXzU27Yn2cGse2XAETY","new_user":1,"device_id_str":"1606862345865831","install_id_str":"1606862345869927","device_token":"AAAYWPNYXEDU2X5WDRWW2XERN3HDP3UBFXBIDPESP2UAC7QXPRYDV3XM7SOTOBZ36TWZ4YKHHHL3OED5WCYICEW3DIX6PGSOPK2YLRIW6ANYJWAIBPQ6LH57BD5SO"}
+11-06 01:00:13.010 http GET https://hongguoduanju.com/api/search/result?aid=8662&query=%E5%AE%8C%E8%9B%8B%EF%BC%81%E6%88%91%E8%A2%AB%E7%BE%8E%E5%A5%B3%E5%8C%85%E5%9B%B4%E4%BA%86 -> 200 len=19000 cost=1310ms
+11-06 01:00:13.026 searchPage attempt#0 无 searchList 字段 code=? message= bodyHead=[{}]
+11-06 01:00:13.774 http GET https://hongguoduanju.com/api/search/result?aid=8662&query=%E5%AE%8C%E8%9B%8B%EF%BC%81%E6%88%91%E8%A2%AB%E7%BE%8E%E5%A5%B3%E5%8C%85%E5%9B%B4%E4%BA%86 -> 200 len=19000 cost=135ms
+11-06 01:00:13.774 searchPage attempt#1 无 searchList 字段 code=? message= bodyHead=[{}]
+11-06 01:00:13.775 searchPage FAIL 2 次尝试均失败 url=https://hongguoduanju.com/api/search/result?aid=8662&query=%E5%AE%8C%E8%9B%8B%EF%BC%81%E6%88%91%E8%A2%AB%E7%BE%8E%E5%A5%B3%E5%8C%85%E5%9B%B4%E4%BA%86（官网接口不可用/频控，返回空结果）
+11-06 01:00:13.775 searchContent FAIL kw=[完蛋！我被美女包围了] page=1 : RuntimeException: search api unavailable (2 attempts) (返回空列表，壳侧将显示该源无结果)

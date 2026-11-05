@@ -1,0 +1,279 @@
+﻿{
+	"dramas": [
+		{
+			"key": "qingguoduanju",
+			"name": "🍐青果短剧",
+			"type": 3,
+			"api": "csp_Qingguoduanju",
+			"jar": "./lib/qingguoduanju-spider.bin;md5;f952528d79f4a13d5f607b0539a1683e",
+			"searchable": 1,
+			"quickSearch": 0,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "xihongshiduanju",
+			"name": "🍅西红柿短剧",
+			"type": 3,
+			"api": "csp_Xihongshiduanju",
+			"jar": "./lib/xihongshiduanju-spider.bin;md5;0c23f8d4fada1e387920b52ad0f8be9d",
+			"searchable": 1,
+			"quickSearch": 0,
+			"filterable": 0,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "HonHon",
+			"name": "❤️红红短剧",
+			"type": 3,
+			"api": "csp_HonHon",
+			"jar": "./lib/honghong-spider.bin;md5;835b242eab0da4d3402724dd4705a9e8",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 0,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"host": "https://short.fishcloud.top",
+				"quality": "1080p",
+				"danmu": false
+			}
+		},
+		{
+			"key": "DJHub",
+			"name": "🎭短剧聚合",
+			"type": 3,
+			"api": "csp_DJHub",
+			"jar": "./lib/honghong-spider.bin;md5;835b242eab0da4d3402724dd4705a9e8",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 0,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "csp_Bili短剧",
+			"name": "🅱️哔哩短剧",
+			"type": 3,
+			"api": "csp_Bili",
+			"jar": "./lib/bili-spider.bin;md5;2faffa26e94c2621d7ae3a61a9678324",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"cookie": "SESSDATA=7624af93%2C1696008331%2C862c8%2A42; bili_jct=141a474ef3ce8cf2fedf384e68f6625d; DedeUserID=3493271303096985; DedeUserID__ckMd5=212a836c164605b7",
+				"classes": [
+					{
+						"type_name": "短剧",
+						"type_id": "短剧"
+					},
+					{
+						"type_name": "沙雕动画",
+						"type_id": "沙雕动画"
+					}
+				],
+				"filter": {
+					"短剧": [
+						{
+							"key": "duration",
+							"name": "时长",
+							"value": [
+								{
+									"n": "全部",
+									"v": "0"
+								},
+								{
+									"n": "60分钟以上",
+									"v": "4"
+								},
+								{
+									"n": "30~60分钟",
+									"v": "3"
+								},
+								{
+									"n": "10~30分钟",
+									"v": "2"
+								},
+								{
+									"n": "10分钟以下",
+									"v": "1"
+								}
+							]
+						}
+					],
+					"沙雕动画": [
+						{
+							"key": "duration",
+							"name": "时长",
+							"value": [
+								{
+									"n": "全部",
+									"v": "0"
+								},
+								{
+									"n": "60分钟以上",
+									"v": "4"
+								},
+								{
+									"n": "30~60分钟",
+									"v": "3"
+								},
+								{
+									"n": "10~30分钟",
+									"v": "2"
+								},
+								{
+									"n": "10分钟以下",
+									"v": "1"
+								}
+							]
+						}
+					]
+				}
+			}
+		},
+		{
+			"key": "csp_XBPQ_duanjuwang",
+			"name": "📱刷刷短剧",
+			"type": 3,
+			"api": "csp_XBPQ",
+			"jar": "./lib/xbpq-hccx-spider.bin;md5;fc692ca5f9fa2dfa443f96c37edaa81a",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"作者": "荷城茶秀",
+				"站名": "短剧网",
+				"主页url": "https://m.duanju5.com/",
+				"简介": "请勿相信影片中的广告，以免上当受骗。",
+				"导演": "果果",
+				"主演": "果果",
+				"影片类型": "短剧",
+				"影片地区": "未知",
+				"影片年代": "未知",
+				"线路数组": "data-dropdown-value=&&</div>",
+				"线路标题": "🌸+<span>&&</small>[替换:</span><small>>>共]+集",
+				"数组": "module-item-pic\">&&module-item\">",
+				"副标题": "module-item-text\"&&</div>",
+				"分类url": "https://m.duanju5.com/vodshow/{cateId}--{by}------{catePg}---.html;;akx",
+				"分类": "逆袭片库$nixi#甜宠片库$tianchong#虐恋片库$nuelian#穿越片库$chuanyue#重生片库$chongsheng"
+			}
+		},
+		{
+			"key": "XBPQ_putao",
+			"name": "🍇葡萄短剧",
+			"type": 3,
+			"api": "csp_XBPQ",
+			"jar": "./lib/xbpq-hccx-spider.bin;md5;fc692ca5f9fa2dfa443f96c37edaa81a",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"数组": "class=\"stui-vodlist__box&&</li",
+				"分类url": "https://www.putaojuchang.com/show/{cateId}/area/{area}/class/{class}/by/{by}/page/{catePg}/year/{year}.html",
+				"分类": "微剧场$1#言情$6#逆袭$7#战神$8#异能$9#生活$10#重生$12#复仇$20#爱情$11"
+			}
+		},
+		{
+			"key": "csp_XBPQ_aoaotv",
+			"name": "🐺嗷嗷短剧",
+			"type": 3,
+			"api": "csp_XBPQ",
+			"jar": "./lib/xbpq-spider.bin;md5;5c5116c70e15343433c8480c3b448408",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"分类url": "https://aoao.tv/vodshow/{cateId}--------{catePg}---.html",
+				"分类": "短剧$20#电视剧$21#电影$22#动漫$23#综艺$24"
+			}
+		},
+		{
+			"key": "Hema",
+			"name": "🦛河马短剧",
+			"type": 3,
+			"api": "csp_Hema",
+			"jar": "./lib/fish-spider.bin;md5;5d14ddf4289dcbcc4bd55705d3315369",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "WeiguanDJ",
+			"name": "🔍微观短剧",
+			"type": 3,
+			"api": "csp_WeiguanDJ",
+			"jar": "./lib/fish-spider.bin;md5;5d14ddf4289dcbcc4bd55705d3315369",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "HHkk",
+			"name": "😍好看短剧",
+			"type": 3,
+			"api": "csp_HHkk",
+			"jar": "./lib/fish-spider.bin;md5;5d14ddf4289dcbcc4bd55705d3315369",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "AiDj",
+			"name": "🤖AI短漫剧",
+			"type": 3,
+			"api": "csp_AiDjGuard",
+			"jar": "./lib/fty-spider.bin;md5;c9024ccf34209d26eb556c728c3f07fa",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"type": "video",
+				"name": "短剧",
+				"DanMu": false
+			}
+		}
+	]
+}
