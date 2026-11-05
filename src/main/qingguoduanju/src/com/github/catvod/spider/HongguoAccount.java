@@ -7,7 +7,7 @@
 // cloud.* 协议调用，壳子侧不含任何红果实现。
 //
 // cloud.* 协议（入参/出参均为 JSON）：
-//   {"do":"cloud.info"}                          → {"code":0,"name":"红果短剧","login":bool,"nickname":str}
+//   {"do":"cloud.info"}                          → {"code":0,"name":"🍎短剧","login":bool,"nickname":str}
 //   {"do":"cloud.qr.create"}                     → {"code":0,"image":base64,"expire":秒}
 //   {"do":"cloud.qr.poll"}                       → {"code":0,"ok":bool}（ok=true 即已登录落盘）
 //   {"do":"cloud.sms.send","mobile":"138..."}    → {"code":0,"masked":"+86 138****0000","retry":60}
@@ -72,7 +72,7 @@ final class HongguoAccount {
             if ("cloud.info".equals(op)) {
                 JSONObject creds = load(ctx);
                 JSONObject out = ok();
-                out.put("name", "红果短剧");
+                out.put("name", "🍎短剧");
                 out.put("login", creds != null && !creds.optString("cookie", "").isEmpty());
                 out.put("nickname", creds == null ? "" : creds.optString("nickname", ""));
                 return out.toString();
@@ -177,10 +177,10 @@ final class HongguoAccount {
         JSONObject data = info.optJSONObject("data");
         String bizUserId = data == null ? "" : str(data, "biz_user_id");
         if (bizUserId.isEmpty()) {
-            throw new RuntimeException("该手机号还没有红果账号资料，请先用官方红果App登录一次再回来试（或改用扫码）");
+            throw new RuntimeException("该手机号还没有账号资料，请先用官方App登录一次再回来试（或改用扫码）");
         }
         String nickname = data == null ? "" : str(data, "user_name");
-        if (nickname.isEmpty()) nickname = "红果用户";
+        if (nickname.isEmpty()) nickname = "短剧用户";
         save(ctx, cookie, dev[0], dev[1], nickname);
     }
 
@@ -286,7 +286,15 @@ final class HongguoAccount {
             LinkedHashMap<String, String> params = new LinkedHashMap<>();
             params.put("next", WEB_BASE + "/");
             params.put("token", token);
-            JSONObject data = checked(call("/passport/web/check_qrconnect/", null, params));
+            JSONObject data;
+            try {
+                data = checked(call("/passport/web/check_qrconnect/", null, params));
+            } catch (RuntimeException e) {
+                // 错误码 13=token 已被消费/失效：说明确认时序已过，按二维码过期引导重取，避免反复报“会话过期”
+                String m = e.getMessage() == null ? "" : e.getMessage();
+                if (m.contains("错误码 13")) throw new RuntimeException("二维码已失效，请点击刷新重新获取");
+                throw e;
+            }
             String status = data.optString("status", "");
             if ("5".equals(status) || "expired".equals(status)) {
                 throw new RuntimeException("二维码已过期，请重新获取");
@@ -294,6 +302,7 @@ final class HongguoAccount {
             if ("3".equals(status) || "confirmed".equals(status)) {
                 String redirect = data.optString("redirect_url", "");
                 if (!redirect.isEmpty()) finishRedirect(redirect);
+                if (!hasSession()) throw new RuntimeException("官网尚未下发登录态，请点击刷新重新扫码");
             }
             return hasSession();
         }
@@ -344,15 +353,20 @@ final class HongguoAccount {
             return cookies.containsKey("sessionid") || cookies.containsKey("sessionid_ss");
         }
 
-        /** 官网确认后的 redirect 收尾（最多 5 跳，域名校验，蓝本 finishRedirect）。 */
+        /** 官网确认后的 redirect 收尾（最多 5 跳，域名校验，蓝本 finishRedirect）。
+         *  蓝本走 execute()：每跳都带 Cookie 头并解析 Set-Cookie——sessionid 正是在这条链里下发，必须收下。 */
         private void finishRedirect(String value) throws Exception {
             URL url = new URL(resolveUrl(WEB_BASE, value));
             for (int hop = 0; hop < 5; hop++) {
                 if (!"https".equals(url.getProtocol()) || !"hongguoduanju.com".equals(url.getHost())) {
                     throw new RuntimeException("登录确认跳转到不支持的站点");
                 }
-                HttpURLConnection conn = open(url, "GET", null);
+                HttpURLConnection conn = open(url, "GET", WEB_UA);
+                conn.setRequestProperty("Referer", WEB_BASE + "/");
+                String cookieHeader = cookieHeader();
+                if (!cookieHeader.isEmpty()) conn.setRequestProperty("Cookie", cookieHeader);
                 int code = conn.getResponseCode();
+                storeCookies(conn);
                 String location = conn.getHeaderField("Location");
                 consume(conn);
                 if (code >= 300 && code < 400 && location != null && !location.isEmpty()) {
@@ -363,6 +377,16 @@ final class HongguoAccount {
                 return;
             }
             throw new RuntimeException("登录确认跳转次数过多");
+        }
+
+        /** 当前会话 Cookie 串（蓝本 execute() 的请求侧 Cookie 头）。 */
+        private String cookieHeader() {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> e : cookies.entrySet()) {
+                if (sb.length() > 0) sb.append("; ");
+                sb.append(e.getKey()).append('=').append(e.getValue());
+            }
+            return sb.toString();
         }
 
         private static String resolveUrl(String base, String value) {
@@ -389,6 +413,8 @@ final class HongguoAccount {
             conn.setRequestProperty("Accept", "application/json, text/javascript");
             String csrf = cookies.get("passport_csrf_token");
             if (csrf != null) conn.setRequestProperty("x-tt-passport-csrf-token", csrf);
+            String cookieHeader = cookieHeader();
+            if (!cookieHeader.isEmpty()) conn.setRequestProperty("Cookie", cookieHeader);
             if (form != null) {
                 StringBuilder body = new StringBuilder();
                 for (Map.Entry<String, String> e : form.entrySet()) {
@@ -415,7 +441,7 @@ final class HongguoAccount {
                 int code = data.optInt("error_code", -1);
                 String message;
                 if (data.has("verify_center_decision_conf")) {
-                    message = "红果要求完成滑块验证，请改用扫码登录";
+                    message = "平台要求完成滑块验证，请改用扫码登录";
                 } else {
                     String desc = data.optString("description", "").trim();
                     message = desc.isEmpty() ? "官网登录失败" : desc;
@@ -504,7 +530,7 @@ final class HongguoAccount {
      */
     private static JSONArray history(Context ctx) {
         JSONObject creds = load(ctx);
-        if (creds == null) throw new RuntimeException("未登录红果账号");
+        if (creds == null) throw new RuntimeException("未登录账号");
         String cookie = creds.optString("cookie", "");
         String[] dev = Qingguoduanju.appDevice(false);
 
