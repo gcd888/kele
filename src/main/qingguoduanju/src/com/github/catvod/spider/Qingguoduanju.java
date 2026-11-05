@@ -1613,6 +1613,20 @@ public class Qingguoduanju extends Spider {
         return (ivOf(sm3(query.getBytes(StandardCharsets.UTF_8)), new byte[16], ts) & 15) % 3;
     }
 
+    /** x-ss-stub 口径：body MD5 十六进制大写（passport POST 签名头用）。 */
+    static String md5HexUpper(byte[] body) {
+        return hexOfLower(digest("MD5", body)).toUpperCase();
+    }
+
+    /**
+     * 签名分支（带 body 口径，蓝本 Signer.branch）：POST 时 body 的 MD5 参与 iv 计算，
+     * 与 GET（body=null → 16 字节占位）分支结果不同，passport POST 请求必须用本重载抖动。
+     */
+    static int branchOf(String query, byte[] body, int ts) {
+        byte[] bodyMd5 = body == null || body.length == 0 ? new byte[16] : digest("MD5", body);
+        return (ivOf(sm3(query.getBytes(StandardCharsets.UTF_8)), bodyMd5, ts) & 15) % 3;
+    }
+
     private static int sumMd5(byte[] d) {
         int check = 0x20220420;
         for (int i = 0; i < 12; i++) {

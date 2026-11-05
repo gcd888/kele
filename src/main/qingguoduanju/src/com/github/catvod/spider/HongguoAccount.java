@@ -43,11 +43,60 @@ import java.util.Map;
 final class HongguoAccount {
 
     private static final String TAG_MSG = "hongguo-account";
-    /** 官网 Web 登录通道（二维码/短信均在此域，无需 App 端签名，蓝本 WebLogin.kt）。 */
+    /** 官网 Web 登录通道（二维码在此域，无需 App 端签名，蓝本 WebLogin.kt）。 */
     private static final String WEB_BASE = "https://hongguoduanju.com";
     private static final String WEB_UA =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
                     + "Chrome/141.0.0.0 Safari/537.36";
+    /**
+     * 手机短信登录通道（官方 App 口径，蓝本 PhoneLogin.kt）：官网 Web 通道发验证码会被风控
+     * 要求滑块验证（verify_center_decision_conf，电视端无法完成），官方 App 通道触发概率低。
+     * 域名必须是 security.snssdk.com——is.snssdk.com 上短信登录会被风控回 2046（蓝本实测）。
+     */
+    private static final String PASSPORT_BASE = "https://security.snssdk.com";
+    private static final String PASSPORT_APP_UA =
+            "com.phoenix.read/72232 (Linux; U; Android 16; zh_CN; 25053RT47C; Build/BP2A.250605.031.A3)";
+    private static final String PASSPORT_VIDEO_UA =
+            "com.phoenix.read/71332 (Linux; U; Android 16; zh_CN; 25053RT47C; Build/BP2A.250605.031.A3; "
+                    + "Cronet/TTNetVersion:04657795 2026-01-23 QuicVersion:c67e9834 2025-09-08)";
+    /**
+     * 官方 App 固定设备指纹（蓝本 VendorConstants.device）。官方 App 的短信登录不注册新设备：
+     * 直接用设备表里的固定 device_id/iid（实测新注册设备 + query 带 device_id 会被判 2046）。
+     * PhoneLogin 口径再覆盖版本 7.3.9.32/73932。
+     */
+    private static final LinkedHashMap<String, String> APP_DEVICE = fixedDevice();
+
+    private static LinkedHashMap<String, String> fixedDevice() {
+        LinkedHashMap<String, String> v = new LinkedHashMap<>();
+        v.put("iid", "1905892595382586");
+        v.put("device_id", "1905892595378490");
+        v.put("ac", "wifi");
+        v.put("channel", "update_64");
+        v.put("aid", "8662");
+        v.put("app_name", "novelread");
+        v.put("version_code", "71332");
+        v.put("version_name", "7.1.3.32");
+        v.put("device_platform", "android");
+        v.put("os", "android");
+        v.put("ssmix", "a");
+        v.put("device_type", "25053RT47C");
+        v.put("device_brand", "Redmi");
+        v.put("language", "zh");
+        v.put("os_api", "36");
+        v.put("os_version", "16");
+        v.put("manifest_version_code", "71332");
+        v.put("resolution", "1280*2772");
+        v.put("dpi", "520");
+        v.put("update_version_code", "71332");
+        v.put("host_abi", "arm64-v8a");
+        v.put("dragon_device_type", "phone");
+        v.put("pv_player", "71332");
+        v.put("compliance_status", "0");
+        v.put("need_personal_recommend", "1");
+        v.put("player_so_load", "1");
+        v.put("is_android_pad_screen", "0");
+        return v;
+    }
     /** 账号数据域（读进度/资料），需签名 + Cookie，蓝本 CloudAccount.kt。 */
     private static final String ACCOUNT_BASE = "https://api5-normal-sinfonlinea.fqnovel.com";
     private static final String ACCOUNT_UA =
@@ -103,7 +152,7 @@ final class HongguoAccount {
             if ("cloud.sms.send".equals(op)) {
                 String mobile = req.optString("mobile", "").trim();
                 if (mobile.isEmpty()) throw new RuntimeException("请输入手机号");
-                WebLogin.Sent s = session().send(mobile);
+                AppLogin.Sent s = smsSession().send(mobile);
                 JSONObject out = ok();
                 out.put("masked", s.maskedMobile);
                 out.put("retry", s.retrySeconds);
@@ -112,19 +161,23 @@ final class HongguoAccount {
             if ("cloud.sms.verify".equals(op)) {
                 String code = req.optString("code", "").trim();
                 if (code.isEmpty()) throw new RuntimeException("请输入验证码");
-                String cookie = session().verify(code);
+                AppLogin s = smsSession;
+                if (s == null) throw new RuntimeException("请先发送验证码");
+                String cookie = s.verify(code);
                 finalizeLogin(ctx, cookie);
-                loginSession = null;
+                smsSession = null;
                 return ok().toString();
             }
             if ("cloud.logout".equals(op)) {
                 loginSession = null;
+                smsSession = null;
                 File f = accountFile(ctx);
                 if (f != null && f.exists()) f.delete();
                 return ok().toString();
             }
             if ("cloud.cancel".equals(op)) {
                 loginSession = null;
+                smsSession = null;
                 return ok().toString();
             }
             if ("cloud.history".equals(op)) {
@@ -157,8 +210,10 @@ final class HongguoAccount {
         }
     }
 
-    /** 当前登录会话（二维码/短信共用同一 Web 会话，短信发码依赖会话里的 csrf cookie）。 */
+    /** 当前登录会话（二维码 Web 会话；短信发码依赖会话里的 csrf cookie 的旧口径已废弃）。 */
     private static volatile WebLogin loginSession;
+    /** 当前短信登录会话（App 通道，蓝本 PhoneLogin：一个实例对应一次发码+验码）。 */
+    private static volatile AppLogin smsSession;
 
     private static WebLogin session() {
         WebLogin w = loginSession;
@@ -167,6 +222,15 @@ final class HongguoAccount {
             loginSession = w;
         }
         return w;
+    }
+
+    private static AppLogin smsSession() {
+        AppLogin s = smsSession;
+        if (s == null) {
+            s = new AppLogin();
+            smsSession = s;
+        }
+        return s;
     }
 
     /** 登录收尾：绑定注册设备 → 校验红果账号资料 → 凭据落盘（蓝本 AccountController.validateAccount）。 */
@@ -514,6 +578,270 @@ final class HongguoAccount {
                 String text = new String(out.toByteArray(), StandardCharsets.UTF_8);
                 if (code >= 400 && text.isEmpty()) {
                     throw new RuntimeException("账号请求失败（HTTP " + code + "）");
+                }
+                return text;
+            } finally {
+                conn.disconnect();
+            }
+        }
+    }
+
+    // ============================ App 通道短信登录（蓝本 PhoneLogin.kt） ============================
+
+    /**
+     * 手机号 + 验证码登录（官方 App 口径）。官网 Web 通道（/passport/web/send_code/）发码会被
+     * 风控要求滑块验证，官方 App 通道（security.snssdk.com + 固定设备指纹 + 全套签名头）触发
+     * 概率低。通道规则（蓝本 PhoneLogin.call 实测注释，均照抄）：
+     * <ul>
+     *   <li>不注册新设备：直接用设备表里的固定 device_id/iid（新注册设备会被判 2046）；</li>
+     *   <li>query 不带 device_id/iid（设备靠签名 medusa 里的 deviceProto 识别），带着会被判异常设备；</li>
+     *   <li>刻意不回发 Cookie（send_code 下发的 cookie 带到 sms_login 会回 2046）；
+     *       Set-Cookie 照常解析保留，仅用于判定 sessionid 是否已下发；</li>
+     *   <li>平台在每次验码尝试后下发新 mobile_ticket，后续端点沿用最新值。</li>
+     * </ul>
+     * 一个实例对应一次登录；重新发码重置会话。
+     */
+    private static final class AppLogin {
+
+        private final LinkedHashMap<String, String> cookies = new LinkedHashMap<>();
+        private String mobile = "";
+        private String ticket = "";
+        private boolean sent = false;
+
+        static final class Sent {
+            String maskedMobile = "";
+            int retrySeconds = 60;
+        }
+
+        /** 发送短信验证码（官方 App 端点 /passport/mobile/send_code/v1/，GET）。 */
+        synchronized Sent send(String number) throws Exception {
+            cookies.clear();
+            ticket = "";
+            sent = false;
+            mobile = number.startsWith("+") ? number : number; // 大陆号原样发（蓝本 format 86 口径）
+            LinkedHashMap<String, String> passport = new LinkedHashMap<>();
+            passport.put("aid", "8662");
+            passport.put("app_name", "novelread");
+            passport.put("device_platform", "android");
+            passport.put("mobile", mobile);
+            passport.put("type", "24"); // login-lab 实测：24=登录验证码；1/3 是绑定/换绑
+            JSONObject reply = passportCall("/passport/mobile/send_code/v1/", false, passport);
+            JSONObject data = reply.optJSONObject("data");
+            if (data == null) data = new JSONObject();
+            // 风控要求滑块验证：App 通道仍可能下发，电视端无法完成，明确引导用户
+            if (data.has("verify_center_decision_conf")) {
+                throw new RuntimeException("平台要求先完成滑块验证，请稍后重试或改用扫码登录");
+            }
+            if (!"success".equals(reply.optString("message"))) {
+                String desc = data.optString("description", "").trim();
+                throw new RuntimeException(desc.isEmpty() ? "验证码没发出去" : desc);
+            }
+            ticket = data.optString("mobile_ticket", "");
+            sent = true;
+            Sent out = new Sent();
+            out.maskedMobile = data.optString("mobile", "").isEmpty() ? "你的手机" : data.optString("mobile");
+            out.retrySeconds = data.optInt("retry_time", 60);
+            return out;
+        }
+
+        /** 验码登录：多端点依次尝试（蓝本 VERIFY_ATTEMPTS），成功返回 Cookie 串。 */
+        synchronized String verify(String code) throws Exception {
+            if (!sent) throw new RuntimeException("请先发送验证码");
+            String firstFailure = null;
+            // 主端点 sms_login 系列；validate_code 是「已登录校验手机号」入口，对未登录固定回
+            // error_code 1 会话过期，仅作最后兜底（蓝本 2026-11-03 实测）
+            String[][] attempts = {
+                    {"/passport/mobile/sms_login/", "post"},
+                    {"/passport/mobile/sms_login_only/", "post"},
+                    {"/passport/mobile/sms_login_continue/", "post"},
+                    {"/passport/mobile/validate_code/v1/", "get"},
+                    {"/passport/mobile/validate_code/v1/", "post"},
+            };
+            for (String[] attempt : attempts) {
+                LinkedHashMap<String, String> passport = new LinkedHashMap<>();
+                passport.put("aid", "8662");
+                passport.put("app_name", "novelread");
+                passport.put("device_platform", "android");
+                passport.put("mobile", mobile);
+                passport.put("code", code);
+                passport.put("type", "24");
+                if (!ticket.isEmpty()) passport.put("mobile_ticket", ticket);
+                JSONObject reply = passportCall(attempt[0], "post".equals(attempt[1]), passport);
+                if (cookies.containsKey("sessionid") || cookies.containsKey("sessionid_ss")) break;
+                JSONObject data = reply.optJSONObject("data");
+                if (data == null) data = new JSONObject();
+                // 平台会在每次尝试后下发新的 mobile_ticket，后续端点沿用最新值
+                String fresh = data.optString("mobile_ticket", "");
+                if (!fresh.isEmpty()) ticket = fresh;
+                int errorCode = data.optInt("error_code", 0);
+                if (errorCode == 0 || errorCode == 1) {
+                    // 1=会话过期：这条端点不适用于「未登录换验证码」，继续试下一条
+                    if (errorCode == 1 && firstFailure == null) {
+                        firstFailure = "会话过期，请重新登录（错误码 1）";
+                    }
+                    continue;
+                }
+                if (errorCode == 1203) {
+                    // 错误次数过多或验证码过期：本次会话作废，继续提交只会更糟
+                    sent = false;
+                    cookies.clear();
+                    ticket = "";
+                    String desc = data.optString("description", "").trim();
+                    throw new RuntimeException(desc.isEmpty()
+                            ? "错误次数过多或验证码过期，请重新获取验证码（错误码 1203）" : desc);
+                }
+                String desc = data.optString("description", "").trim();
+                throw new RuntimeException(desc.isEmpty()
+                        ? "验证码校验失败（错误码 " + errorCode + "）" : desc);
+            }
+            if (!cookies.containsKey("sessionid") && !cookies.containsKey("sessionid_ss")) {
+                throw new RuntimeException(firstFailure == null ? "登录没有成功，平台没有下发登录态" : firstFailure);
+            }
+            return credentials();
+        }
+
+        /** 当前会话 Cookie 串（与 WebLogin.credentials() 同格式，供 finalizeLogin 落盘）。 */
+        private String credentials() {
+            StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> e : cookies.entrySet()) {
+                if (sb.length() > 0) sb.append("; ");
+                sb.append(e.getKey()).append('=').append(e.getValue());
+            }
+            return sb.toString();
+        }
+
+        /**
+         * passport 签名请求（蓝本 PhoneLogin.call + Signer.sign）：设备表组参 → branch0 抖动 →
+         * 全套签名头。GET 时业务参数进 query；POST 时业务参数编 urlencoded body、query 只有设备表。
+         * 刻意不回发 Cookie；Set-Cookie 解析进 {@link #cookies}。
+         */
+        private JSONObject passportCall(String path, boolean post,
+                                        LinkedHashMap<String, String> passport) throws Exception {
+            long now = System.currentTimeMillis();
+            int ts = (int) (now / 1000);
+            // 设备表：固定指纹 + 版本口径覆盖 7.3.9.32/73932（蓝本 PhoneLogin.call device 块）
+            LinkedHashMap<String, String> device = new LinkedHashMap<>(APP_DEVICE);
+            device.put("version_code", "73932");
+            device.put("manifest_version_code", "73932");
+            device.put("update_version_code", "73932");
+            device.put("pv_player", "73932");
+            device.put("version_name", "7.3.9.32");
+            String deviceId = APP_DEVICE.get("device_id");
+            // query 去掉 device_id/iid（带着会被判异常设备），签名器内部仍使用完整设备表
+            LinkedHashMap<String, String> queryDevice = new LinkedHashMap<>();
+            for (Map.Entry<String, String> e : device.entrySet()) {
+                if (!"device_id".equals(e.getKey()) && !"iid".equals(e.getKey())) {
+                    queryDevice.put(e.getKey(), e.getValue());
+                }
+            }
+            byte[] body = null;
+            if (post) {
+                // 蓝本 Signer.encode(passport)：仅业务参数编 urlencoded（pythonUrlEncode 同口径）
+                body = Qingguoduanju.pythonUrlEncode(passport).getBytes(StandardCharsets.UTF_8);
+            }
+            String query = null;
+            long ticketTs = now;
+            for (int offset = 0; offset <= 127; offset++) {
+                ticketTs = now + offset;
+                LinkedHashMap<String, String> vals = new LinkedHashMap<>(queryDevice);
+                if (!post) vals.putAll(passport);
+                vals.put("ts", String.valueOf(ts));
+                vals.put("_rticket", String.valueOf(ticketTs));
+                String q = Qingguoduanju.pythonUrlEncode(vals);
+                if (Qingguoduanju.branchOf(q, body, ts) == 0) {
+                    query = q;
+                    break;
+                }
+            }
+            if (query == null) throw new RuntimeException("签名分支抖动失败（128 次）");
+            String url = PASSPORT_BASE + path + "?" + query;
+            int random = (int) (Math.random() * 65536);
+            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+            headers.put("User-Agent", post ? PASSPORT_VIDEO_UA : PASSPORT_APP_UA);
+            headers.put("Accept", "application/json; charset=utf-8,application/x-protobuf");
+            headers.put("x-ss-req-ticket", String.valueOf(ticketTs));
+            headers.put("x-tt-request-tag", "t=0;n=0");
+            headers.put("sdk-version", "2");
+            headers.put("passport-sdk-version", "50561");
+            headers.put("x-xs-from-web", "0");
+            headers.put("x-khronos", String.valueOf(ts));
+            headers.put("x-ladon", Base64.encodeToString(Qingguoduanju.be32(ts), Base64.NO_WRAP));
+            headers.put("x-argus", Base64.encodeToString(Qingguoduanju.le32(ts), Base64.NO_WRAP));
+            headers.put("x-gorgon", Qingguoduanju.xGorgon(query, body, ts, random));
+            headers.put("x-helios", Qingguoduanju.helios(ts));
+            headers.put("x-medusa", Qingguoduanju.buildMedusa(url, body, ts, deviceId));
+            headers.put("x-tt-dt", "");
+            if (body != null) {
+                headers.put("Content-Type", "application/x-www-form-urlencoded");
+                headers.put("x-ss-stub", Qingguoduanju.md5HexUpper(body));
+            }
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(30000);
+            conn.setRequestMethod(post ? "POST" : "GET");
+            conn.setInstanceFollowRedirects(false);
+            for (Map.Entry<String, String> e : headers.entrySet()) {
+                conn.setRequestProperty(e.getKey(), e.getValue());
+            }
+            if (body != null) {
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(body);
+            }
+            storeCookies(conn);
+            String text = WebText.read(conn);
+            JSONObject reply;
+            try {
+                reply = new JSONObject(text);
+            } catch (Exception e) {
+                throw new RuntimeException("passport 返回格式异常: "
+                        + text.substring(0, Math.min(120, text.length())));
+            }
+            return reply;
+        }
+
+        /** 解析 Set-Cookie 进会话存储（同名覆盖；仅保留 name=value 主部；不回发）。 */
+        private void storeCookies(HttpURLConnection conn) {
+            try {
+                Map<String, List<String>> fields = conn.getHeaderFields();
+                for (Map.Entry<String, List<String>> e : fields.entrySet()) {
+                    String key = e.getKey();
+                    if (key == null || !"set-cookie".equalsIgnoreCase(key)) continue;
+                    for (String line : e.getValue()) {
+                        String pair = line.contains(";") ? line.substring(0, line.indexOf(';')) : line;
+                        int eq = pair.indexOf('=');
+                        if (eq <= 0) continue;
+                        String name = pair.substring(0, eq).trim();
+                        String value = pair.substring(eq + 1).trim();
+                        if (!name.isEmpty() && !value.isEmpty()) {
+                            cookies.remove(name);
+                            cookies.put(name, value);
+                        }
+                    }
+                }
+            } catch (Throwable ignore) {
+            }
+        }
+    }
+
+    /** 响应读取小工具（App 通道专用：非 2xx 也读 body，passport 用 JSON 报错）。 */
+    private static final class WebText {
+        static String read(HttpURLConnection conn) throws Exception {
+            try {
+                int code = conn.getResponseCode();
+                InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buf = new byte[8192];
+                if (in != null) {
+                    int n;
+                    while ((n = in.read(buf)) > 0) {
+                        out.write(buf, 0, n);
+                        if (out.size() > 2 * 1024 * 1024) break;
+                    }
+                    in.close();
+                }
+                String text = new String(out.toByteArray(), StandardCharsets.UTF_8);
+                if (code >= 400 && text.isEmpty()) {
+                    throw new RuntimeException("passport 请求失败（HTTP " + code + "）");
                 }
                 return text;
             } finally {
