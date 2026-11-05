@@ -1,16 +1,30 @@
+# 依赖与构建产物
 node_modules/
 dist/
 unpackage/
+
+# 本地凭证与环境（Cloudflare R2 / Wrangler）
 .dev.vars
+.env
 .wrangler/
-*.local
+
+# IDE / 工具目录
+.idea/
+.trae/
 .DS_Store
 .npm-cache/
-.idea/
+*.local
+
+# 本地草稿
 demo/
+
 # spider 源码工程编译产物与桌面测试类（不入库）
 src/main/*/build/
 src/main/*/test/
 
-# 嵌套独立仓库：果果接口配置（独立推送 gitcode）
-src/guoju-api/
+# 第三方参考蓝本与抓包测试数据（不入库）
+case/
+
+# 线路配置发布目录：凭证与打包产物不入库
+src/guoju-api/r2.env
+src/guoju-api/*.zip

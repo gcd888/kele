@@ -116,4 +116,20 @@ $size = (Get-Item $jarPath).Length
 Write-Host ""
 Write-Host "BUILD OK: $jarPath ($size bytes)"
 Write-Host "MD5: $md5"
-Write-Host "果果音乐.json ref: ./lib/luoxueyinyue-spider.jar;md5;$md5"
+
+# 7. 自动同步 果果音乐.json 里全部 luoxueyinyue 源的 jar ref md5（原为手动更新，曾导致壳端 md5 校验不匹配回退旧 jar）
+$jsonPath = Join-Path $root "..\..\guoju-api\果果音乐\果果音乐.json"
+if (Test-Path $jsonPath) {
+    $jsonRaw = [System.IO.File]::ReadAllText((Resolve-Path $jsonPath).ToString())
+    $pattern = '(\./lib/luoxueyinyue-spider\.jar;md5;)[0-9a-f]{32}'
+    $jsonNew = [regex]::Replace($jsonRaw, $pattern, ('${1}' + $md5))
+    if ($jsonNew -ne $jsonRaw) {
+        # 保持原文件 BOM/编码（UTF-8）
+        [System.IO.File]::WriteAllText((Resolve-Path $jsonPath).ToString(), $jsonNew, (New-Object System.Text.UTF8Encoding($true)))
+        Write-Host "果果音乐.json musics jar ref 已同步 -> $md5"
+    } else {
+        Write-Host "果果音乐.json musics jar ref 已是最新 ($md5)"
+    }
+} else {
+    Write-Host "果果音乐.json 不存在，跳过 ref 同步: $jsonPath"
+}

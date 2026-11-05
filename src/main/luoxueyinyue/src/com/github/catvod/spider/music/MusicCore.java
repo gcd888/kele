@@ -114,10 +114,14 @@ public final class MusicCore {
     private static final String WEB_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
 
     private static byte[] http(String method, String url, Map<String, String> headers, byte[] body) throws Exception {
+        return http(method, url, headers, body, CONNECT_TIMEOUT, READ_TIMEOUT);
+    }
+
+    private static byte[] http(String method, String url, Map<String, String> headers, byte[] body, int connectMs, int readMs) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try {
-            conn.setConnectTimeout(CONNECT_TIMEOUT);
-            conn.setReadTimeout(READ_TIMEOUT);
+            conn.setConnectTimeout(connectMs);
+            conn.setReadTimeout(readMs);
             conn.setRequestMethod(method);
             conn.setRequestProperty("User-Agent", WEB_UA);
             conn.setRequestProperty("Accept-Encoding", "gzip");
@@ -157,7 +161,12 @@ public final class MusicCore {
     }
 
     private static byte[] httpGet(String url, Map<String, String> headers) throws Exception {
-        return http("GET", url, headers, null);
+        return http("GET", url, headers, null, CONNECT_TIMEOUT, READ_TIMEOUT);
+    }
+
+    /** 短超时 GET：分类拉取等辅助请求专用（connect 3s / read 4s），避免单个站点拖慢 homeContent。 */
+    private static byte[] httpGetShort(String url, Map<String, String> headers) throws Exception {
+        return http("GET", url, headers, null, 3000, 4000);
     }
 
     private static byte[] httpPost(String url, Map<String, String> headers, String body) throws Exception {
@@ -168,6 +177,11 @@ public final class MusicCore {
 
     private static JSONObject getJson(String url, Map<String, String> headers) throws Exception {
         return new JSONObject(new String(httpGet(url, headers), StandardCharsets.UTF_8));
+    }
+
+    /** 短超时 GET JSON（connect 3s / read 4s）：分类拉取等辅助请求专用。 */
+    private static JSONObject getJsonShort(String url, Map<String, String> headers) throws Exception {
+        return new JSONObject(new String(httpGetShort(url, headers), StandardCharsets.UTF_8));
     }
 
     private static JSONObject postJson(String url, Map<String, String> headers, String body) throws Exception {
@@ -663,7 +677,7 @@ public final class MusicCore {
     /** 网易云歌单分类目录（失败回退内置常用分类）。 */
     public static List<String> neCatlist() {
         try {
-            JSONObject resp = getJson("https://music.163.com/api/playlist/catlist", neHeaders());
+            JSONObject resp = getJsonShort("https://music.163.com/api/playlist/catlist", neHeaders());
             JSONArray sub = resp.optJSONArray("sub");
             List<String> out = new ArrayList<>();
             if (sub != null) {
@@ -3689,6 +3703,64 @@ public final class MusicCore {
         return m.find() ? m.group(1) : null;
     }
 
+    // ============================ 歌单分类拉取（缓存 + 并行 + 短超时） ============================
+
+    /** 五平台歌单分类进程级缓存：homeContent 每次启动/切源都会调用，缓存避免重复串行拉取超时。 */
+    private static final java.util.concurrent.ConcurrentHashMap<String, List<String[]>> CATS_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    /** 分类统一出口：缓存优先，未命中由 catsParallel 并行调度同步拉取。netease 返回 [名,名]，其余 [tagId, 名]。 */
+    private static List<String[]> catsOf(String platform) {
+        List<String[]> hit = CATS_CACHE.get(platform);
+        if (hit != null) return hit;
+        List<String[]> out = new ArrayList<>();
+        try {
+            if ("netease".equals(platform)) {
+                for (String n : neCatlist()) out.add(new String[]{n, n});
+            } else if ("kugou".equals(platform)) {
+                out = kgV9Cats();
+            } else if ("qq".equals(platform)) {
+                out = qqPlaylistCats();
+            } else if ("kuwo".equals(platform)) {
+                out = kwPlaylistCats();
+            } else if ("migu".equals(platform)) {
+                out = mgPlaylistCats();
+            }
+        } catch (Exception e) {
+            fileLog("catsOf " + platform + " FAIL : " + e);
+        }
+        CATS_CACHE.put(platform, out);
+        return out;
+    }
+
+    /** 五平台分类并行拉取：总耗时 ≈ 最慢单个（Future 限 6s 兜底截断），失败回退缓存或空。 */
+    private static java.util.Map<String, List<String[]>> catsParallel() {
+        String[] platforms = {"netease", "kugou", "qq", "kuwo", "migu"};
+        ExecutorService pool = Executors.newFixedThreadPool(platforms.length);
+        java.util.Map<String, java.util.concurrent.Future<List<String[]>>> fs = new java.util.LinkedHashMap<>();
+        for (final String p : platforms) {
+            fs.put(p, pool.submit(new java.util.concurrent.Callable<List<String[]>>() {
+                @Override
+                public List<String[]> call() {
+                    return catsOf(p);
+                }
+            }));
+        }
+        pool.shutdown();
+        java.util.Map<String, List<String[]>> out = new java.util.LinkedHashMap<>();
+        for (java.util.Map.Entry<String, java.util.concurrent.Future<List<String[]>>> e : fs.entrySet()) {
+            List<String[]> v;
+            try {
+                v = e.getValue().get(6, TimeUnit.SECONDS);
+            } catch (Exception ex) {
+                v = CATS_CACHE.get(e.getKey());
+                if (v == null) v = new ArrayList<>();
+            }
+            out.put(e.getKey(), v);
+        }
+        return out;
+    }
+
     // ============================ homeContent / categoryContent ============================
 
     /** homeContent：all=聚合源（热歌榜 + 歌单/榜单目录）；单平台=榜单 + 热歌（netease 加歌单 tab）。 */
@@ -3706,25 +3778,19 @@ public final class MusicCore {
                 // MV 站源不再并入主页 tab（2026-11-04 去掉「xx映MV」页签）：MV 内容仍可经
                 // 聚合搜索 / 各独立 MV 源（style=mv）到达；categoryContent 对历史 tid 的路由保留
                 if (filter) {
-                    JSONArray cats = new JSONArray();
-                    cats.put(new JSONObject().put("n", "全部").put("v", ""));
-                    for (String c : neCatlist()) {
-                        cats.put(new JSONObject().put("n", c).put("v", c));
-                    }
-                    // 酷狗歌单分类（v9 getSpecial tagids 动态拉取，lx getTags 蓝本；失败仅「全部」）
-                    JSONArray kgCats = catsJson(kgV9Cats());
+                    // 五平台分类并行拉取（各 3-4s 短超时 + 进程缓存），总耗时 ≈ 最慢单个，避免 homeContent 超壳超时
+                    java.util.Map<String, List<String[]>> catsAll = catsParallel();
                     JSONObject filters = new JSONObject();
                     filters.put("netease", new JSONArray().put(new JSONObject()
-                            .put("key", "cat").put("name", "分类").put("value", cats)));
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(catsAll.get("netease")))));
                     filters.put("kugou", new JSONArray().put(new JSONObject()
-                            .put("key", "cat").put("name", "分类").put("value", kgCats)));
-                    // 秋秋/蜗牛/小蜜 歌单分类（lx songList.js 动态 tags，失败仅「全部」=推荐流）
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(catsAll.get("kugou")))));
                     filters.put("qq", new JSONArray().put(new JSONObject()
-                            .put("key", "cat").put("name", "分类").put("value", catsJson(qqPlaylistCats()))));
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(catsAll.get("qq")))));
                     filters.put("kuwo", new JSONArray().put(new JSONObject()
-                            .put("key", "cat").put("name", "分类").put("value", catsJson(kwPlaylistCats()))));
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(catsAll.get("kuwo")))));
                     filters.put("migu", new JSONArray().put(new JSONObject()
-                            .put("key", "cat").put("name", "分类").put("value", catsJson(mgPlaylistCats()))));
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(catsAll.get("migu")))));
                     result.put("filters", filters);
                 }
             } else {
@@ -3736,33 +3802,12 @@ public final class MusicCore {
                 classes.put(new JSONObject().put("type_id", "hot").put("type_name", pn + "热歌"));
                 classes.put(new JSONObject().put("type_id", platform + "_rank").put("type_name", pn + "榜单"));
                 if (filter) {
+                    // 单平台源：同五平台并行拉取（缓存优先），失败仅「全部」
+                    java.util.Map<String, List<String[]>> catsAll = catsParallel();
                     JSONObject filters = new JSONObject();
-                    if ("netease".equals(platform)) {
-                        JSONArray cats = new JSONArray();
-                        cats.put(new JSONObject().put("n", "全部").put("v", ""));
-                        for (String c : neCatlist()) {
-                            cats.put(new JSONObject().put("n", c).put("v", c));
-                        }
-                        filters.put("netease", new JSONArray().put(new JSONObject()
-                                .put("key", "cat").put("name", "分类").put("value", cats)));
-                    }
-                    if ("kugou".equals(platform)) {
-                        JSONArray kgCats = catsJson(kgV9Cats());
-                        filters.put("kugou", new JSONArray().put(new JSONObject()
-                                .put("key", "cat").put("name", "分类").put("value", kgCats)));
-                    }
-                    if ("qq".equals(platform)) {
-                        filters.put("qq", new JSONArray().put(new JSONObject()
-                                .put("key", "cat").put("name", "分类").put("value", catsJson(qqPlaylistCats()))));
-                    }
-                    if ("kuwo".equals(platform)) {
-                        filters.put("kuwo", new JSONArray().put(new JSONObject()
-                                .put("key", "cat").put("name", "分类").put("value", catsJson(kwPlaylistCats()))));
-                    }
-                    if ("migu".equals(platform)) {
-                        filters.put("migu", new JSONArray().put(new JSONObject()
-                                .put("key", "cat").put("name", "分类").put("value", catsJson(mgPlaylistCats()))));
-                    }
+                    List<String[]> own = catsAll.containsKey(platform) ? catsAll.get(platform) : new ArrayList<String[]>();
+                    filters.put(platform, new JSONArray().put(new JSONObject()
+                            .put("key", "cat").put("name", "分类").put("value", catsJson(own))));
                     result.put("filters", filters);
                 }
             }
@@ -3977,7 +4022,8 @@ public final class MusicCore {
             if (p == null) continue;
             String id = String.valueOf(p.opt("specialid"));
             String name = p.optString("specialname", "").trim();
-            if (id.isEmpty() || "0".equals(id) || name.isEmpty()) continue;
+            // 防御：specialid 缺失/非数字（org.json null 会转 "null" 字符串）直接跳过，防脏 id 进列表
+            if (!id.matches("\\d+") || "0".equals(id) || name.isEmpty()) continue;
             // lx filterList：total_play_count（服务端已格式化字符串如"1718.4万"）优先，否则格式化 play_count
             String tpc = p.optString("total_play_count", "").trim();
             String remarks = tpc.isEmpty() || "0".equals(tpc) ? playCountText(p.optLong("play_count", 0)) : tpc;
@@ -3995,7 +4041,7 @@ public final class MusicCore {
     private static List<String[]> kgV9Cats() {
         List<String[]> out = new ArrayList<>();
         try {
-            JSONObject resp = getJson("http://www2.kugou.kugou.com/yueku/v9/special/getSpecial?is_smarty=1&cdn=cdn&t=5&c=",
+            JSONObject resp = getJsonShort("http://www2.kugou.kugou.com/yueku/v9/special/getSpecial?is_smarty=1&cdn=cdn&t=5&c=",
                     headers("User-Agent", WEB_UA, "Referer", "http://www2.kugou.kugou.com/"));
             if (resp.optInt("status", -1) != 1) return out;
             JSONObject data = resp.optJSONObject("data");
@@ -4277,7 +4323,7 @@ public final class MusicCore {
                     .put("module", "playlist.PlaylistAllCategoriesServer"));
             String url = "https://u.y.qq.com/cgi-bin/musicu.fcg?loginUin=0&hostUin=0&format=json" +
                     "&inCharset=utf-8&outCharset=utf-8&notice=0&platform=wk_v15.json&needNewCode=0&data=" + enc(data.toString());
-            JSONObject resp = getJson(url, headers("Referer", "https://c.y.qq.com/", "User-Agent", WEB_UA));
+            JSONObject resp = getJsonShort(url, headers("Referer", "https://c.y.qq.com/", "User-Agent", WEB_UA));
             JSONObject tags = resp.optJSONObject("tags");
             JSONObject tdata = tags == null ? null : tags.optJSONObject("data");
             JSONArray groups = tdata == null ? null : tdata.optJSONArray("v_group");
@@ -4385,7 +4431,7 @@ public final class MusicCore {
         try {
             String url = "http://wapi.kuwo.cn/api/pc/classify/playlist/getTagList?cmd=rcm_keyword_playlist&user=0" +
                     "&prod=kwplayer_pc_9.0.5.0&vipver=9.0.5.0&source=kwplayer_pc_9.0.5.0&loginUid=0&loginSid=0&appUid=76039576";
-            JSONObject resp = getJson(url, withRandomIp(headers("User-Agent", KW_UA)));
+            JSONObject resp = getJsonShort(url, withRandomIp(headers("User-Agent", KW_UA)));
             if (resp.optInt("code", -1) != 200) return out;
             JSONArray groups = resp.optJSONArray("data");
             if (groups == null) return out;
@@ -4464,7 +4510,7 @@ public final class MusicCore {
     private static List<String[]> mgPlaylistCats() {
         List<String[]> out = new ArrayList<>();
         try {
-            JSONObject resp = getJson("https://app.c.nf.migu.cn/pc/v1.0/template/musiclistplaza-taglist/release", mgHeaders());
+            JSONObject resp = getJsonShort("https://app.c.nf.migu.cn/pc/v1.0/template/musiclistplaza-taglist/release", mgHeaders());
             if (!"000000".equals(resp.optString("code", ""))) return out;
             JSONArray data = resp.optJSONArray("data");
             if (data == null) return out;

@@ -1,5 +1,5 @@
-﻿# Build qingguoduanju spider jar: javac (stub + android.jar) -> R8 obfuscate+dex -> zip (qingguoduanju-spider.jar)
-# Output: ..\..\guoju-api\果果短剧\lib\qingguoduanju-spider.jar (classes.dex) + MD5 (for 果果短剧.json dramas.jar)
+﻿# Build qingguoduanju spider jar: javac (stub + android.jar) -> R8 obfuscate+dex -> zip (qingguoduanju-spider.bin)
+# Output: ..\..\guoju-api\果果短剧\lib\qingguoduanju-spider.bin (classes.dex) + MD5 (for 果果短剧.json dramas.jar)
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -28,9 +28,11 @@ foreach ($sdk in $sdks) {
 if (-not $androidJar) { throw "android.jar not found (set ANDROID_HOME or check D:\Tool\platforms)" }
 Write-Host "android.jar: $androidJar"
 
-# 2. locate r8.jar (obfuscator + dexer)
+# 2. locate r8.jar (obfuscator + dexer)：兼容 SDK 根目录与 ANDROID_HOME 两种布局
 $r8Jar = "D:\Tool\cmdline-tools\latest\lib\r8.jar"
-if (-not (Test-Path $r8Jar)) { throw "r8.jar not found (check D:\Tool\cmdline-tools)" }
+if (-not (Test-Path $r8Jar)) { $r8Jar = "D:\Tool\Android\cmdline-tools\latest\lib\r8.jar" }
+if (-not (Test-Path $r8Jar) -and $env:ANDROID_HOME) { $r8Jar = Join-Path $env:ANDROID_HOME "cmdline-tools\latest\lib\r8.jar" }
+if (-not (Test-Path $r8Jar)) { throw "r8.jar not found (check D:\Tool\cmdline-tools or ANDROID_HOME)" }
 Write-Host "r8.jar: $r8Jar"
 
 # 3. clean + compile
@@ -75,7 +77,7 @@ if (-not (Test-Path $dexPath)) { throw "classes.dex not generated" }
 Add-Type -AssemblyName System.IO.Compression
 $outRepoDir = Join-Path (Join-Path $root "..\..\guoju-api\果果短剧") "lib"
 if (-not (Test-Path $outRepoDir)) { New-Item -ItemType Directory -Path $outRepoDir -Force | Out-Null }
-$jarPath = Join-Path $outRepoDir "qingguoduanju-spider.jar"
+$jarPath = Join-Path $outRepoDir "qingguoduanju-spider.bin"
 if (Test-Path $jarPath) { Remove-Item $jarPath -Force }
 $fs = [System.IO.File]::Create($jarPath)
 try {
@@ -100,4 +102,4 @@ $size = (Get-Item $jarPath).Length
 Write-Host ""
 Write-Host "BUILD OK: $jarPath ($size bytes)"
 Write-Host "MD5: $md5"
-Write-Host "果果短剧.json ref: ./lib/qingguoduanju-spider.jar;md5;$md5"
+Write-Host "果果短剧.json ref: ./lib/qingguoduanju-spider.bin;md5;$md5"

@@ -61,7 +61,7 @@ public class Qingguoduanju extends Spider {
     /** 把 jar 内部排查日志桥接到壳的 LogWriter（落 guoju_log.txt，导出可见）；
      *  反射失败时兜底直写 App 外部 files 目录 qingguoduanju_spider.log（与 guoju_log.txt 同目录），双通道确保落盘。
      *  注意：壳包名是 com.github.gcd888.guoju（勿回退 tvbox 旧包名，旧包名反射必失败=日志静默丢失）。 */
-    private static void fileLog(String msg) {
+    static void fileLog(String msg) {
         Log.e(TAG, msg);
         try {
             Class<?> lw = Class.forName("com.github.gcd888.guoju.util.LogWriter");
@@ -168,7 +168,7 @@ public class Qingguoduanju extends Spider {
 
     // ============================ HTTP ============================
 
-    private static String text(String url, String method, byte[] body, Map<String, String> headers) {
+    static String text(String url, String method, byte[] body, Map<String, String> headers) {
         long t0 = System.currentTimeMillis();
         HttpURLConnection conn = null;
         try {
@@ -1427,11 +1427,11 @@ public class Qingguoduanju extends Spider {
     private static int rol32(int v, int n) { n &= 31; return (v << n) | (v >>> (32 - n)); }
     private static int ror32(int v, int n) { n &= 31; return (v >>> n) | (v << (32 - n)); }
 
-    private static byte[] le32(int v) {
+    static byte[] le32(int v) {
         return new byte[]{(byte) v, (byte) (v >>> 8), (byte) (v >>> 16), (byte) (v >>> 24)};
     }
 
-    private static byte[] be32(int v) {
+    static byte[] be32(int v) {
         return new byte[]{(byte) (v >>> 24), (byte) (v >>> 16), (byte) (v >>> 8), (byte) v};
     }
 
@@ -2209,7 +2209,7 @@ public class Qingguoduanju extends Spider {
         }
     }
 
-    private static synchronized String[] appDevice(boolean force) {
+    static synchronized String[] appDevice(boolean force) {
         if (!force && appDeviceIds != null) return appDeviceIds;
         String path = deviceStorePath();
         if (!force && path != null) {
@@ -3195,6 +3195,12 @@ public class Qingguoduanju extends Spider {
             // 用 500 不用 502：NanoHTTPD 2.3.1 Status 枚举缺 502，lookup 返回 null 会崩壳进程
             return new Object[]{500, "text/plain", new ByteArrayInputStream(new byte[0]), headers};
         }
+    }
+
+    /** 云端账号能力（红果登录 + 云端观看历史）：协议见 HongguoAccount.handle 注释。 */
+    @Override
+    public String action(String json) {
+        return HongguoAccount.handle(mContext, json);
     }
 
     /** 本地代理：__range 分段 → CENC 解密 → 206 回吐（与壳 getProxy 契约一致）。 */
