@@ -38,10 +38,10 @@ import javax.crypto.spec.SecretKeySpec;
  *  - 首次必须调 1103 注册匿名设备拿 userId（否则业务接口回 code=9 用户ID不能为空）。
  *
  * 分类 Tab（对应果果短剧站点内 tab）：
- *  - 海马热播  = 1125 剧场 channelGroupId=65（15 个频道可筛选）
- *  - 海马新剧  = 1125 channelGroupId=13
- *  - 海马漫剧  = 1125 channelGroupId=78
- *  - 海马排行榜 = 1125 channelGroupId=14 + channelId 68/69/70/71（热播榜/飙升榜/新剧榜/热搜榜）
+ *  - 热播榜  = 1125 剧场 channelGroupId=65（15 个频道可筛选）
+ *  - 新剧热播榜 = 1125 channelGroupId=13
+ *  - 漫剧热播榜 = 1125 channelGroupId=78
+ *  - 排行榜  = 1125 channelGroupId=14 + channelId 68/69/70/71（热播榜/飙升榜/新剧榜/热搜榜）
  *                + channelGroupId=17（经典好剧，作为榜单筛选项）
  */
 public class Haimajuchang extends Spider {
@@ -172,13 +172,17 @@ public class Haimajuchang extends Spider {
             for (String domain : DOMAINS) {
                 try {
                     JSONObject params = new JSONObject();
-                    params.put("oaid", "");
-                    params.put("userAgent", "Flutter/" + APP_VERSION);
-                    params.put("requestType", 1);
-                    params.put("activeType", 1);
-                    params.put("isFirstLaunch", true);
-                    params.put("todayLaunchNums", 1);
-                    params.put("launchTime", System.currentTimeMillis());
+                    try {
+                        params.put("oaid", "");
+                        params.put("userAgent", "Flutter/" + APP_VERSION);
+                        params.put("requestType", 1);
+                        params.put("activeType", 1);
+                        params.put("isFirstLaunch", true);
+                        params.put("todayLaunchNums", 1);
+                        params.put("launchTime", System.currentTimeMillis());
+                    } catch (Exception je) {
+                        throw new RuntimeException(je);
+                    }
                     JSONObject data = request(domain, "1103", params);
                     String uid = "";
                     JSONObject userInfo = data == null ? null : data.optJSONObject("userInfoVo");
@@ -415,16 +419,16 @@ public class Haimajuchang extends Spider {
 
     // ============================ Spider 协议 ============================
 
-    /** 分类定义：海马热播（频道筛选）/ 海马新剧 / 海马漫剧 / 海马排行榜（榜单筛选含经典好剧）。 */
+    /** 分类定义：热播榜（频道筛选）/ 新剧热播榜 / 漫剧热播榜 / 排行榜（榜单筛选含经典好剧）。 */
     @Override
     public String homeContent(boolean filter) {
         try {
             JSONObject result = new JSONObject();
             JSONArray classes = new JSONArray();
-            classes.put(new JSONObject().put("type_id", "haima-hot").put("type_name", "海马热播"));
-            classes.put(new JSONObject().put("type_id", "haima-new").put("type_name", "海马新剧"));
-            classes.put(new JSONObject().put("type_id", "haima-comic").put("type_name", "海马漫剧"));
-            classes.put(new JSONObject().put("type_id", "haima-rank").put("type_name", "海马排行榜"));
+            classes.put(new JSONObject().put("type_id", "haima-hot").put("type_name", "热播榜"));
+            classes.put(new JSONObject().put("type_id", "haima-new").put("type_name", "新剧热播榜"));
+            classes.put(new JSONObject().put("type_id", "haima-comic").put("type_name", "漫剧热播榜"));
+            classes.put(new JSONObject().put("type_id", "haima-rank").put("type_name", "排行榜"));
             result.put("class", classes);
             // 筛选组：热播=剧场频道（1125 group 65 channelData 实测固化）；排行榜=榜单频道+经典好剧
             JSONObject filters = new JSONObject();
@@ -524,10 +528,13 @@ public class Haimajuchang extends Spider {
             // 按 chapterIndex 排序后拼 play url：第N集$bookId-chapterId
             List<int[]> order = new ArrayList<>();
             for (int i = 0; i < cl.length(); i++) order.add(new int[]{i});
-            Collections.sort(order, (a, b) -> {
-                JSONObject x = cl.optJSONObject(a[0]), y = cl.optJSONObject(b[0]);
-                return Integer.compare(x == null ? 0 : x.optInt("chapterIndex", 0),
-                        y == null ? 0 : y.optInt("chapterIndex", 0));
+            Collections.sort(order, new java.util.Comparator<int[]>() {
+                @Override
+                public int compare(int[] a, int[] b) {
+                    JSONObject x = cl.optJSONObject(a[0]), y = cl.optJSONObject(b[0]);
+                    return Integer.compare(x == null ? 0 : x.optInt("chapterIndex", 0),
+                            y == null ? 0 : y.optInt("chapterIndex", 0));
+                }
             });
             JSONArray eps = new JSONArray();
             JSONArray epNames = new JSONArray();
