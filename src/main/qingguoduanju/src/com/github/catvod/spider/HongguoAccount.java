@@ -524,7 +524,12 @@ final class HongguoAccount {
         }
 
         private static String urlEncode(String v) {
-            return java.net.URLEncoder.encode(v, StandardCharsets.UTF_8);
+            // encode(String, Charset) 为 API 33+ 重载，低版本电视抛 NoSuchMethodError；改用 API 1 的 (String, String)
+            try {
+                return java.net.URLEncoder.encode(v, "UTF-8");
+            } catch (java.io.UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         private static HttpURLConnection open(URL url, String method, String ua) throws Exception {

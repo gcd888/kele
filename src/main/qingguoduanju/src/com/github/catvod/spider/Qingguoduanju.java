@@ -157,8 +157,13 @@ public class Qingguoduanju extends Spider {
     }
 
     private static String encodeValue(String v) {
-        return java.net.URLEncoder.encode(v, StandardCharsets.UTF_8)
-                .replace("+", "%20").replace("%7E", "~");
+        // encode(String, Charset) 为 API 33+ 重载，低版本电视抛 NoSuchMethodError；改用 API 1 的 (String, String)
+        try {
+            return java.net.URLEncoder.encode(v, "UTF-8")
+                    .replace("+", "%20").replace("%7E", "~");
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String encodeQuery(Map<String, String> values) {
@@ -2633,15 +2638,15 @@ public class Qingguoduanju extends Spider {
 
     /** 影视类型分类（官网 /category/{type}）：type_id + 类型名 + 类型内筛选（名称|slug，官网 selectorList 实测固化）。 */
     private static final String[][] TYPE_FILTERS = {
-            {"real-drama", "真人剧",
+            {"real-drama", "真人剧热播榜",
                     "爱情|romance", "年代|period", "逆袭|comeback", "传奇|legend", "成长|growth", "家庭|family",
                     "家族|clan", "萌宝|cute-kids", "悬疑|suspense", "惊悚|thriller", "恐怖|horror", "志怪|supernatural",
                     "古装|costume", "玄幻|fantasy", "奇幻|wonder", "都市|urban", "青春|youth", "喜剧|comedy",
                     "科幻|sci-fi", "灾难|disaster", "动作冒险|action-adventure", "战争|war", "综艺|variety", "剧情|drama"},
-            {"comic-drama", "漫剧",
+            {"comic-drama", "漫剧热播榜",
                     "脑洞|creative", "玄幻|fantasy", "剧情|drama", "末世|apocalypse", "豪门|wealthy-family",
                     "奇幻|wonder", "科幻|sci-fi", "冒险|adventure"},
-            {"ai-drama", "AI剧",
+            {"ai-drama", "AI剧热播榜",
                     "脑洞|creative", "玄幻|fantasy", "剧情|drama", "末世|apocalypse", "豪门|wealthy-family",
                     "奇幻|wonder", "科幻|sci-fi", "冒险|adventure"},
     };
@@ -2657,11 +2662,10 @@ public class Qingguoduanju extends Spider {
         try {
             JSONObject result = new JSONObject();
             JSONArray classes = new JSONArray();
-            classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热播短剧"));
-            classes.put(new JSONObject().put("type_id", "real-drama").put("type_name", "真人剧"));
-            classes.put(new JSONObject().put("type_id", "comic-drama").put("type_name", "漫剧"));
-            classes.put(new JSONObject().put("type_id", "ai-drama").put("type_name", "AI剧"));
-            classes.put(new JSONObject().put("type_id", "rank").put("type_name", "漫剧榜"));
+            classes.put(new JSONObject().put("type_id", "hot").put("type_name", "热播榜"));
+            classes.put(new JSONObject().put("type_id", "real-drama").put("type_name", "真人剧热播榜"));
+            classes.put(new JSONObject().put("type_id", "comic-drama").put("type_name", "漫剧热播榜"));
+            classes.put(new JSONObject().put("type_id", "ai-drama").put("type_name", "AI剧热播榜"));
             result.put("class", classes);
             // 类型内筛选组（key=cate）：值=官网筛选 slug，categoryContent 拼 /category/{type}/{slug} 路径式筛选
             JSONObject filters = new JSONObject();
