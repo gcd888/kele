@@ -1,0 +1,128 @@
+{
+	"dramas": [
+		{
+			"key": "qingguoduanju",
+			"name": "🍐青果短剧",
+			"type": 3,
+			"api": "./lib/qingguoduanju/qingguoduanju.js",
+			"searchable": 1,
+			"quickSearch": 0,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "xihongshiduanju",
+			"name": "🍅西红柿短剧",
+			"type": 3,
+			"api": "./lib/xihongshiduanju/xihongshiduanju.js",
+			"searchable": 1,
+			"quickSearch": 0,
+			"filterable": 0,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "haimajuchang",
+			"name": "🐴海马短剧",
+			"type": 3,
+			"api": "./lib/haimajuchang/haimajuchang.js",
+			"searchable": 1,
+			"quickSearch": 0,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama"
+		},
+		{
+			"key": "csp_Bili短剧",
+			"name": "🅱️破站短剧",
+			"type": 3,
+			"api": "csp_Bili",
+			"jar": "./lib/bili-spider.bin;md5;2faffa26e94c2621d7ae3a61a9678324",
+			"searchable": 1,
+			"quickSearch": 1,
+			"filterable": 1,
+			"changeable": 1,
+			"playerType": 2,
+			"timeout": 45,
+			"style": "drama",
+			"ext": {
+				"cookie": "SESSDATA=7624af93%2C1696008331%2C862c8%2A42; bili_jct=141a474ef3ce8cf2fedf384e68f6625d; DedeUserID=3493271303096985; DedeUserID__ckMd5=212a836c164605b7",
+				"classes": [
+					{
+						"type_name": "短剧",
+						"type_id": "短剧"
+					},
+					{
+						"type_name": "沙雕动画",
+						"type_id": "沙雕动画"
+					}
+				],
+				"filter": {
+					"短剧": [
+						{
+							"key": "duration",
+							"name": "时长",
+							"value": [
+								{
+									"n": "全部",
+									"v": "0"
+								},
+								{
+									"n": "60分钟以上",
+									"v": "4"
+								},
+								{
+									"n": "30~60分钟",
+									"v": "3"
+								},
+								{
+									"n": "10~30分钟",
+									"v": "2"
+								},
+								{
+									"n": "10分钟以下",
+									"v": "1"
+								}
+							]
+						}
+					],
+					"沙雕动画": [
+						{
+							"key": "duration",
+							"name": "时长",
+							"value": [
+								{
+									"n": "全部",
+									"v": "0"
+								},
+								{
+									"n": "60分钟以上",
+									"v": "4"
+								},
+								{
+									"n": "30~60分钟",
+									"v": "3"
+								},
+								{
+									"n": "10~30分钟",
+									"v": "2"
+								},
+								{
+									"n": "10分钟以下",
+									"v": "1"
+								}
+							]
+						}
+					]
+				}
+			}
+		}
+	]
+}

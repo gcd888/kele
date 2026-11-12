@@ -1,0 +1,38 @@
+package com.github.catvod.spider.merge.g0;
+
+/* JADX INFO: loaded from: E:\HelloWorld\project\kele\src\ysc\diy\摸鱼儿\extracted2\classes.dex */
+public final enum X0 extends g1 {
+    public X0() {
+        super("DoctypeSystemIdentifier_doubleQuoted", 62);
+    }
+
+    @Override // com.github.catvod.spider.merge.g0.g1
+    public final void d(P p, C0397a c0397a) {
+        char cE = c0397a.e();
+        if (cE == 0) {
+            p.m(this);
+            p.m.e.append((char) 65533);
+            return;
+        }
+        if (cE == '\"') {
+            p.o(g1.m0);
+            return;
+        }
+        C0400b0 c0400b0 = g1.a;
+        if (cE == '>') {
+            p.m(this);
+            p.m.f = true;
+            p.j();
+            p.o(c0400b0);
+            return;
+        }
+        if (cE != 65535) {
+            p.m.e.append(cE);
+            return;
+        }
+        p.l(this);
+        p.m.f = true;
+        p.j();
+        p.o(c0400b0);
+    }
+}

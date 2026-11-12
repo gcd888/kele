@@ -1,0 +1,1414 @@
+# compiler: R8
+# compiler_version: 8.2.33
+# min_api: 21
+# common_typos_disable
+# {"id":"com.android.tools.r8.mapping","version":"2.2"}
+# pg_map_id: 711e473
+# pg_map_hash: SHA-256 711e473d4d95383d81f822651510faf543af4122897c40748f1433cd5eab03a9
+com.github.catvod.crawler.Spider -> com.github.catvod.crawler.Spider:
+# {"id":"sourceFile","fileName":"Spider.java"}
+    android.content.Context mContext -> a
+    1:1:void init(android.content.Context):0:0 -> init
+    2:2:void init(android.content.Context,java.lang.String):0:0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.KugouMv -> com.github.catvod.spider.KugouMv:
+# {"id":"sourceFile","fileName":"KugouMv.java"}
+    3:81:java.lang.String com.github.catvod.spider.music.MusicCore.kgMvHomeContent(boolean):0:0 -> homeContent
+    3:81:java.lang.String homeContent(boolean):0 -> homeContent
+    4:6:void com.github.catvod.spider.music.MusicCore.bindHost(com.github.catvod.crawler.Spider):0:0 -> init
+    4:6:void init(android.content.Context):0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.Luoxueyinyue -> com.github.catvod.spider.Luoxueyinyue:
+# {"id":"sourceFile","fileName":"Luoxueyinyue.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LuoxueyinyueGou -> com.github.catvod.spider.LuoxueyinyueGou:
+# {"id":"sourceFile","fileName":"LuoxueyinyueGou.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void com.github.catvod.spider.music.LuoxueSpiderBase.<init>():0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LuoxueyinyueMi -> com.github.catvod.spider.LuoxueyinyueMi:
+# {"id":"sourceFile","fileName":"LuoxueyinyueMi.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void com.github.catvod.spider.music.LuoxueSpiderBase.<init>():0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LuoxueyinyueQiu -> com.github.catvod.spider.LuoxueyinyueQiu:
+# {"id":"sourceFile","fileName":"LuoxueyinyueQiu.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void com.github.catvod.spider.music.LuoxueSpiderBase.<init>():0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LuoxueyinyueShui -> com.github.catvod.spider.LuoxueyinyueShui:
+# {"id":"sourceFile","fileName":"LuoxueyinyueShui.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LuoxueyinyueWo -> com.github.catvod.spider.LuoxueyinyueWo:
+# {"id":"sourceFile","fileName":"LuoxueyinyueWo.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void com.github.catvod.spider.music.LuoxueSpiderBase.<init>():0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LuoxueyinyueYun -> com.github.catvod.spider.LuoxueyinyueYun:
+# {"id":"sourceFile","fileName":"LuoxueyinyueYun.java"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void com.github.catvod.spider.music.LuoxueSpiderBase.<init>():0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+com.github.catvod.spider.LxSource -> com.github.catvod.spider.LxSource:
+# {"id":"sourceFile","fileName":"LxSource.java"}
+    com.github.catvod.spider.music.lx.LxScript lx -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/l;"}
+    1:4:void com.github.catvod.spider.music.MusicSpiderBase.<init>():0:0 -> <init>
+    1:4:void com.github.catvod.spider.music.LuoxueSpiderBase.<init>():0 -> <init>
+    1:4:void <init>():0 -> <init>
+    1:1:java.lang.String platform():0:0 -> a
+    1:1:java.lang.String com.github.catvod.spider.music.lx.LxScript.musicUrl(java.lang.String,java.lang.String):0:0 -> b
+    1:1:java.lang.String lxStream(java.lang.String,java.lang.String):0 -> b
+    2:2:void com.github.catvod.spider.music.lx.LxScript.ensure():0:0 -> b
+    2:2:java.lang.String com.github.catvod.spider.music.lx.LxScript.musicUrl(java.lang.String,java.lang.String):0 -> b
+    2:2:java.lang.String lxStream(java.lang.String,java.lang.String):0 -> b
+    3:3:java.lang.String com.github.catvod.spider.music.lx.LxScript.musicUrl(java.lang.String,java.lang.String):0:0 -> b
+    3:3:java.lang.String lxStream(java.lang.String,java.lang.String):0 -> b
+    4:4:void com.github.catvod.spider.music.lx.LxScript.ensure():0:0 -> b
+    4:4:java.lang.String com.github.catvod.spider.music.lx.LxScript.musicUrl(java.lang.String,java.lang.String):0 -> b
+    4:4:java.lang.String lxStream(java.lang.String,java.lang.String):0 -> b
+    5:16:void com.github.catvod.spider.music.lx.LxScript.close():0:0 -> destroy
+    5:16:void destroy():0 -> destroy
+    17:33:void com.github.catvod.spider.music.lx.LxScript.closeQuiet():0:0 -> destroy
+    17:33:void com.github.catvod.spider.music.lx.LxScript.close():0 -> destroy
+    17:33:void destroy():0 -> destroy
+    34:37:void destroy():0:0 -> destroy
+com.github.catvod.spider.LxSource$$ExternalSyntheticLambda0 -> a.a:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+com.github.catvod.spider.MiguMv -> com.github.catvod.spider.MiguMv:
+# {"id":"sourceFile","fileName":"MiguMv.java"}
+    3:81:java.lang.String com.github.catvod.spider.music.MusicCore.mgMvHomeContent(boolean):0:0 -> homeContent
+    3:81:java.lang.String homeContent(boolean):0 -> homeContent
+    4:6:void com.github.catvod.spider.music.MusicCore.bindHost(com.github.catvod.crawler.Spider):0:0 -> init
+    4:6:void init(android.content.Context):0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.NeteaseMv -> com.github.catvod.spider.NeteaseMv:
+# {"id":"sourceFile","fileName":"NeteaseMv.java"}
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.mvHomeContent(boolean):0:0 -> homeContent
+    1:1:java.lang.String homeContent(boolean):0 -> homeContent
+    4:6:void com.github.catvod.spider.music.MusicCore.bindHost(com.github.catvod.crawler.Spider):0:0 -> init
+    4:6:void init(android.content.Context):0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.QqMv -> com.github.catvod.spider.QqMv:
+# {"id":"sourceFile","fileName":"QqMv.java"}
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.qqMvHomeContent(boolean):0:0 -> homeContent
+    1:1:java.lang.String homeContent(boolean):0 -> homeContent
+    4:6:void com.github.catvod.spider.music.MusicCore.bindHost(com.github.catvod.crawler.Spider):0:0 -> init
+    4:6:void init(android.content.Context):0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.music.LuoxueApi -> b.a:
+# {"id":"sourceFile","fileName":"LuoxueApi.java"}
+    1:1:byte[] com.github.catvod.spider.music.lx.LxCrypto.fit(byte[],int):0:0 -> a
+    1:1:byte[] com.github.catvod.spider.music.lx.LxCrypto.aes(com.github.catvod.spider.music.lx.JsRuntime,java.lang.Object[],boolean):0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([Ljava/lang/Object;Z)[B"}
+    2:2:byte[] com.github.catvod.spider.music.lx.LxCrypto.aes(com.github.catvod.spider.music.lx.JsRuntime,java.lang.Object[],boolean):0:0 -> a
+    3:3:byte[] com.github.catvod.spider.music.lx.LxCrypto.fit(byte[],int):0:0 -> a
+    3:3:byte[] com.github.catvod.spider.music.lx.LxCrypto.aes(com.github.catvod.spider.music.lx.JsRuntime,java.lang.Object[],boolean):0 -> a
+    4:4:byte[] com.github.catvod.spider.music.lx.LxCrypto.aes(com.github.catvod.spider.music.lx.JsRuntime,java.lang.Object[],boolean):0:0 -> a
+    1:1:java.lang.Object dig(java.lang.Object,org.json.JSONArray):0:0 -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;Lorg/json/JSONArray;)Ljava/lang/Object;"}
+    1:1:org.json.JSONArray com.github.catvod.spider.music.LuoxueApi.toArray(java.lang.Object):0:0 -> c
+    1:1:java.lang.String follow303(org.json.JSONObject):0 -> c
+    2:2:java.lang.String follow303(org.json.JSONObject):0:0 -> c
+    1:1:java.lang.String httpRaw(java.lang.String,java.lang.String,java.lang.String,java.util.Map):0:0 -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/LinkedHashMap;)Ljava/lang/String;"}
+    1:1:java.lang.String mapSource(java.lang.String):0:0 -> e
+    1:1:org.json.JSONObject musicInfo(java.lang.String,java.lang.String):0:0 -> f
+    1:1:java.util.Map com.github.catvod.spider.music.LuoxueApi.mapOf(java.lang.String[]):0:0 -> g
+    1:1:java.lang.String post(java.lang.String,java.lang.String):0 -> g
+    2:2:java.lang.String post(java.lang.String,java.lang.String):0:0 -> g
+    1:1:java.lang.String com.github.catvod.spider.music.lx.LxHttp.urlEncode(org.json.JSONObject):0:0 -> h
+    1:1:java.lang.String com.github.catvod.spider.music.lx.LxHttp.request(java.lang.String,java.lang.String):0 -> h
+    2:2:java.lang.String com.github.catvod.spider.music.lx.LxHttp.request(java.lang.String,java.lang.String):0:0 -> h
+    3:3:java.lang.Object com.github.catvod.spider.music.lx.LxHttp.parseBody(java.lang.String):0:0 -> h
+    3:3:java.lang.String com.github.catvod.spider.music.lx.LxHttp.request(java.lang.String,java.lang.String):0 -> h
+    4:4:java.lang.String com.github.catvod.spider.music.lx.LxHttp.request(java.lang.String,java.lang.String):0:0 -> h
+com.github.catvod.spider.music.LuoxueSpiderBase -> b.b:
+# {"id":"sourceFile","fileName":"LuoxueSpiderBase.java"}
+    1:1:java.lang.String lxStream(java.lang.String,java.lang.String):0:0 -> b
+    1:1:java.lang.String com.github.catvod.spider.music.LuoxueApi.stream(java.lang.String,java.lang.String):0:0 -> playerContent
+    1:1:java.lang.String playerContent(java.lang.String,java.lang.String,java.util.List):0 -> playerContent
+    2:2:java.lang.String playerContent(java.lang.String,java.lang.String,java.util.List):0:0 -> playerContent
+com.github.catvod.spider.music.MusicCore -> b.i:
+# {"id":"sourceFile","fileName":"MusicCore.java"}
+    java.lang.String[] PLATFORMS -> a
+    com.github.catvod.crawler.Spider host -> b
+    byte[] LINUX_KEY -> c
+    byte[] QRC_KEY -> d
+    byte[][] QRC_SBOX -> e
+    int[] QRC_KEY_RND_SHIFT -> f
+    int[] QRC_KEY_PERM_C -> g
+    int[] QRC_KEY_PERM_D -> h
+    int[] QRC_KEY_COMPRESSION -> i
+    byte[] KRC_KEY -> j
+    java.util.Map qqDetailCache -> k
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/HashMap;"}
+    java.util.Map qqMetaCache -> l
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/HashMap;"}
+    java.lang.String[][] KG_MV_CATS -> m
+    java.util.Map KG_MV_CACHE -> n
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/concurrent/ConcurrentHashMap;"}
+    java.lang.String[][] MG_MV_CATS -> o
+    java.lang.String kgMid -> p
+    java.lang.String[][] SODA_BUILTIN_RANKS -> q
+    java.lang.String[][] KW_BUILTIN_RANKS -> r
+    java.util.Map SONG_CACHE -> s
+    java.util.concurrent.ConcurrentHashMap CATS_CACHE -> t
+    1:1:void <clinit>():0:0 -> <clinit>
+    1:1:com.github.catvod.spider.music.MusicCore$Song com.github.catvod.spider.music.MusicCore.kgParseSong(org.json.JSONObject):0:0 -> A
+    1:1:java.util.List kgParseInfoList(org.json.JSONArray):0 -> A
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)Ljava/util/ArrayList;"}
+    2:2:java.util.List kgParseInfoList(org.json.JSONArray):0:0 -> A
+    1:1:org.json.JSONObject qqComm():0:0 -> A0
+    1:1:java.lang.String kgPlaylistPage(java.lang.String,java.util.HashMap):0:0 -> B
+    13:16:java.util.Map com.github.catvod.spider.music.MusicCore.qqJsonHeaders():0:0 -> B0
+    13:16:org.json.JSONObject qqFcgPost(org.json.JSONObject):0 -> B0
+    17:27:org.json.JSONObject qqFcgPost(org.json.JSONObject):0:0 -> B0
+    1:1:java.lang.String[] kgSplitId(java.lang.String):0:0 -> C
+    1:1:java.lang.String qqMvCategoryContent(java.lang.String,java.lang.String,java.util.HashMap):0:0 -> C0
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.kgRandom(int):0:0 -> D
+    1:1:java.lang.String kgV5Url(java.lang.String,java.lang.String):0 -> D
+    2:2:java.lang.String kgV5Url(java.lang.String,java.lang.String):0:0 -> D
+    1:1:java.lang.String qqMvDetailContent(java.util.List):0:0 -> D0
+    1:1:java.util.List kgV9Cats():0:0 -> E
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/ArrayList;"}
+    1:1:org.json.JSONObject qqMvItem(org.json.JSONObject):0:0 -> E0
+    1:1:java.util.List kgV9Playlists(java.lang.String,int):0:0 -> F
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)Ljava/util/ArrayList;"}
+    1:1:java.lang.String qqMvPage(org.json.JSONArray,int,boolean):0:0 -> F0
+    1:1:java.lang.String kuwoLrcxToLrc(java.lang.String):0:0 -> G
+    1:1:java.lang.String qqMvSearchContent(java.lang.String,java.lang.String):0:0 -> G0
+    1:1:java.lang.String kwImgUrl(java.lang.String):0:0 -> H
+    1:1:java.lang.String qqMvUrl(java.lang.String):0:0 -> H0
+    1:1:java.util.List kwParseAbslist(org.json.JSONArray):0:0 -> I
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)Ljava/util/ArrayList;"}
+    1:1:com.github.catvod.spider.music.MusicCore$Song qqParseSong(org.json.JSONObject):0:0 -> I0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;)Lb/h;"}
+    1:1:java.util.List kwPlaylistCats():0:0 -> J
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/ArrayList;"}
+    1:1:java.util.List qqParseSongList(org.json.JSONArray):0:0 -> J0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)Ljava/util/ArrayList;"}
+    1:1:java.lang.String kwPlaylistPage(java.lang.String,java.util.HashMap):0:0 -> K
+    1:1:java.util.List qqPlaylistCats():0:0 -> K0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/ArrayList;"}
+    1:1:java.util.List kwPlaylists(java.lang.String,int):0:0 -> L
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)Ljava/util/ArrayList;"}
+    1:1:java.lang.String qqPlaylistPage(java.lang.String,java.util.HashMap):0:0 -> L0
+    1:1:java.lang.String[] com.github.catvod.spider.music.MusicCore.neLyric(java.lang.String):0:0 -> M
+    1:1:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    2:2:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0:0 -> M
+    2:2:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.decryptKRC(java.lang.String):0:0 -> M
+    3:3:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0 -> M
+    3:3:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    4:4:java.lang.String com.github.catvod.spider.music.MusicCore.zlibInflate(byte[]):0:0 -> M
+    4:4:java.lang.String com.github.catvod.spider.music.MusicCore.decryptKRC(java.lang.String):0 -> M
+    4:4:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0 -> M
+    4:4:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.decryptKRC(java.lang.String):0:0 -> M
+    5:5:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0 -> M
+    5:5:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    6:6:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0:0 -> M
+    6:6:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.krcToLrc(java.lang.String):0:0 -> M
+    7:7:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0 -> M
+    7:7:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    8:8:java.lang.String[] com.github.catvod.spider.music.MusicCore.kgLyric(java.lang.String,int):0:0 -> M
+    8:8:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    9:9:java.lang.String[] com.github.catvod.spider.music.MusicCore.sodaLyric(java.lang.String):0:0 -> M
+    9:9:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    10:10:java.lang.String com.github.catvod.spider.music.MusicCore.sodaWordLyricToLrc(java.lang.String):0:0 -> M
+    10:10:java.lang.String[] com.github.catvod.spider.music.MusicCore.sodaLyric(java.lang.String):0 -> M
+    10:10:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    11:11:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    11:11:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    12:12:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0:0 -> M
+    12:12:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0 -> M
+    12:12:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    13:13:byte[] com.github.catvod.spider.music.MusicCore.httpGet(java.lang.String,java.util.Map):0:0 -> M
+    13:13:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0 -> M
+    13:13:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0 -> M
+    13:13:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    14:14:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0:0 -> M
+    14:14:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0 -> M
+    14:14:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    15:15:java.lang.String[] lyric(java.lang.String,java.lang.String):0:0 -> M
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":33,"2":34,"3":35,"4":36,"5":37,"6":38,"7":39},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    16:16:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    16:16:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    17:17:byte[] com.github.catvod.spider.music.MusicCore.httpGet(java.lang.String,java.util.Map):0:0 -> M
+    17:17:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0 -> M
+    17:17:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    18:18:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    18:18:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    19:19:java.lang.String[] lyric(java.lang.String,java.lang.String):0:0 -> M
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":40,"2":41,"3":42,"4":43,"5":44,"6":45,"7":46},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    20:20:java.lang.String[] lyric(java.lang.String,java.lang.String):0:0 -> M
+    21:21:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    21:21:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    22:22:java.lang.String com.github.catvod.spider.music.MusicCore.b64Utf8(java.lang.String):0:0 -> M
+    22:22:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0 -> M
+    22:22:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    23:23:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    23:23:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    24:24:java.lang.String com.github.catvod.spider.music.MusicCore.b64Utf8(java.lang.String):0:0 -> M
+    24:24:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0 -> M
+    24:24:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    25:25:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    25:25:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    26:26:long com.github.catvod.spider.music.MusicCore.parseSongNum(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    26:26:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0 -> M
+    26:26:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    27:27:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    27:27:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    28:28:java.lang.String com.github.catvod.spider.music.MusicCore.b64Utf8(java.lang.String):0:0 -> M
+    28:28:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0 -> M
+    28:28:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    29:29:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    29:29:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    30:30:java.lang.String[] lyric(java.lang.String,java.lang.String):0:0 -> M
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":47,"2":48,"3":49,"4":50,"5":51,"6":52,"7":53},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    31:31:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    31:31:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    32:32:java.lang.String com.github.catvod.spider.music.MusicCore.qrcToLrc(java.lang.String):0:0 -> M
+    32:32:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0 -> M
+    32:32:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    33:33:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    33:33:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    34:34:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    34:34:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    35:35:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    35:35:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    36:36:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    36:36:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    37:37:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    37:37:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    38:38:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    38:38:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    39:39:java.lang.String[] com.github.catvod.spider.music.MusicCore.mgLyric(java.lang.String):0:0 -> M
+    39:39:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    40:40:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    40:40:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    41:41:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    41:41:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    42:42:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    42:42:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    43:43:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    43:43:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    44:44:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    44:44:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    45:45:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    45:45:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    46:46:java.lang.String[] com.github.catvod.spider.music.MusicCore.kwLyric(java.lang.String):0:0 -> M
+    46:46:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    47:47:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    47:47:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    48:48:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    48:48:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    49:49:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    49:49:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    50:50:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    50:50:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    51:51:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    51:51:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    52:52:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    52:52:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    53:53:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqLyric(com.github.catvod.spider.music.MusicCore$Song):0:0 -> M
+    53:53:java.lang.String[] lyric(java.lang.String,java.lang.String):0 -> M
+    1:1:java.util.List qqPlaylists(java.lang.String,int):0:0 -> M0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)Ljava/util/ArrayList;"}
+    1:1:void mgCollectPlaylists(org.json.JSONArray,java.util.List,java.util.Set):0:0 -> N
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;Ljava/util/ArrayList;Ljava/util/HashSet;)V"}
+    1:1:java.util.List qqPlaylistsByModule(java.lang.String,int):0:0 -> N0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)Ljava/util/ArrayList;"}
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.mgPickImg(org.json.JSONArray):0:0 -> O
+    1:1:com.github.catvod.spider.music.MusicCore$Song mgConvertItem(org.json.JSONObject):0 -> O
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;)Lb/h;"}
+    2:2:com.github.catvod.spider.music.MusicCore$Song mgConvertItem(org.json.JSONObject):0:0 -> O
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.mgImgUrl(java.lang.String):0:0 -> O
+    3:3:com.github.catvod.spider.music.MusicCore$Song mgConvertItem(org.json.JSONObject):0 -> O
+    4:4:com.github.catvod.spider.music.MusicCore$Song mgConvertItem(org.json.JSONObject):0:0 -> O
+    1:1:java.util.List qqSearch(java.lang.String):0:0 -> O0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Ljava/util/ArrayList;"}
+    1:1:java.util.Map mgHeaders():0:0 -> P
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/LinkedHashMap;"}
+    1:1:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Lb/h;"}
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":3,"2":4,"3":5,"4":6,"5":7,"6":8,"7":9},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    2:2:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    3:3:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    4:4:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    5:5:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    6:6:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    7:7:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    8:8:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    9:9:com.github.catvod.spider.music.MusicCore$Song qqSongDetail(java.lang.String):0:0 -> P0
+    1:1:java.util.Map com.github.catvod.spider.music.MusicCore.mgMvHeaders():0:0 -> Q
+    1:1:java.lang.String mgMvCategoryContent(java.lang.String,java.lang.String,java.util.HashMap):0 -> Q
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
+    2:2:java.lang.String mgMvCategoryContent(java.lang.String,java.lang.String,java.util.HashMap):0:0 -> Q
+    1:1:long qrcBitNum(byte[],int,int):0:0 -> Q0
+    1:1:java.util.Map com.github.catvod.spider.music.MusicCore.mgMvHeaders():0:0 -> R
+    1:1:java.lang.String mgMvDetailContent(java.util.List):0 -> R
+    2:2:java.lang.String mgMvDetailContent(java.util.List):0:0 -> R
+    1:1:long qrcBitNumIntl(long,int,int):0:0 -> R0
+    1:1:org.json.JSONObject mgMvItem(org.json.JSONObject):0:0 -> S
+    1:1:long qrcBitNumIntr(long,int,int):0:0 -> S0
+    1:1:java.lang.String mgMvPage(org.json.JSONArray,int,boolean):0:0 -> T
+    1:1:long[] com.github.catvod.spider.music.MusicCore.qrcInitialPermutation(byte[]):0:0 -> T0
+    1:1:byte[] qrcDESCrypt(byte[],long[][]):0 -> T0
+    2:2:byte[] qrcDESCrypt(byte[],long[][]):0:0 -> T0
+    3:3:byte[] com.github.catvod.spider.music.MusicCore.qrcInversePermutation(long,long):0:0 -> T0
+    3:3:byte[] qrcDESCrypt(byte[],long[][]):0 -> T0
+    1:1:java.util.Map com.github.catvod.spider.music.MusicCore.mgMvHeaders():0:0 -> U
+    1:1:java.lang.String mgMvSearchContent(java.lang.String,java.lang.String):0 -> U
+    2:2:java.lang.String mgMvSearchContent(java.lang.String,java.lang.String):0:0 -> U
+    1:1:long qrcF(long,long[]):0:0 -> U0
+    1:1:java.util.Map com.github.catvod.spider.music.MusicCore.mgMvHeaders():0:0 -> V
+    1:1:java.lang.String mgMvUrl(java.lang.String):0 -> V
+    2:2:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    3:3:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":4,"2":5,"3":6,"4":7,"5":8,"6":9,"7":10},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    4:4:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    5:5:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    6:6:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    7:7:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    8:8:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    9:9:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    10:10:java.lang.String mgMvUrl(java.lang.String):0:0 -> V
+    1:1:long[][] qrcKeySchedule(byte[],int):0:0 -> V0
+    1:1:java.util.List mgPlaylistCats():0:0 -> W
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/ArrayList;"}
+    1:1:byte qrcSBoxBit(byte):0:0 -> W0
+    1:1:java.lang.String mgPlaylistPage(java.lang.String,java.util.HashMap):0:0 -> X
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore.kgRankList():0:0 -> X0
+    1:1:java.util.List rankList(java.lang.String):0 -> X0
+    2:2:java.util.List rankList(java.lang.String):0:0 -> X0
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore.mgRankList():0:0 -> X0
+    3:3:java.util.List rankList(java.lang.String):0 -> X0
+    4:4:java.util.List rankList(java.lang.String):0:0 -> X0
+    1:1:java.util.List mgPlaylists(java.lang.String,int):0:0 -> Y
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)Ljava/util/ArrayList;"}
+    1:1:java.lang.String rankPage(java.lang.String):0:0 -> Y0
+    1:1:java.util.List mgRankIndex(java.lang.String):0:0 -> Z
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Ljava/util/ArrayList;"}
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore.kgToplistSongs(java.lang.String):0:0 -> Z0
+    1:1:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;"}
+    2:2:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    2:2:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.sodaPcParams():0:0 -> Z0
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0 -> Z0
+    3:3:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    4:4:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    4:4:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    5:5:java.util.Map com.github.catvod.spider.music.MusicCore.sodaPcHeaders():0:0 -> Z0
+    5:5:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0 -> Z0
+    5:5:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    6:6:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    6:6:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    7:7:java.util.List rankSongs(java.lang.String,java.lang.String):0:0 -> Z0
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":15,"2":16,"3":17,"4":18,"5":19,"6":20,"7":21},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    8:8:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    8:8:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    9:9:java.util.List rankSongs(java.lang.String,java.lang.String):0:0 -> Z0
+    10:10:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    10:10:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    11:11:java.util.List com.github.catvod.spider.music.MusicCore.mgToplistSongs(java.lang.String):0:0 -> Z0
+    11:11:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    12:12:java.util.List com.github.catvod.spider.music.MusicCore.kwToplistSongs(java.lang.String):0:0 -> Z0
+    12:12:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    13:13:java.util.List com.github.catvod.spider.music.MusicCore.qqToplistSongs(java.lang.String):0:0 -> Z0
+    13:13:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    14:14:java.util.List rankSongs(java.lang.String,java.lang.String):0:0 -> Z0
+    15:15:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    15:15:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    16:16:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    16:16:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    17:17:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    17:17:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    18:18:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    18:18:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    19:19:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    19:19:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    20:20:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    20:20:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    21:21:java.util.List com.github.catvod.spider.music.MusicCore.sodaChartSongs(java.lang.String):0:0 -> Z0
+    21:21:java.util.List rankSongs(java.lang.String,java.lang.String):0 -> Z0
+    1:1:java.lang.String action(java.lang.String):0:0 -> a
+    1:1:java.lang.String mvCategoryContent(java.lang.String,java.lang.String,java.util.HashMap):0:0 -> a0
+    1:1:java.lang.String[] resolvePlaylistFromUrl(java.lang.String):0:0 -> a1
+    1:1:byte[] aesCbc(java.lang.String,byte[],byte[]):0:0 -> b
+    1:1:java.lang.String mvDetailContent(java.util.List):0:0 -> b0
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore.neSearch(java.lang.String):0:0 -> b1
+    1:1:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;"}
+    2:2:byte[] com.github.catvod.spider.music.MusicCore.aesEcb(java.lang.String,byte[]):0:0 -> b1
+    2:2:java.lang.String com.github.catvod.spider.music.MusicCore.linuxEparams(java.lang.String):0 -> b1
+    2:2:java.util.List com.github.catvod.spider.music.MusicCore.neSearch(java.lang.String):0 -> b1
+    2:2:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.linuxEparams(java.lang.String):0:0 -> b1
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore.neSearch(java.lang.String):0 -> b1
+    3:3:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    4:4:java.util.List com.github.catvod.spider.music.MusicCore.neSearch(java.lang.String):0:0 -> b1
+    4:4:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.linuxEparams(java.lang.String):0:0 -> b1
+    5:5:java.util.List com.github.catvod.spider.music.MusicCore.neSearch(java.lang.String):0 -> b1
+    5:5:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    6:6:java.util.List com.github.catvod.spider.music.MusicCore.kgSearch(java.lang.String):0:0 -> b1
+    6:6:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    7:7:java.util.List com.github.catvod.spider.music.MusicCore.sodaSearch(java.lang.String):0:0 -> b1
+    7:7:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    8:8:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    8:8:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    9:9:java.util.List searchOne(java.lang.String,java.lang.String):0:0 -> b1
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":25,"2":26,"3":27,"4":28,"5":29,"6":30,"7":31},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    10:10:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    10:10:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    11:11:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    11:11:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    12:12:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0:0 -> b1
+    12:12:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0 -> b1
+    12:12:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    13:13:byte[] com.github.catvod.spider.music.MusicCore.httpGet(java.lang.String,java.util.Map):0:0 -> b1
+    13:13:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0 -> b1
+    13:13:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0 -> b1
+    13:13:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    14:14:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0:0 -> b1
+    14:14:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0 -> b1
+    14:14:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    15:15:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    15:15:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    16:16:java.util.List searchOne(java.lang.String,java.lang.String):0:0 -> b1
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":32,"2":33,"3":34,"4":35,"5":36,"6":37,"7":38},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    17:17:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    17:17:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    18:18:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0:0 -> b1
+    18:18:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0 -> b1
+    18:18:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    19:19:byte[] com.github.catvod.spider.music.MusicCore.httpGet(java.lang.String,java.util.Map):0:0 -> b1
+    19:19:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0 -> b1
+    19:19:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0 -> b1
+    19:19:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    20:20:java.lang.String com.github.catvod.spider.music.MusicCore.getText(java.lang.String,java.util.Map):0:0 -> b1
+    20:20:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0 -> b1
+    20:20:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    21:21:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    21:21:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    22:22:java.util.List searchOne(java.lang.String,java.lang.String):0:0 -> b1
+    23:23:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    23:23:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    24:24:java.util.List searchOne(java.lang.String,java.lang.String):0:0 -> b1
+    25:25:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    25:25:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    26:26:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    26:26:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    27:27:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    27:27:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    28:28:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    28:28:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    29:29:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    29:29:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    30:30:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    30:30:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    31:31:java.util.List com.github.catvod.spider.music.MusicCore.mgSearch(java.lang.String):0:0 -> b1
+    31:31:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    32:32:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    32:32:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    33:33:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    33:33:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    34:34:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    34:34:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    35:35:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    35:35:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    36:36:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    36:36:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    37:37:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    37:37:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    38:38:java.util.List com.github.catvod.spider.music.MusicCore.kwSearch(java.lang.String):0:0 -> b1
+    38:38:java.util.List searchOne(java.lang.String,java.lang.String):0 -> b1
+    1:1:org.json.JSONArray catsJson(java.util.List):0:0 -> c
+    1:1:org.json.JSONObject mvItem(org.json.JSONObject):0:0 -> c0
+    1:1:java.util.List sodaParseChartResp(org.json.JSONObject):0:0 -> c1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;)Ljava/util/ArrayList;"}
+    1:1:java.util.Map catsParallel():0:0 -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/LinkedHashMap;"}
+    1:1:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqSongMeta(java.lang.String):0:0 -> d0
+    1:1:java.lang.String[] mvMeta(java.lang.String,java.lang.String):0 -> d0
+    2:2:java.lang.String[] mvMeta(java.lang.String,java.lang.String):0:0 -> d0
+    3:3:java.lang.String[] com.github.catvod.spider.music.MusicCore.qqSongMeta(java.lang.String):0:0 -> d0
+    3:3:java.lang.String[] mvMeta(java.lang.String,java.lang.String):0 -> d0
+    4:4:java.lang.String[] mvMeta(java.lang.String,java.lang.String):0:0 -> d0
+    5:5:com.github.catvod.spider.music.MusicCore$Song com.github.catvod.spider.music.MusicCore.songByUid(java.lang.String):0:0 -> d0
+    5:5:java.lang.String[] mvMeta(java.lang.String,java.lang.String):0 -> d0
+    6:6:java.lang.String[] mvMeta(java.lang.String,java.lang.String):0:0 -> d0
+    1:1:com.github.catvod.spider.music.MusicCore$Song sodaParseTrack(org.json.JSONObject):0:0 -> d1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;)Lb/h;"}
+    1:1:byte[] com.github.catvod.spider.music.MusicCore.slice(byte[],int):0:0 -> e
+    1:1:java.lang.String decryptQRC(java.lang.String):0 -> e
+    2:2:java.lang.String decryptQRC(java.lang.String):0:0 -> e
+    3:3:byte[] com.github.catvod.spider.music.MusicCore.slice(byte[],int):0:0 -> e
+    3:3:java.lang.String decryptQRC(java.lang.String):0 -> e
+    4:4:java.lang.String decryptQRC(java.lang.String):0:0 -> e
+    5:5:byte[] com.github.catvod.spider.music.MusicCore.slice(byte[],int):0:0 -> e
+    5:5:java.lang.String decryptQRC(java.lang.String):0 -> e
+    6:6:java.lang.String decryptQRC(java.lang.String):0:0 -> e
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.zlibInflate(byte[]):0:0 -> e
+    7:7:java.lang.String decryptQRC(java.lang.String):0 -> e
+    8:8:java.lang.String decryptQRC(java.lang.String):0:0 -> e
+    1:1:java.lang.String mvPageData(org.json.JSONArray,int,boolean):0:0 -> e0
+    1:1:java.util.List sodaPlaylistSongs(java.lang.String):0:0 -> e1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Ljava/util/ArrayList;"}
+    1:1:java.lang.String enc(java.lang.String):0:0 -> f
+    1:1:java.lang.String mvSearchContent(java.lang.String,java.lang.String):0:0 -> f0
+    1:1:org.json.JSONObject sodaTrackV2(java.lang.String):0:0 -> f1
+    1:1:android.content.Context com.github.catvod.spider.music.MusicCore.hostContext():0:0 -> g
+    1:1:void fileLog(java.lang.String):0 -> g
+    2:2:void fileLog(java.lang.String):0:0 -> g
+    1:1:java.lang.String mvUrl(java.lang.String,java.lang.String):0:0 -> g0
+    1:1:com.github.catvod.spider.music.MusicCore$Song songInfo(java.lang.String):0:0 -> g1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Lb/h;"}
+    1:1:org.json.JSONArray filterValues(java.lang.String[]):0:0 -> h
+    1:1:java.util.List neCatlist():0:0 -> h0
+    1:1:org.json.JSONObject songJson(com.github.catvod.spider.music.MusicCore$Song):0:0 -> h1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lb/h;)Lorg/json/JSONObject;"}
+    1:1:java.lang.String findUrlDeep(java.lang.Object,int):0:0 -> i
+    1:1:java.util.Map neHeaders():0:0 -> i0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/LinkedHashMap;"}
+    1:1:java.lang.String songsToPageData(java.util.List):0:0 -> i1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/util/ArrayList;)Ljava/lang/String;"}
+    1:1:java.lang.String firstMatch(java.lang.String,java.lang.String):0:0 -> j
+    1:1:java.util.List neHighquality(int):0:0 -> j0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/ArrayList;"}
+    1:1:java.lang.String[] splitUid(java.lang.String):0:0 -> j1
+    1:1:java.lang.String firstNonEmpty(java.lang.String[]):0:0 -> k
+    1:1:java.lang.String neMvUrl(java.lang.String):0:0 -> k0
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0:0 -> k1
+    1:1:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    2:2:java.lang.String com.github.catvod.spider.music.MusicCore.neStream(java.lang.String):0:0 -> k1
+    2:2:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    2:2:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    3:3:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    4:4:java.lang.String stream(java.lang.String,java.lang.String):0:0 -> k1
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":15,"2":16,"3":17,"4":18,"5":19,"6":20,"7":21},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.kgStreamLegacy(java.lang.String):0:0 -> k1
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0 -> k1
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    5:5:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    6:6:java.lang.String stream(java.lang.String,java.lang.String):0:0 -> k1
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":22,"2":23,"3":24,"4":25,"5":26,"6":27,"7":28},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    7:7:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    8:8:java.lang.String stream(java.lang.String,java.lang.String):0:0 -> k1
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":29,"2":30,"3":31,"4":32,"5":33,"6":34,"7":35},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    9:9:java.lang.String com.github.catvod.spider.music.MusicCore.mgStream(java.lang.String):0:0 -> k1
+    9:9:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    9:9:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    10:10:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    10:10:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    10:10:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    11:11:java.lang.String stream(java.lang.String,java.lang.String):0:0 -> k1
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":36,"2":37,"3":38,"4":39,"5":40,"6":41,"7":42},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    12:12:java.lang.String com.github.catvod.spider.music.MusicCore.qqStream(java.lang.String):0:0 -> k1
+    12:12:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    12:12:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    13:13:java.lang.String stream(java.lang.String,java.lang.String):0:0 -> k1
+    14:14:java.lang.String com.github.catvod.spider.music.MusicCore.lxStream(java.lang.String,java.lang.String):0:0 -> k1
+    14:14:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    15:15:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    15:15:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    15:15:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    16:16:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    16:16:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    16:16:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    17:17:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    17:17:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    17:17:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    18:18:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    18:18:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    18:18:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    19:19:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    19:19:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    19:19:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    20:20:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    20:20:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    20:20:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    21:21:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    21:21:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    21:21:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    22:22:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    22:22:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    22:22:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    23:23:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    23:23:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    23:23:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    24:24:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    24:24:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    24:24:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    25:25:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    25:25:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    25:25:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    26:26:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    26:26:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    26:26:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    27:27:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    27:27:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    27:27:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    28:28:java.lang.String com.github.catvod.spider.music.MusicCore.kgStream(java.lang.String):0:0 -> k1
+    28:28:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    28:28:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    29:29:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    29:29:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    29:29:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    30:30:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    30:30:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    30:30:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    31:31:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    31:31:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    31:31:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    32:32:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    32:32:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    32:32:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    33:33:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    33:33:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    33:33:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    34:34:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    34:34:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    34:34:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    35:35:java.lang.String com.github.catvod.spider.music.MusicCore.sodaStream(java.lang.String):0:0 -> k1
+    35:35:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    35:35:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    36:36:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    36:36:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    36:36:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    37:37:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    37:37:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    37:37:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    38:38:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    38:38:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    38:38:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    39:39:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    39:39:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    39:39:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    40:40:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    40:40:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    40:40:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    41:41:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    41:41:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    41:41:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    42:42:java.lang.String com.github.catvod.spider.music.MusicCore.kwStream(java.lang.String):0:0 -> k1
+    42:42:java.lang.String com.github.catvod.spider.music.MusicCore.streamDirect(java.lang.String,java.lang.String):0 -> k1
+    42:42:java.lang.String stream(java.lang.String,java.lang.String):0 -> k1
+    1:1:byte[] com.github.catvod.spider.music.MusicCore.httpGet(java.lang.String,java.util.Map):0:0 -> l
+    1:1:org.json.JSONObject getJson(java.lang.String,java.util.Map):0 -> l
+    2:2:org.json.JSONObject getJson(java.lang.String,java.util.Map):0:0 -> l
+    1:1:java.util.List neParseSongs(org.json.JSONArray):0:0 -> l0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)Ljava/util/ArrayList;"}
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.randomString(int):0:0 -> l1
+    1:1:java.lang.String[] weapi(java.lang.String):0 -> l1
+    2:2:java.lang.String[] weapi(java.lang.String):0:0 -> l1
+    1:1:byte[] com.github.catvod.spider.music.MusicCore.httpGetShort(java.lang.String,java.util.Map):0:0 -> m
+    1:1:org.json.JSONObject getJsonShort(java.lang.String,java.util.Map):0 -> m
+    2:2:org.json.JSONObject getJsonShort(java.lang.String,java.util.Map):0:0 -> m
+    70:77:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":78,"2":80,"3":83,"4":87,"5":92,"6":98,"7":105},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    78:78:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    80:80:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    83:83:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    87:87:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    92:92:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    98:98:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    105:105:java.lang.String[] nePlaylistMeta(java.lang.String):0:0 -> m0
+    1:1:java.util.Map withRandomIp(java.util.Map):0:0 -> m1
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/util/LinkedHashMap;)Ljava/util/Map;"}
+    1:1:java.util.Map headers(java.lang.String[]):0:0 -> n
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([Ljava/lang/String;)Ljava/util/LinkedHashMap;"}
+    1:1:java.lang.String nePlaylistPage(java.lang.String,java.util.HashMap):0:0 -> n0
+    1:1:byte[] zlibInflateBytes(byte[]):0:0 -> n1
+    1:1:byte[] hexBytes(java.lang.String):0:0 -> o
+    1:1:java.util.List nePlaylistSongs(java.lang.String):0:0 -> o0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Ljava/util/ArrayList;"}
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.dedupeKey(com.github.catvod.spider.music.MusicCore$Song):0:0 -> p
+    1:1:java.util.List hotMerge():0 -> p
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/ArrayList;"}
+    2:2:java.util.List hotMerge():0:0 -> p
+    1:1:java.util.List nePlaylists(java.lang.String,int):0:0 -> p0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)Ljava/util/ArrayList;"}
+    1:1:java.lang.String hotRankId(java.lang.String):0:0 -> q
+    1:1:java.lang.String pageDataEmpty(int):0:0 -> q0
+    1:1:byte[] http(java.lang.String,java.lang.String,java.util.Map,byte[],int,int):0:0 -> r
+    1:1:int pageSafe(java.lang.String):0:0 -> r0
+    1:1:java.util.Map kgHeaders():0:0 -> s
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()Ljava/util/LinkedHashMap;"}
+    1:1:java.util.List parallelSearch(java.lang.String):0:0 -> s0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Ljava/util/ArrayList;"}
+    1:1:java.lang.String kgMd5(java.lang.String):0:0 -> t
+    1:1:java.lang.String platformName(java.lang.String):0:0 -> t0
+    1:1:java.lang.String kgMid():0:0 -> u
+    1:1:java.lang.String playCountText(long):0:0 -> u0
+    1:1:java.lang.String kgMvCategoryContent(java.lang.String,java.lang.String,java.util.HashMap):0:0 -> v
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"}
+    1:1:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":2,"2":3,"3":4,"4":5,"5":6,"6":7,"7":8},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    2:2:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    3:3:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    4:4:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    5:5:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    6:6:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    7:7:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    8:8:java.lang.String playerContent(java.lang.String,java.lang.String):0:0 -> v0
+    1:1:java.lang.String kgMvDetailContent(java.util.List):0:0 -> w
+    1:1:java.lang.String playlistAction(java.lang.String,java.lang.String,long,boolean):0:0 -> w0
+    1:1:org.json.JSONObject com.github.catvod.spider.music.MusicCore.kgMvItem(org.json.JSONObject):0:0 -> x
+    1:1:java.lang.String kgMvPage(org.json.JSONArray,int,boolean):0 -> x
+    2:2:java.lang.String kgMvPage(org.json.JSONArray,int,boolean):0:0 -> x
+    1:1:java.lang.String playlistEntriesPage(java.lang.String,java.util.List,int,boolean):0:0 -> x0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/util/ArrayList;IZ)Ljava/lang/String;"}
+    1:1:java.lang.String kgMvSearchContent(java.lang.String,java.lang.String):0:0 -> y
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore.kgPlaylistSongs(java.lang.String):0:0 -> y0
+    1:1:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;)Ljava/util/ArrayList;"}
+    2:2:java.util.List playlistSongs(java.lang.String,java.lang.String):0:0 -> y0
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore.mgPlaylistSongs(java.lang.String):0:0 -> y0
+    3:3:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    4:4:java.util.List com.github.catvod.spider.music.MusicCore.kwPlaylistSongs(java.lang.String):0:0 -> y0
+    4:4:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    5:5:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    5:5:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    6:6:java.util.List playlistSongs(java.lang.String,java.lang.String):0:0 -> y0
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":10,"2":11,"3":12,"4":13,"5":14,"6":15,"7":16},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    7:7:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    7:7:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    8:8:java.util.List playlistSongs(java.lang.String,java.lang.String):0:0 -> y0
+    9:9:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    9:9:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    10:10:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    10:10:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    11:11:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    11:11:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    12:12:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    12:12:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    13:13:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    13:13:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    14:14:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    14:14:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    15:15:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    15:15:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    16:16:java.util.List com.github.catvod.spider.music.MusicCore.qqPlaylistSongs(java.lang.String):0:0 -> y0
+    16:16:java.util.List playlistSongs(java.lang.String,java.lang.String):0 -> y0
+    1:1:java.lang.String kgMvUrl(java.lang.String):0:0 -> z
+    1:1:byte[] com.github.catvod.spider.music.MusicCore.httpPost(java.lang.String,java.util.Map,java.lang.String):0:0 -> z0
+    1:1:org.json.JSONObject postJson(java.lang.String,java.util.Map,java.lang.String):0 -> z0
+    2:2:byte[] com.github.catvod.spider.music.MusicCore.http(java.lang.String,java.lang.String,java.util.Map,byte[]):0:0 -> z0
+    2:2:byte[] com.github.catvod.spider.music.MusicCore.httpPost(java.lang.String,java.util.Map,java.lang.String):0 -> z0
+    2:2:org.json.JSONObject postJson(java.lang.String,java.util.Map,java.lang.String):0 -> z0
+    3:3:org.json.JSONObject postJson(java.lang.String,java.util.Map,java.lang.String):0:0 -> z0
+com.github.catvod.spider.music.MusicCore$1 -> b.d:
+# {"id":"sourceFile","fileName":"MusicCore.java"}
+    java.util.List val$buckets -> a
+    java.lang.String val$p -> b
+    java.lang.String val$kw -> c
+    1:1:void <init>(java.util.List,java.lang.String,java.lang.String):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V"}
+    20:23:void run():0:0 -> run
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":24,"2":26,"3":29,"4":33,"5":38,"6":44,"7":51},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    24:24:void run():0:0 -> run
+    26:26:void run():0:0 -> run
+    29:29:void run():0:0 -> run
+    33:33:void run():0:0 -> run
+    38:38:void run():0:0 -> run
+    44:44:void run():0:0 -> run
+    51:51:void run():0:0 -> run
+com.github.catvod.spider.music.MusicCore$1$$ExternalSyntheticOutline0 -> b.c:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    1:7:void com.github.catvod.spider.music.MusicCore$1$$InternalSyntheticOutline$25$9aebaec452318dce99faf7939251041635e96f87e0fa0013bc327fa2af03a8fc$0.m(java.lang.String,java.lang.String,java.lang.String,java.lang.Exception):0:6 -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.outline"}
+com.github.catvod.spider.music.MusicCore$2 -> b.e:
+# {"id":"sourceFile","fileName":"MusicCore.java"}
+    1:1:void <init>(int,float,boolean):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()V"}
+    1:1:boolean removeEldestEntry(java.util.Map$Entry):0:0 -> removeEldestEntry
+com.github.catvod.spider.music.MusicCore$3 -> b.f:
+# {"id":"sourceFile","fileName":"MusicCore.java"}
+    java.lang.String val$p -> a
+    1:1:void <init>(java.lang.String):0:0 -> <init>
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    1:1:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    1:1:java.lang.Object call():0 -> call
+    2:2:java.lang.Object call():0:0 -> call
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":4,"2":5,"3":6,"4":7,"5":8,"6":9,"7":10},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    3:3:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    3:3:java.lang.Object call():0 -> call
+    4:4:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    4:4:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    4:4:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    4:4:java.lang.Object call():0 -> call
+    5:5:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    5:5:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    5:5:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    5:5:java.lang.Object call():0 -> call
+    6:6:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    6:6:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    6:6:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    6:6:java.lang.Object call():0 -> call
+    7:7:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    7:7:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    7:7:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    7:7:java.lang.Object call():0 -> call
+    8:8:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    8:8:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    8:8:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    8:8:java.lang.Object call():0 -> call
+    9:9:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    9:9:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    9:9:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    9:9:java.lang.Object call():0 -> call
+    10:10:java.util.List com.github.catvod.spider.music.MusicCore.catsOf(java.lang.String):0:0 -> call
+    10:10:java.util.List com.github.catvod.spider.music.MusicCore.access$000(java.lang.String):0 -> call
+    10:10:java.util.List com.github.catvod.spider.music.MusicCore$3.call():0 -> call
+    10:10:java.lang.Object call():0 -> call
+com.github.catvod.spider.music.MusicCore$4 -> b.g:
+# {"id":"sourceFile","fileName":"MusicCore.java"}
+    java.lang.String val$p -> a
+    java.util.List val$buckets -> b
+    1:1:void <init>(java.lang.String,java.util.List):0:0 -> <init>
+    43:46:void run():0:0 -> run
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":47,"2":49,"3":52,"4":56,"5":61,"6":67,"7":74},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    47:47:void run():0:0 -> run
+    49:49:void run():0:0 -> run
+    52:52:void run():0:0 -> run
+    56:56:void run():0:0 -> run
+    61:61:void run():0:0 -> run
+    67:67:void run():0:0 -> run
+    74:74:void run():0:0 -> run
+com.github.catvod.spider.music.MusicCore$Song -> b.h:
+# {"id":"sourceFile","fileName":"MusicCore.java"}
+    java.lang.String platform -> a
+    java.lang.String id -> b
+    java.lang.String name -> c
+    java.lang.String artist -> d
+    java.lang.String album -> e
+    java.lang.String cover -> f
+    int duration -> g
+    java.lang.String mvid -> h
+    java.lang.String songNumId -> i
+    boolean hasK -> j
+    1:1:void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,int):0:0 -> <init>
+    1:1:java.lang.String uid():0:0 -> a
+com.github.catvod.spider.music.MusicSpiderBase -> b.j:
+# {"id":"sourceFile","fileName":"MusicSpiderBase.java"}
+    java.lang.String platform() -> a
+    1:1:java.lang.String action(java.lang.String):0:0 -> action
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.categoryContent(java.lang.String,java.lang.String,java.lang.String,boolean,java.util.HashMap):0:0 -> categoryContent
+    1:1:java.lang.String categoryContent(java.lang.String,java.lang.String,boolean,java.util.HashMap):0 -> categoryContent
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    1:1:java.lang.String detailContent(java.util.List):0 -> detailContent
+    2:2:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    2:2:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    2:2:java.lang.String detailContent(java.util.List):0 -> detailContent
+    3:3:java.lang.String detailContent(java.util.List):0:0 -> detailContent
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":6,"2":7,"3":8,"4":9,"5":10,"6":11,"7":12},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    4:4:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    4:4:java.lang.String detailContent(java.util.List):0 -> detailContent
+    5:5:java.lang.String detailContent(java.util.List):0:0 -> detailContent
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":13,"2":14,"3":15,"4":16,"5":17,"6":18,"7":19},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    6:6:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    6:6:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    6:6:java.lang.String detailContent(java.util.List):0 -> detailContent
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    7:7:java.lang.String detailContent(java.util.List):0 -> detailContent
+    8:8:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    8:8:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    8:8:java.lang.String detailContent(java.util.List):0 -> detailContent
+    9:9:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    9:9:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    9:9:java.lang.String detailContent(java.util.List):0 -> detailContent
+    10:10:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    10:10:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    10:10:java.lang.String detailContent(java.util.List):0 -> detailContent
+    11:11:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    11:11:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    11:11:java.lang.String detailContent(java.util.List):0 -> detailContent
+    12:12:java.lang.String com.github.catvod.spider.music.MusicCore.singleDetail(java.lang.String,long):0:0 -> detailContent
+    12:12:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0 -> detailContent
+    12:12:java.lang.String detailContent(java.util.List):0 -> detailContent
+    13:13:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    13:13:java.lang.String detailContent(java.util.List):0 -> detailContent
+    14:14:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    14:14:java.lang.String detailContent(java.util.List):0 -> detailContent
+    15:15:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    15:15:java.lang.String detailContent(java.util.List):0 -> detailContent
+    16:16:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    16:16:java.lang.String detailContent(java.util.List):0 -> detailContent
+    17:17:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    17:17:java.lang.String detailContent(java.util.List):0 -> detailContent
+    18:18:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    18:18:java.lang.String detailContent(java.util.List):0 -> detailContent
+    19:19:java.lang.String com.github.catvod.spider.music.MusicCore.detailContent(java.util.List):0:0 -> detailContent
+    19:19:java.lang.String detailContent(java.util.List):0 -> detailContent
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    1:1:java.lang.String homeContent(boolean):0 -> homeContent
+    2:2:java.lang.String homeContent(boolean):0:0 -> homeContent
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":3,"2":4,"3":5,"4":6,"5":7,"6":8,"7":9},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    3:3:java.lang.String homeContent(boolean):0 -> homeContent
+    4:4:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    4:4:java.lang.String homeContent(boolean):0 -> homeContent
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    5:5:java.lang.String homeContent(boolean):0 -> homeContent
+    6:6:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    6:6:java.lang.String homeContent(boolean):0 -> homeContent
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    7:7:java.lang.String homeContent(boolean):0 -> homeContent
+    8:8:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    8:8:java.lang.String homeContent(boolean):0 -> homeContent
+    9:9:java.lang.String com.github.catvod.spider.music.MusicCore.homeContent(java.lang.String,boolean):0:0 -> homeContent
+    9:9:java.lang.String homeContent(boolean):0 -> homeContent
+    1:1:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    1:1:java.lang.String homeVideoContent():0 -> homeVideoContent
+    2:2:java.lang.String homeVideoContent():0:0 -> homeVideoContent
+      # {"id":"com.android.tools.r8.outlineCallsite","positions":{"1":3,"2":4,"3":5,"4":6,"5":7,"6":8,"7":9},"outline":"Lb/c;a(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Exception;)V"}
+    3:3:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    3:3:java.lang.String homeVideoContent():0 -> homeVideoContent
+    4:4:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    4:4:java.lang.String homeVideoContent():0 -> homeVideoContent
+    5:5:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    5:5:java.lang.String homeVideoContent():0 -> homeVideoContent
+    6:6:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    6:6:java.lang.String homeVideoContent():0 -> homeVideoContent
+    7:7:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    7:7:java.lang.String homeVideoContent():0 -> homeVideoContent
+    8:8:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    8:8:java.lang.String homeVideoContent():0 -> homeVideoContent
+    9:9:java.lang.String com.github.catvod.spider.music.MusicCore.homeVideoContent(java.lang.String):0:0 -> homeVideoContent
+    9:9:java.lang.String homeVideoContent():0 -> homeVideoContent
+    4:6:void com.github.catvod.spider.music.MusicCore.bindHost(com.github.catvod.crawler.Spider):0:0 -> init
+    4:6:void init(android.content.Context):0 -> init
+    1:1:java.lang.String playerContent(java.lang.String,java.lang.String,java.util.List):0:0 -> playerContent
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.music.lx.JsRuntime -> c.b:
+# {"id":"sourceFile","fileName":"JsRuntime.java"}
+com.github.catvod.spider.music.lx.JsRuntime$HostFn -> c.a:
+# {"id":"sourceFile","fileName":"JsRuntime.java"}
+    java.lang.Object invoke(java.lang.Object[]) -> a
+com.github.catvod.spider.music.lx.LxCrypto -> R8$$REMOVED$$CLASS$$0:
+# {"id":"sourceFile","fileName":"LxCrypto.java"}
+com.github.catvod.spider.music.lx.LxHost -> c.g:
+# {"id":"sourceFile","fileName":"LxHost.java"}
+    com.github.catvod.spider.music.lx.JsRuntime rt -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/b;"}
+    com.github.catvod.spider.music.lx.LxHost$Listener listener -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/k;"}
+    java.lang.String scriptInfoJson -> c
+    java.util.concurrent.ScheduledExecutorService timer -> d
+    java.util.concurrent.atomic.AtomicLong timerId -> e
+    java.util.concurrent.ConcurrentMap timers -> f
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/concurrent/ConcurrentHashMap;"}
+    1:1:void <init>(com.github.catvod.spider.music.lx.JsRuntime,com.github.catvod.spider.music.lx.LxHost$Listener,java.lang.String,java.util.concurrent.ScheduledExecutorService):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/p;Lc/k;Ljava/lang/String;Ljava/util/concurrent/ScheduledExecutorService;)V"}
+    1:1:java.lang.String abbreviate(java.lang.String):0:0 -> a
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.LxHost.utils():0:0 -> b
+    1:1:void install():0 -> b
+    2:2:void install():0:0 -> b
+    3:3:java.lang.Object com.github.catvod.spider.music.lx.LxHost.console():0:0 -> b
+    3:3:void install():0 -> b
+    4:4:void install():0:0 -> b
+    1:1:java.lang.Object setTimeout(java.lang.Object[],boolean):0:0 -> c
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([Ljava/lang/Object;Z)Ljava/lang/Double;"}
+    1:1:java.lang.String str(java.lang.Object,java.lang.String):0:0 -> d
+com.github.catvod.spider.music.lx.LxHost$$ExternalSyntheticLambda0 -> c.c:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    int com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.$r8$classId -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    com.github.catvod.spider.music.lx.LxHost com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.f$0 -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/g;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.<init>(com.github.catvod.spider.music.lx.LxHost):0:0 -> <init>
+    1:1:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.$r8$init$synthetic(com.github.catvod.spider.music.lx.LxHost,int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/g;I)V"}
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$17(java.lang.Object[]):0:0 -> a
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:2:byte[] com.github.catvod.spider.music.lx.LxCrypto.deflate(byte[]):0:0 -> a
+    2:2:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$17(java.lang.Object[]):0 -> a
+    2:2:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    3:3:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    4:4:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$16(java.lang.Object[]):0:0 -> a
+    4:4:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    5:5:byte[] com.github.catvod.spider.music.lx.LxCrypto.inflate(byte[]):0:0 -> a
+    5:5:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$16(java.lang.Object[]):0 -> a
+    5:5:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    6:6:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$13(java.lang.Object[]):0:0 -> a
+    6:6:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    7:7:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$12(java.lang.Object[]):0:0 -> a
+    7:7:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    8:8:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    9:9:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$10(java.lang.Object[]):0:0 -> a
+    9:9:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    10:10:java.lang.String com.github.catvod.spider.music.lx.LxHttp.b64(byte[]):0:0 -> a
+    10:10:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$10(java.lang.Object[]):0 -> a
+    10:10:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    11:11:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    12:12:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$console$18(java.lang.Object[]):0:0 -> a
+    12:12:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    13:13:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    14:14:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$7(java.lang.Object[]):0:0 -> a
+    14:14:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    15:15:java.lang.String com.github.catvod.spider.music.lx.LxHttp.b64(byte[]):0:0 -> a
+    15:15:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$7(java.lang.Object[]):0 -> a
+    15:15:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    16:16:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$6(java.lang.Object[]):0:0 -> a
+    16:16:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    17:17:void com.github.catvod.spider.music.lx.LxHost.clear(java.lang.Object[]):0:0 -> a
+    17:17:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$6(java.lang.Object[]):0 -> a
+    17:17:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    18:18:void com.github.catvod.spider.music.lx.LxHost.clear(long):0:0 -> a
+    18:18:void com.github.catvod.spider.music.lx.LxHost.clear(java.lang.Object[]):0 -> a
+    18:18:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$6(java.lang.Object[]):0 -> a
+    18:18:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    19:19:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$5(java.lang.Object[]):0:0 -> a
+    19:19:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    20:20:void com.github.catvod.spider.music.lx.LxHost.clear(java.lang.Object[]):0:0 -> a
+    20:20:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$5(java.lang.Object[]):0 -> a
+    20:20:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    21:21:void com.github.catvod.spider.music.lx.LxHost.clear(long):0:0 -> a
+    21:21:void com.github.catvod.spider.music.lx.LxHost.clear(java.lang.Object[]):0 -> a
+    21:21:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$5(java.lang.Object[]):0 -> a
+    21:21:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    22:22:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$4(java.lang.Object[]):0:0 -> a
+    22:22:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    23:23:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$3(java.lang.Object[]):0:0 -> a
+    23:23:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    24:24:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    25:25:java.lang.Object com.github.catvod.spider.music.lx.LxHost.request(java.lang.Object[]):0:0 -> a
+    25:25:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$2(java.lang.Object[]):0 -> a
+    25:25:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    26:26:java.lang.String com.github.catvod.spider.music.lx.LxHost.str(java.lang.Object):0:0 -> a
+    26:26:java.lang.Object com.github.catvod.spider.music.lx.LxHost.request(java.lang.Object[]):0 -> a
+    26:26:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$2(java.lang.Object[]):0 -> a
+    26:26:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    27:27:java.lang.Object com.github.catvod.spider.music.lx.LxHost.request(java.lang.Object[]):0:0 -> a
+    27:27:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$2(java.lang.Object[]):0 -> a
+    27:27:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    28:28:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    29:29:java.lang.Object com.github.catvod.spider.music.lx.LxHost.send(java.lang.Object[]):0:0 -> a
+    29:29:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$1(java.lang.Object[]):0 -> a
+    29:29:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    30:30:java.lang.String com.github.catvod.spider.music.lx.LxHost.str(java.lang.Object):0:0 -> a
+    30:30:java.lang.Object com.github.catvod.spider.music.lx.LxHost.send(java.lang.Object[]):0 -> a
+    30:30:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$1(java.lang.Object[]):0 -> a
+    30:30:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    31:31:java.lang.Object com.github.catvod.spider.music.lx.LxHost.send(java.lang.Object[]):0:0 -> a
+    31:31:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$1(java.lang.Object[]):0 -> a
+    31:31:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    32:32:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0:0 -> a
+    33:33:java.lang.Object com.github.catvod.spider.music.lx.LxHost.on(java.lang.Object[]):0:0 -> a
+    33:33:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$0(java.lang.Object[]):0 -> a
+    33:33:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    34:34:java.lang.String com.github.catvod.spider.music.lx.LxHost.str(java.lang.Object):0:0 -> a
+    34:34:java.lang.Object com.github.catvod.spider.music.lx.LxHost.on(java.lang.Object[]):0 -> a
+    34:34:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$0(java.lang.Object[]):0 -> a
+    34:34:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    35:35:java.lang.Object com.github.catvod.spider.music.lx.LxHost.on(java.lang.Object[]):0:0 -> a
+    35:35:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$0(java.lang.Object[]):0 -> a
+    35:35:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    36:36:void com.github.catvod.spider.music.lx.LxScript$1.onRequestHandler(java.lang.Object):0:0 -> a
+    36:36:java.lang.Object com.github.catvod.spider.music.lx.LxHost.on(java.lang.Object[]):0 -> a
+      # {"id":"com.android.tools.r8.rewriteFrame","conditions":["throws(Ljava/lang/NullPointerException;)"],"actions":["removeInnerFrames(1)"]}
+    36:36:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$0(java.lang.Object[]):0 -> a
+    36:36:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    37:37:java.lang.Object com.github.catvod.spider.music.lx.LxScript.access$102(com.github.catvod.spider.music.lx.LxScript,java.lang.Object):0:0 -> a
+    37:37:void com.github.catvod.spider.music.lx.LxScript$1.onRequestHandler(java.lang.Object):0 -> a
+    37:37:java.lang.Object com.github.catvod.spider.music.lx.LxHost.on(java.lang.Object[]):0 -> a
+    37:37:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$0(java.lang.Object[]):0 -> a
+    37:37:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+    38:38:java.lang.Object com.github.catvod.spider.music.lx.LxHost.on(java.lang.Object[]):0:0 -> a
+    38:38:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$0(java.lang.Object[]):0 -> a
+    38:38:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$0.invoke$bridge(java.lang.Object[]):0 -> a
+com.github.catvod.spider.music.lx.LxHost$$ExternalSyntheticLambda1 -> c.d:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    int com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.$r8$classId -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:6:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.<init>():0:0 -> <init>
+    1:6:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.$r8$init$synthetic(int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$15(java.lang.Object[]):0:0 -> a
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:2:byte[] com.github.catvod.spider.music.lx.LxCrypto.randomBytes(int):0:0 -> a
+    2:2:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$15(java.lang.Object[]):0 -> a
+    2:2:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    3:3:byte[] com.github.catvod.spider.music.lx.LxCrypto.rsa(java.lang.Object[]):0:0 -> a
+    3:3:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$14(java.lang.Object[]):0 -> a
+    3:3:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    4:4:byte[] com.github.catvod.spider.music.lx.LxHttp.unb64(java.lang.String):0:0 -> a
+    4:4:byte[] com.github.catvod.spider.music.lx.LxCrypto.rsa(java.lang.Object[]):0 -> a
+    4:4:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$14(java.lang.Object[]):0 -> a
+    4:4:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    5:5:byte[] com.github.catvod.spider.music.lx.LxCrypto.rsa(java.lang.Object[]):0:0 -> a
+    5:5:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$14(java.lang.Object[]):0 -> a
+    5:5:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    6:6:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$11(java.lang.Object[]):0:0 -> a
+    6:6:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    7:7:java.lang.String com.github.catvod.spider.music.lx.LxHost.str(java.lang.Object):0:0 -> a
+    7:7:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$11(java.lang.Object[]):0 -> a
+    7:7:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    8:8:java.lang.String com.github.catvod.spider.music.lx.LxCrypto.encodeURIComponent(java.lang.String):0:0 -> a
+    8:8:java.lang.String com.github.catvod.spider.music.lx.LxCrypto.md5(java.lang.String):0 -> a
+    8:8:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$11(java.lang.Object[]):0 -> a
+    8:8:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    9:9:java.lang.String com.github.catvod.spider.music.lx.LxCrypto.md5(java.lang.String):0:0 -> a
+    9:9:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$11(java.lang.Object[]):0 -> a
+    9:9:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    10:10:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$9(java.lang.Object[]):0:0 -> a
+    10:10:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    11:11:java.lang.String com.github.catvod.spider.music.lx.LxHost.str(java.lang.Object):0:0 -> a
+    11:11:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$9(java.lang.Object[]):0 -> a
+    11:11:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    12:12:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$9(java.lang.Object[]):0:0 -> a
+    12:12:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    13:13:byte[] com.github.catvod.spider.music.lx.LxHost.hexDecode(java.lang.String):0:0 -> a
+    13:13:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$9(java.lang.Object[]):0 -> a
+    13:13:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    14:14:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$9(java.lang.Object[]):0:0 -> a
+    14:14:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    15:15:byte[] com.github.catvod.spider.music.lx.LxHttp.unb64(java.lang.String):0:0 -> a
+    15:15:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$utils$9(java.lang.Object[]):0 -> a
+    15:15:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    16:16:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$8(java.lang.Object[]):0:0 -> a
+    16:16:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    17:17:java.lang.String com.github.catvod.spider.music.lx.LxHost.str(java.lang.Object):0:0 -> a
+    17:17:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$8(java.lang.Object[]):0 -> a
+    17:17:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    18:18:byte[] com.github.catvod.spider.music.lx.LxHttp.unb64(java.lang.String):0:0 -> a
+    18:18:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$8(java.lang.Object[]):0 -> a
+    18:18:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+    19:19:java.lang.Object com.github.catvod.spider.music.lx.LxHost.lambda$install$8(java.lang.Object[]):0:0 -> a
+    19:19:java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$4$959711369f3d5173c7cf359e1344b9953be34aaf4aaa5c901a343402364513b0$8.invoke$bridge(java.lang.Object[]):0 -> a
+com.github.catvod.spider.music.lx.LxHost$$ExternalSyntheticLambda2 -> c.e:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    com.github.catvod.spider.music.lx.LxHost com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$0.f$0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/g;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$0.f$1 -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$0.<init>(com.github.catvod.spider.music.lx.LxHost,java.lang.Object):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/g;Ljava/lang/Object;)V"}
+    8:39:void com.github.catvod.spider.music.lx.LxHost.lambda$setTimeout$19(java.lang.Object):0:0 -> run
+    8:39:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$0.run():0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
+com.github.catvod.spider.music.lx.LxHost$$ExternalSyntheticLambda3 -> c.f:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    com.github.catvod.spider.music.lx.LxHost com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.f$0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/g;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    long com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.f$1 -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    java.lang.Object com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.f$2 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.<init>(com.github.catvod.spider.music.lx.LxHost,long,java.lang.Object):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/g;JLjava/lang/Object;)V"}
+    5:8:void com.github.catvod.spider.music.lx.LxHost.clear(long):0:0 -> run
+    5:8:void com.github.catvod.spider.music.lx.LxHost.lambda$setTimeout$20(long,java.lang.Object):0 -> run
+    5:8:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.run():0 -> run
+      # {"id":"com.android.tools.r8.rewriteFrame","conditions":["throws(Ljava/lang/NullPointerException;)"],"actions":["removeInnerFrames(2)"]}
+      # {"id":"com.android.tools.r8.synthesized"}
+    9:24:void com.github.catvod.spider.music.lx.LxHost.clear(long):0:0 -> run
+    9:24:void com.github.catvod.spider.music.lx.LxHost.lambda$setTimeout$20(long,java.lang.Object):0 -> run
+    9:24:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.run():0 -> run
+    25:55:void com.github.catvod.spider.music.lx.LxHost.lambda$setTimeout$20(long,java.lang.Object):0:0 -> run
+    25:55:void com.github.catvod.spider.music.lx.LxHost$$InternalSyntheticLambda$5$d5f8be0f7b8764b9ef43d77be2a36ad530a29f2e5ea1731d64fd4bb390280b66$1.run():0 -> run
+com.github.catvod.spider.music.lx.LxHttp -> R8$$REMOVED$$CLASS$$1:
+# {"id":"sourceFile","fileName":"LxHttp.java"}
+com.github.catvod.spider.music.lx.LxScript -> c.l:
+# {"id":"sourceFile","fileName":"LxScript.java"}
+    android.content.Context context -> a
+    java.lang.String ext -> b
+    java.lang.String label -> c
+    com.github.catvod.spider.music.lx.JsRuntime$Factory factory -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/a;"}
+    java.util.concurrent.ExecutorService js -> e
+    java.util.concurrent.ScheduledExecutorService timer -> f
+    com.github.catvod.spider.music.lx.JsRuntime rt -> g
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/p;"}
+    boolean ready -> h
+    java.lang.Object handler -> i
+    org.json.JSONObject sources -> j
+    java.lang.String infoName -> k
+    java.lang.String[] PREFER_QUALITY -> l
+    1:1:void <clinit>():0:0 -> <clinit>
+    1:1:void <init>(android.content.Context,java.lang.String,java.lang.String,com.github.catvod.spider.music.lx.JsRuntime$Factory):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;La/a;)V"}
+    1:1:java.lang.String buildScriptInfoJson(java.lang.String):0:0 -> a
+    1:1:java.lang.String extractDebug(java.lang.Object):0:0 -> b
+    1:1:java.lang.String com.github.catvod.spider.music.lx.LxScript.md5(java.lang.String):0:0 -> c
+    1:1:java.lang.String loadScript():0 -> c
+    2:2:java.lang.String loadScript():0:0 -> c
+    3:3:java.lang.String com.github.catvod.spider.music.lx.LxScript.download(java.lang.String):0:0 -> c
+    3:3:java.lang.String loadScript():0 -> c
+    4:4:java.lang.String com.github.catvod.spider.music.lx.LxScript.rawFetch(java.lang.String):0:0 -> c
+    4:4:java.lang.String com.github.catvod.spider.music.lx.LxScript.download(java.lang.String):0 -> c
+    4:4:java.lang.String loadScript():0 -> c
+    5:5:java.lang.String loadScript():0:0 -> c
+    6:6:java.lang.String com.github.catvod.spider.music.lx.LxScript.download(java.lang.String):0:0 -> c
+    6:6:java.lang.String loadScript():0 -> c
+    7:7:java.lang.String loadScript():0:0 -> c
+    1:1:void log(java.lang.String):0:0 -> d
+    1:1:java.lang.String matchHeader(java.lang.String,java.lang.String):0:0 -> e
+    1:1:java.lang.String musicInfoJson(java.lang.String,java.lang.String):0:0 -> f
+    1:1:java.lang.String read(java.io.File):0:0 -> g
+    1:1:boolean streamReachable(java.lang.String):0:0 -> h
+com.github.catvod.spider.music.lx.LxScript$$ExternalSyntheticLambda0 -> c.h:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    com.github.catvod.spider.music.lx.LxScript com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.f$0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/l;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    java.lang.String com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.f$1 -> b
+      # {"id":"com.android.tools.r8.synthesized"}
+    java.lang.String com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.f$2 -> c
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.<init>(com.github.catvod.spider.music.lx.LxScript,java.lang.String,java.lang.String):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/l;Ljava/lang/String;Ljava/lang/String;)V"}
+    1:1:java.util.List com.github.catvod.spider.music.lx.LxScript.qualityList(java.lang.String):0:0 -> call
+    1:1:java.lang.String com.github.catvod.spider.music.lx.LxScript.lambda$musicUrl$2(java.lang.String,java.lang.String):0 -> call
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.call():0 -> call
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:2:java.lang.String com.github.catvod.spider.music.lx.LxScript.lambda$musicUrl$2(java.lang.String,java.lang.String):0:0 -> call
+    2:2:java.lang.Object com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.call():0 -> call
+    3:3:java.lang.String com.github.catvod.spider.music.lx.LxScript.extractUrl(java.lang.Object):0:0 -> call
+    3:3:java.lang.String com.github.catvod.spider.music.lx.LxScript.lambda$musicUrl$2(java.lang.String,java.lang.String):0 -> call
+    3:3:java.lang.Object com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.call():0 -> call
+    4:4:java.lang.String com.github.catvod.spider.music.lx.LxScript.lambda$musicUrl$2(java.lang.String,java.lang.String):0:0 -> call
+    4:4:java.lang.Object com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$2415bf57ae0e21f64bcc6d95e2b38e5cc8a269ecce867421c8685985d2c234bd$0.call():0 -> call
+com.github.catvod.spider.music.lx.LxScript$$ExternalSyntheticLambda1 -> c.i:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    int com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$3fc915af78ed79b65693b6d293b878a30238b6187c9860fb24e8006cddb99377$0.$r8$classId -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:6:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$3fc915af78ed79b65693b6d293b878a30238b6187c9860fb24e8006cddb99377$0.<init>():0:0 -> <init>
+    1:6:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$3fc915af78ed79b65693b6d293b878a30238b6187c9860fb24e8006cddb99377$0.$r8$init$synthetic(int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    7:17:java.lang.Thread com.github.catvod.spider.music.lx.LxScript.lambda$new$1(java.lang.Runnable):0:0 -> newThread
+    7:17:java.lang.Thread com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$3fc915af78ed79b65693b6d293b878a30238b6187c9860fb24e8006cddb99377$0.newThread$bridge(java.lang.Runnable):0 -> newThread
+      # {"id":"com.android.tools.r8.synthesized"}
+    18:28:java.lang.Thread com.github.catvod.spider.music.lx.LxScript.lambda$new$0(java.lang.Runnable):0:0 -> newThread
+    18:28:java.lang.Thread com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$2$3fc915af78ed79b65693b6d293b878a30238b6187c9860fb24e8006cddb99377$0.newThread$bridge(java.lang.Runnable):0 -> newThread
+com.github.catvod.spider.music.lx.LxScript$$ExternalSyntheticLambda2 -> c.j:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    com.github.catvod.spider.music.lx.LxScript com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.f$0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/l;"}
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.<init>(com.github.catvod.spider.music.lx.LxScript):0:0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/l;)V"}
+    1:1:void com.github.catvod.spider.music.lx.LxScript.start():0:0 -> run
+    1:1:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.run():0 -> run
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:2:void com.github.catvod.spider.music.lx.LxScript.parseHeader(java.lang.String):0:0 -> run
+    2:2:void com.github.catvod.spider.music.lx.LxScript.start():0 -> run
+    2:2:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.run():0 -> run
+    3:3:void com.github.catvod.spider.music.lx.LxScript.start():0:0 -> run
+    3:3:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.run():0 -> run
+    4:4:java.lang.String com.github.catvod.spider.music.lx.LxScript.srcLocation(java.lang.Throwable):0:0 -> run
+    4:4:void com.github.catvod.spider.music.lx.LxScript.start():0 -> run
+    4:4:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.run():0 -> run
+    5:5:void com.github.catvod.spider.music.lx.LxScript.start():0:0 -> run
+    5:5:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.run():0 -> run
+    6:6:void com.github.catvod.spider.music.lx.LxScript.closeQuiet():0:0 -> run
+    6:6:void com.github.catvod.spider.music.lx.LxScript.start():0 -> run
+    6:6:void com.github.catvod.spider.music.lx.LxScript$$InternalSyntheticLambda$3$dadf82e3e5acb66365c20ecf623313158d21c29d4c8e002fa9bbd4cc865fa203$0.run():0 -> run
+com.github.catvod.spider.music.lx.LxScript$1 -> c.k:
+# {"id":"sourceFile","fileName":"LxScript.java"}
+    com.github.catvod.spider.music.lx.LxScript this$0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/l;"}
+    1:1:void <init>(com.github.catvod.spider.music.lx.LxScript):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/l;)V"}
+    1:1:void com.github.catvod.spider.music.lx.LxScript.access$000(com.github.catvod.spider.music.lx.LxScript,java.lang.String):0:0 -> a
+    1:1:void onInited(java.lang.String):0 -> a
+    2:2:void com.github.catvod.spider.music.lx.LxScript.handleInited(java.lang.String):0:0 -> a
+    2:2:void com.github.catvod.spider.music.lx.LxScript.access$000(com.github.catvod.spider.music.lx.LxScript,java.lang.String):0 -> a
+    2:2:void onInited(java.lang.String):0 -> a
+    3:6:void com.github.catvod.spider.music.lx.LxScript.access$200(com.github.catvod.spider.music.lx.LxScript,java.lang.String):0:0 -> b
+    3:6:void onLog(java.lang.String):0 -> b
+com.github.catvod.spider.music.lx.QuickJsRuntime -> c.p:
+# {"id":"sourceFile","fileName":"QuickJsRuntime.java"}
+    com.whl.quickjs.wrapper.QuickJSContext ctx -> a
+    1:1:void <init>():0:0 -> <init>
+    1:1:java.lang.Object[] com.github.catvod.spider.music.lx.QuickJsRuntime.convertIn(java.lang.Object[]):0:0 -> a
+    1:1:java.lang.Object[] access$000(com.github.catvod.spider.music.lx.QuickJsRuntime,java.lang.Object[]):0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/p;[Ljava/lang/Object;)V"}
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.QuickJsRuntime.convertOut(java.lang.Object):0:0 -> b
+    1:1:java.lang.Object access$100(com.github.catvod.spider.music.lx.QuickJsRuntime,java.lang.Object):0 -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/p;Ljava/lang/Object;)Ljava/lang/Object;"}
+    1:1:java.lang.Object com.github.catvod.spider.music.lx.QuickJsRuntime.awaitPromise(java.lang.Object):0:0 -> c
+    1:1:java.lang.Object callFunction(java.lang.Object,java.lang.Object[]):0 -> c
+    1:1:void close():0:0 -> d
+    1:1:void eval(java.lang.String,java.lang.String):0:0 -> e
+    1:1:java.lang.Object getProperty(java.lang.Object,java.lang.String):0:0 -> f
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/Object;)Ljava/lang/Object;"}
+    1:1:boolean isFunction(java.lang.Object):0:0 -> g
+    1:1:java.lang.Object newObject():0:0 -> h
+    1:1:java.lang.Object parseJson(java.lang.String):0:0 -> i
+    1:1:void setGlobal(java.lang.String,java.lang.Object):0:0 -> j
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/Object;Ljava/lang/String;)V"}
+    1:1:void setProperty(java.lang.Object,java.lang.String,java.lang.Object):0:0 -> k
+    1:1:java.lang.String stringify(java.lang.Object):0:0 -> l
+    1:1:byte[] toBytes(java.lang.Object):0:0 -> m
+com.github.catvod.spider.music.lx.QuickJsRuntime$1 -> c.m:
+# {"id":"sourceFile","fileName":"QuickJsRuntime.java"}
+    com.github.catvod.spider.music.lx.JsRuntime$HostFn val$fn -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/a;"}
+    com.github.catvod.spider.music.lx.QuickJsRuntime this$0 -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Lc/p;"}
+    1:1:void <init>(com.github.catvod.spider.music.lx.QuickJsRuntime,com.github.catvod.spider.music.lx.JsRuntime$HostFn):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lc/p;Lc/a;)V"}
+    1:1:java.lang.Object call(java.lang.Object[]):0:0 -> call
+com.github.catvod.spider.music.lx.QuickJsRuntime$2 -> c.n:
+# {"id":"sourceFile","fileName":"QuickJsRuntime.java"}
+    java.lang.Object[] val$result -> a
+    java.util.concurrent.CountDownLatch val$latch -> b
+    1:1:void <init>(com.github.catvod.spider.music.lx.QuickJsRuntime,java.lang.Object[],java.util.concurrent.CountDownLatch):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([Ljava/lang/Object;Ljava/util/concurrent/CountDownLatch;)V"}
+    1:1:java.lang.Object call(java.lang.Object[]):0:0 -> call
+com.github.catvod.spider.music.lx.QuickJsRuntime$3 -> c.o:
+# {"id":"sourceFile","fileName":"QuickJsRuntime.java"}
+    java.lang.Throwable[] val$error -> a
+    java.util.concurrent.CountDownLatch val$latch -> b
+    1:1:void <init>(com.github.catvod.spider.music.lx.QuickJsRuntime,java.lang.Throwable[],java.util.concurrent.CountDownLatch):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([Ljava/lang/Throwable;Ljava/util/concurrent/CountDownLatch;)V"}
+    1:1:java.lang.Object call(java.lang.Object[]):0:0 -> call

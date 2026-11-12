@@ -1,0 +1,703 @@
+# compiler: R8
+# compiler_version: 8.2.33
+# min_api: 19
+# common_typos_disable
+# {"id":"com.android.tools.r8.mapping","version":"2.2"}
+# pg_map_id: a5969d4
+# pg_map_hash: SHA-256 a5969d4e678b57bf17c8f99e51c383f89489a484d72b7ba0c9470bdacbf32880
+com.github.catvod.crawler.Spider -> com.github.catvod.crawler.Spider:
+# {"id":"sourceFile","fileName":"Spider.java"}
+    1:1:void init(android.content.Context):0:0 -> init
+    2:2:void init(android.content.Context,java.lang.String):0:0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.HongguoAccount -> a.e:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+    java.util.LinkedHashMap APP_DEVICE -> a
+    com.github.catvod.spider.HongguoAccount$WebLogin loginSession -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/d;"}
+    com.github.catvod.spider.HongguoAccount$AppLogin smsSession -> c
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/c;"}
+    1:1:java.util.LinkedHashMap com.github.catvod.spider.HongguoAccount.fixedDevice():0:0 -> <clinit>
+    1:1:void <clinit>():0 -> <clinit>
+    1:1:java.io.File accountFile(android.content.Context):0:0 -> a
+    1:1:int com.github.catvod.spider.Qingguoduanju.branchOf(java.lang.String,int):0:0 -> b
+    1:1:org.json.JSONObject accountGet(android.content.Context,java.lang.String,java.util.LinkedHashMap,java.lang.String,java.lang.String[]):0 -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/util/LinkedHashMap;Ljava/lang/String;[Ljava/lang/String;)Lorg/json/JSONObject;"}
+    2:2:int com.github.catvod.spider.Qingguoduanju.ivOf(byte[],byte[],int):0:0 -> b
+    2:2:int com.github.catvod.spider.Qingguoduanju.branchOf(java.lang.String,int):0 -> b
+    2:2:org.json.JSONObject accountGet(android.content.Context,java.lang.String,java.util.LinkedHashMap,java.lang.String,java.lang.String[]):0 -> b
+    3:3:int com.github.catvod.spider.Qingguoduanju.branchOf(java.lang.String,int):0:0 -> b
+    3:3:org.json.JSONObject accountGet(android.content.Context,java.lang.String,java.util.LinkedHashMap,java.lang.String,java.lang.String[]):0 -> b
+    4:4:org.json.JSONObject accountGet(android.content.Context,java.lang.String,java.util.LinkedHashMap,java.lang.String,java.lang.String[]):0:0 -> b
+    1:1:org.json.JSONObject err(java.lang.String):0:0 -> c
+    1:1:void com.github.catvod.spider.HongguoAccount.save(android.content.Context,java.lang.String,java.lang.String,java.lang.String,java.lang.String):0:0 -> d
+    1:1:void finalizeLogin(android.content.Context,java.lang.String):0 -> d
+    2:2:void finalizeLogin(android.content.Context,java.lang.String):0:0 -> d
+    1:1:java.lang.String com.github.catvod.spider.HongguoAccount.cleanUrl(java.lang.String):0:0 -> e
+    1:1:org.json.JSONArray history(android.content.Context):0 -> e
+    2:2:org.json.JSONArray history(android.content.Context):0:0 -> e
+    3:3:java.lang.String com.github.catvod.spider.HongguoAccount.episodeBadge(org.json.JSONObject):0:0 -> e
+    3:3:org.json.JSONArray history(android.content.Context):0 -> e
+    4:4:org.json.JSONArray history(android.content.Context):0:0 -> e
+    1:1:org.json.JSONObject load(android.content.Context):0:0 -> f
+    1:1:org.json.JSONObject ok():0:0 -> g
+    1:1:java.lang.String str(org.json.JSONObject,java.lang.String):0:0 -> h
+com.github.catvod.spider.HongguoAccount$1 -> a.a:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+    int $r8$classId -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    3:6:void com.github.catvod.spider.HongguoAccount$1.<init>():0:0 -> <init>
+    3:6:void $r8$init$synthetic(int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:int com.github.catvod.spider.Qingguoduanju$4.compare(java.lang.Object,java.lang.Object):0:0 -> compare
+    1:1:int compare$bridge(java.lang.Object,java.lang.Object):0 -> compare
+      # {"id":"com.android.tools.r8.synthesized"}
+    2:2:int com.github.catvod.spider.Qingguoduanju$4.compare(com.github.catvod.spider.Qingguoduanju$Sample,com.github.catvod.spider.Qingguoduanju$Sample):0:0 -> compare
+    2:2:int com.github.catvod.spider.Qingguoduanju$4.compare(java.lang.Object,java.lang.Object):0 -> compare
+    2:2:int compare$bridge(java.lang.Object,java.lang.Object):0 -> compare
+    3:3:int com.github.catvod.spider.HongguoAccount$1.compare(java.lang.Object,java.lang.Object):0:0 -> compare
+    3:3:int compare$bridge(java.lang.Object,java.lang.Object):0 -> compare
+    4:4:int com.github.catvod.spider.HongguoAccount$1.compare(org.json.JSONObject,org.json.JSONObject):0:0 -> compare
+    4:4:int com.github.catvod.spider.HongguoAccount$1.compare(java.lang.Object,java.lang.Object):0 -> compare
+    4:4:int compare$bridge(java.lang.Object,java.lang.Object):0 -> compare
+com.github.catvod.spider.HongguoAccount$AppLogin -> a.c:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+    java.util.LinkedHashMap cookies -> a
+    java.lang.String mobile -> b
+    java.lang.String ticket -> c
+    boolean sent -> d
+    1:1:void com.github.catvod.spider.HongguoAccount$AppLogin.<init>():0:0 -> <init>
+    1:1:void <init>(com.github.catvod.spider.HongguoAccount$1):0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()V"}
+    1:1:java.lang.String credentials():0:0 -> a
+    1:1:java.util.LinkedHashMap com.github.catvod.spider.HongguoAccount.access$200():0:0 -> b
+    1:1:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0 -> b
+    2:2:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0:0 -> b
+    3:3:java.lang.String com.github.catvod.spider.Qingguoduanju.md5HexUpper(byte[]):0:0 -> b
+    3:3:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0 -> b
+    4:4:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0:0 -> b
+    5:5:void com.github.catvod.spider.HongguoAccount$AppLogin.storeCookies(java.net.HttpURLConnection):0:0 -> b
+    5:5:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0 -> b
+    6:6:java.lang.String com.github.catvod.spider.HongguoAccount$WebText.read(java.net.HttpURLConnection):0:0 -> b
+    6:6:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0 -> b
+    7:7:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0:0 -> b
+    8:8:java.lang.String com.github.catvod.spider.HongguoAccount$WebText.read(java.net.HttpURLConnection):0:0 -> b
+    8:8:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0 -> b
+    9:9:org.json.JSONObject passportCall(java.lang.String,boolean,java.util.LinkedHashMap):0:0 -> b
+    1:1:com.github.catvod.spider.HongguoAccount$AppLogin$Sent send(java.lang.String):0:0 -> c
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)La/b;"}
+    1:1:java.lang.String verify(java.lang.String):0:0 -> d
+com.github.catvod.spider.HongguoAccount$AppLogin$Sent -> a.b:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+    int retrySeconds -> a
+    java.lang.String maskedMobile -> b
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/io/Serializable;"}
+    4:15:void com.github.catvod.spider.HongguoAccount$AppLogin$Sent.<init>():0:0 -> <init>
+    4:15:void $r8$init$synthetic(int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    16:19:void com.github.catvod.spider.HongguoAccount$WebLogin$Qr.<init>():0:0 -> <init>
+    16:19:void $r8$init$synthetic(int):0 -> <init>
+com.github.catvod.spider.HongguoAccount$WebLogin -> a.d:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+    java.util.LinkedHashMap cookies -> a
+    java.lang.String token -> b
+    1:1:void com.github.catvod.spider.HongguoAccount$WebLogin.<init>():0:0 -> <init>
+    1:1:void <init>(com.github.catvod.spider.HongguoAccount$1):0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()V"}
+    1:1:org.json.JSONObject call(java.lang.String,java.util.LinkedHashMap,java.util.LinkedHashMap):0:0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/util/LinkedHashMap;)Lorg/json/JSONObject;"}
+    1:1:org.json.JSONObject checked(org.json.JSONObject):0:0 -> b
+    1:1:java.lang.String consume(java.net.HttpURLConnection):0:0 -> c
+    1:1:java.lang.String cookieHeader():0:0 -> d
+    1:1:java.lang.String credentials():0:0 -> e
+    1:1:void finishRedirect(java.lang.String):0:0 -> f
+    1:1:boolean hasSession():0:0 -> g
+    1:1:java.net.HttpURLConnection open(java.net.URL,java.lang.String,java.lang.String):0:0 -> h
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/net/URL;Ljava/lang/String;)Ljava/net/HttpURLConnection;"}
+    1:1:boolean poll():0:0 -> i
+    1:1:com.github.catvod.spider.HongguoAccount$WebLogin$Qr qr():0:0 -> j
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()La/b;"}
+    1:1:java.lang.String resolveUrl(java.lang.String,java.lang.String):0:0 -> k
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)Ljava/lang/String;"}
+    1:1:void storeCookies(java.net.HttpURLConnection):0:0 -> l
+    1:1:java.lang.String urlEncode(java.lang.String):0:0 -> m
+com.github.catvod.spider.HongguoAccount$WebLogin$Qr -> R8$$REMOVED$$CLASS$$0:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+com.github.catvod.spider.HongguoAccount$WebText -> R8$$REMOVED$$CLASS$$1:
+# {"id":"sourceFile","fileName":"HongguoAccount.java"}
+com.github.catvod.spider.Qingguoduanju -> com.github.catvod.spider.Qingguoduanju:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    java.util.Map streamLocks -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/HashMap;"}
+    java.util.Map streamCache -> b
+    java.util.Map streamCacheAt -> c
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/concurrent/ConcurrentHashMap;"}
+    java.util.Map preparedCache -> d
+    javax.net.ssl.X509TrustManager TRUST_ALL -> e
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/j;"}
+    java.lang.String playerCdid -> f
+    byte[] PLAYER_SIGN_KEY -> g
+    byte[] PLAYER_AES_KEY -> h
+    byte[] PLAYER_AES_IV -> i
+    byte[] PLAYER_MAGIC8 -> j
+    byte[] PLAYER_TAIL9 -> k
+    java.util.Random PLAYER_RANDOM -> l
+    java.util.concurrent.ExecutorService PRIMER -> m
+    java.util.Map primedAt -> n
+      # {"id":"com.android.tools.r8.residualsignature","signature":"Ljava/util/concurrent/ConcurrentHashMap;"}
+    byte[] APP_SIGN_KEY -> o
+    byte[] REG_MAGIC -> p
+    com.github.catvod.spider.Qingguoduanju$Rand RAND -> q
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/g;"}
+    com.github.catvod.spider.Qingguoduanju$ClockMs CLOCK -> r
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/g;"}
+    int[] IVV1_LIST -> s
+    int[][] CHOSEN -> t
+    int[] HASH_TABLE -> u
+    byte[] SBOX -> v
+    java.lang.String[] appDeviceIds -> w
+    java.util.concurrent.ConcurrentHashMap appSearchCache -> x
+    java.lang.String[][] TYPE_FILTERS -> y
+    java.util.Map DM_VID_SERIES -> z
+    1:1:byte[] dmPkcs7(byte[]):0:0 -> A
+    1:1:java.lang.String dmLadon(long,byte[]):0 -> A
+    2:2:java.lang.String dmLadon(long,byte[]):0:0 -> A
+    1:1:byte[] sm3(byte[]):0:0 -> A0
+    1:1:byte[] dmLe64(long):0:0 -> B
+    1:1:java.lang.String text(java.lang.String):0:0 -> B0
+    1:1:com.github.catvod.spider.Qingguoduanju$StreamInfo stream(java.lang.String):0 -> B0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;)La/w;"}
+    2:2:com.github.catvod.spider.Qingguoduanju$StreamInfo stream(java.lang.String):0:0 -> B0
+    3:3:java.lang.String cleanUrl(java.lang.String):0:0 -> B0
+    3:3:com.github.catvod.spider.Qingguoduanju$StreamInfo stream(java.lang.String):0 -> B0
+    4:4:com.github.catvod.spider.Qingguoduanju$StreamInfo stream(java.lang.String):0:0 -> B0
+    1:1:byte[] dmMd5(byte[]):0:0 -> C
+    1:1:java.lang.String tagsText(org.json.JSONArray):0:0 -> C0
+    1:1:byte[] dmProto(java.util.LinkedHashMap):0:0 -> D
+    1:1:java.lang.String text(java.lang.String,java.lang.String,byte[],java.util.Map):0:0 -> D0
+    1:1:java.lang.Object[] dmProxy(java.util.Map):0:0 -> E
+    1:1:byte[] ttEncrypt(byte[]):0:0 -> E0
+    1:1:java.lang.String dmProxyUrl(java.lang.String):0:0 -> F
+    1:1:java.net.HttpURLConnection tuneTLS(java.net.HttpURLConnection):0:0 -> F0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/net/HttpURLConnection;)V"}
+    1:1:void dmVarint(java.io.ByteArrayOutputStream,long):0:0 -> G
+    1:1:byte[] varint(long):0:0 -> G0
+    1:1:long dmWord64le(byte[],int):0:0 -> H
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I[B)J"}
+    1:1:long com.github.catvod.spider.Qingguoduanju$10.now():0:0 -> H0
+    1:1:org.json.JSONObject videoTabModel(java.lang.String,java.lang.String[],java.lang.String):0 -> H0
+    2:2:org.json.JSONObject videoTabModel(java.lang.String,java.lang.String[],java.lang.String):0:0 -> H0
+    1:1:java.lang.String encodeQuery(java.util.Map):0:0 -> I
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/util/LinkedHashMap;)Ljava/lang/String;"}
+    1:1:java.lang.String xGorgon(java.lang.String,byte[],int,int):0:0 -> I0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(IILjava/lang/String;[B)Ljava/lang/String;"}
+    1:1:java.lang.String encodeValue(java.lang.String):0:0 -> J
+    1:1:int xt(int):0:0 -> J0
+    1:1:org.json.JSONObject extractRouter(java.lang.String):0:0 -> K
+    1:1:void fileLog(java.lang.String):0:0 -> L
+    1:1:com.github.catvod.spider.Qingguoduanju$Box find(byte[],java.lang.String,int,int):0:0 -> M
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(IILjava/lang/String;[B)La/q;"}
+    1:1:int getIv(int,byte[]):0:0 -> N
+    1:1:java.lang.String unescapeHtml(java.lang.String):0:0 -> O
+    1:1:org.json.JSONObject h5Album(java.lang.String):0 -> O
+    2:2:org.json.JSONObject h5Album(java.lang.String):0:0 -> O
+    1:1:double com.github.catvod.spider.Qingguoduanju$9.next():0:0 -> P
+    1:1:java.lang.String helios(int):0 -> P
+    2:2:java.lang.String helios(int):0:0 -> P
+    3:3:byte[] le64(long):0:0 -> P
+    3:3:java.lang.String helios(int):0 -> P
+    4:4:java.lang.String helios(int):0:0 -> P
+    5:5:byte[] le64(long):0:0 -> P
+    5:5:java.lang.String helios(int):0 -> P
+    6:6:java.lang.String helios(int):0:0 -> P
+    1:1:byte[] hexOf(java.lang.String):0:0 -> Q
+    1:1:java.lang.String hexOfLower(byte[]):0:0 -> R
+    1:1:com.github.catvod.spider.Qingguoduanju$Page home(int):0:0 -> S
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I)La/s;"}
+    1:1:int i32(byte[],int):0:0 -> T
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I[B)I"}
+    1:1:long i64(byte[],int):0:0 -> U
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I[B)J"}
+    1:1:long i64le(byte[],int):0:0 -> V
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I[B)J"}
+    1:1:java.lang.String keysOf(org.json.JSONObject):0:0 -> W
+    1:1:byte[] le32(int):0:0 -> X
+    1:1:java.net.HttpURLConnection open(java.lang.String):0:0 -> Y
+    1:1:java.lang.String pageData(java.util.List,int,int,boolean):0:0 -> Z
+    1:1:byte[] aes(boolean,byte[],byte[],byte[],java.lang.String):0:0 -> a
+    1:1:com.github.catvod.spider.Qingguoduanju$Page parseCategoryPage(org.json.JSONObject,int):0:0 -> a0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;I)La/s;"}
+    1:1:java.lang.String com.github.catvod.spider.HongguoAccount.handle(android.content.Context,java.lang.String):0:0 -> action
+    1:1:java.lang.String action(java.lang.String):0 -> action
+    2:2:com.github.catvod.spider.HongguoAccount$AppLogin com.github.catvod.spider.HongguoAccount.smsSession():0:0 -> action
+    2:2:java.lang.String com.github.catvod.spider.HongguoAccount.handle(android.content.Context,java.lang.String):0 -> action
+    2:2:java.lang.String action(java.lang.String):0 -> action
+    3:3:java.lang.String com.github.catvod.spider.HongguoAccount.handle(android.content.Context,java.lang.String):0:0 -> action
+    3:3:java.lang.String action(java.lang.String):0 -> action
+    4:4:void com.github.catvod.spider.HongguoAccount.fileLog(android.content.Context,java.lang.String):0:0 -> action
+    4:4:java.lang.String com.github.catvod.spider.HongguoAccount.handle(android.content.Context,java.lang.String):0 -> action
+    4:4:java.lang.String action(java.lang.String):0 -> action
+    5:5:java.lang.String com.github.catvod.spider.HongguoAccount.handle(android.content.Context,java.lang.String):0:0 -> action
+    5:5:java.lang.String action(java.lang.String):0 -> action
+    1:1:java.lang.String deviceStorePath():0:0 -> b
+    1:1:java.lang.String[] appDevice(boolean):0 -> b
+    2:2:java.lang.String[] appDevice(boolean):0:0 -> b
+    1:1:void pbFieldBytes(java.io.ByteArrayOutputStream,int,byte[]):0:0 -> b0
+    1:1:java.util.LinkedHashMap appDeviceParams(java.lang.String,java.lang.String):0:0 -> c
+    1:1:void pbFieldVarint(java.io.ByteArrayOutputStream,int,long):0:0 -> c0
+    1:1:boolean isTypeCategory(java.lang.String):0:0 -> categoryContent
+    1:1:java.lang.String categoryContent(java.lang.String,java.lang.String,boolean,java.util.HashMap):0 -> categoryContent
+    2:2:java.lang.String categoryContent(java.lang.String,java.lang.String,boolean,java.util.HashMap):0:0 -> categoryContent
+    3:3:com.github.catvod.spider.Qingguoduanju$Page typeCategoryPage(java.lang.String,java.lang.String,int):0:0 -> categoryContent
+    3:3:java.lang.String categoryContent(java.lang.String,java.lang.String,boolean,java.util.HashMap):0 -> categoryContent
+    4:4:java.lang.String categoryContent(java.lang.String,java.lang.String,boolean,java.util.HashMap):0:0 -> categoryContent
+    1:1:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0:0 -> d
+    1:1:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)La/s;"}
+    2:2:long com.github.catvod.spider.Qingguoduanju$10.now():0:0 -> d
+    2:2:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0 -> d
+    2:2:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    3:3:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0:0 -> d
+    3:3:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    4:4:int branchOf(java.lang.String,int):0:0 -> d
+    4:4:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0 -> d
+    4:4:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    5:5:int ivOf(byte[],byte[],int):0:0 -> d
+    5:5:int branchOf(java.lang.String,int):0 -> d
+    5:5:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0 -> d
+    5:5:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    6:6:int branchOf(java.lang.String,int):0:0 -> d
+    6:6:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0 -> d
+    6:6:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    7:7:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0:0 -> d
+    7:7:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    8:8:double com.github.catvod.spider.Qingguoduanju$9.next():0:0 -> d
+    8:8:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0 -> d
+    8:8:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    9:9:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0:0 -> d
+    9:9:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    10:10:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0:0 -> d
+    11:11:com.github.catvod.spider.Qingguoduanju$Series appSearchVod(org.json.JSONObject):0:0 -> d
+    11:11:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    12:12:java.lang.String cleanUrl(java.lang.String):0:0 -> d
+    12:12:com.github.catvod.spider.Qingguoduanju$Series appSearchVod(org.json.JSONObject):0 -> d
+    12:12:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    13:13:com.github.catvod.spider.Qingguoduanju$Series appSearchVod(org.json.JSONObject):0:0 -> d
+    13:13:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    14:14:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0:0 -> d
+    15:15:org.json.JSONObject appSearchRequest(java.util.LinkedHashMap,java.lang.String):0:0 -> d
+    15:15:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String,java.lang.String[]):0 -> d
+    1:1:void pbRawVarint(java.io.ByteArrayOutputStream,long):0:0 -> d0
+    1:1:org.json.JSONObject seriesDetailOf(org.json.JSONObject):0:0 -> detailContent
+    1:1:java.lang.String detailContent(java.util.List):0 -> detailContent
+    2:2:java.util.List vidsOf(org.json.JSONObject):0:0 -> detailContent
+    2:2:java.lang.String detailContent(java.util.List):0 -> detailContent
+    3:3:java.lang.String detailContent(java.util.List):0:0 -> detailContent
+    1:1:long com.github.catvod.spider.Qingguoduanju$10.now():0:0 -> e
+    1:1:com.github.catvod.spider.Qingguoduanju$Page appSearchPage(java.lang.String,int):0 -> e
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)La/s;"}
+    2:2:com.github.catvod.spider.Qingguoduanju$Page appSearchPage(java.lang.String,int):0:0 -> e
+    3:3:com.github.catvod.spider.Qingguoduanju$Page appSearchOnce(java.lang.String,int,java.lang.String,java.lang.String):0:0 -> e
+    3:3:com.github.catvod.spider.Qingguoduanju$Page appSearchPage(java.lang.String,int):0 -> e
+    4:4:com.github.catvod.spider.Qingguoduanju$Page appSearchPage(java.lang.String,int):0:0 -> e
+    5:5:long com.github.catvod.spider.Qingguoduanju$10.now():0:0 -> e
+    5:5:com.github.catvod.spider.Qingguoduanju$Page appSearchPage(java.lang.String,int):0 -> e
+    6:6:com.github.catvod.spider.Qingguoduanju$Page appSearchPage(java.lang.String,int):0:0 -> e
+    1:1:byte[] pkcs7(byte[]):0:0 -> e0
+    1:1:byte[] b64(java.lang.String):0:0 -> f
+    1:1:java.lang.String playerLadon(int):0:0 -> f0
+    1:1:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    2:2:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0:0 -> f0
+    3:3:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0:0 -> f0
+    3:3:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    4:4:java.lang.String queryParamValue(java.lang.String,java.lang.String):0:0 -> f0
+    4:4:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0 -> f0
+    4:4:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    5:5:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0:0 -> f0
+    5:5:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    6:6:long[] simon72Keys(byte[]):0:0 -> f0
+    6:6:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0 -> f0
+    6:6:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    7:7:byte[] simon72Encrypt(byte[],long[]):0:0 -> f0
+    7:7:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0 -> f0
+    7:7:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    8:8:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0:0 -> f0
+    8:8:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    9:9:byte[] aesCbcNoPad(byte[],byte[],byte[]):0:0 -> f0
+    9:9:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0 -> f0
+    9:9:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    10:10:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0:0 -> f0
+    10:10:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    11:11:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0:0 -> f0
+    12:12:byte[] aesCbcNoPad(byte[],byte[],byte[]):0:0 -> f0
+    12:12:java.lang.String playerArgus(java.lang.String,java.lang.String,int,java.lang.String):0 -> f0
+    12:12:java.util.LinkedHashMap playbackHeaders(java.lang.String,byte[],long,java.lang.String):0 -> f0
+    1:1:byte[] be32(int):0:0 -> g
+    1:1:java.util.LinkedHashMap playbackValues(java.lang.String[],java.lang.String):0:0 -> g0
+    1:1:long u32(byte[],int):0:0 -> h
+    1:1:com.github.catvod.spider.Qingguoduanju$Box box(byte[],int,int):0 -> h
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([BII)La/q;"}
+    2:2:com.github.catvod.spider.Qingguoduanju$Box box(byte[],int,int):0:0 -> h
+    3:3:java.lang.String ascii4(byte[],int):0:0 -> h
+    3:3:com.github.catvod.spider.Qingguoduanju$Box box(byte[],int,int):0 -> h
+    4:4:com.github.catvod.spider.Qingguoduanju$Box box(byte[],int,int):0:0 -> h
+    1:1:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    1:1:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;La/w;J[B)La/t;"}
+    2:2:long u32(byte[],int):0:0 -> h0
+    2:2:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    2:2:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    3:3:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    3:3:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    4:4:long u32(byte[],int):0:0 -> h0
+    4:4:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    4:4:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    5:5:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    5:5:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    6:6:long u32(byte[],int):0:0 -> h0
+    6:6:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    6:6:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    7:7:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    7:7:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    8:8:long u32(byte[],int):0:0 -> h0
+    8:8:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    8:8:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    9:9:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    9:9:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    10:10:long u32(byte[],int):0:0 -> h0
+    10:10:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    10:10:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    11:11:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    11:11:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    12:12:long u32(byte[],int):0:0 -> h0
+    12:12:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    12:12:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    13:13:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    13:13:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    14:14:long u32(byte[],int):0:0 -> h0
+    14:14:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    14:14:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    15:15:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    15:15:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    16:16:long u32(byte[],int):0:0 -> h0
+    16:16:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    16:16:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    17:17:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    17:17:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    18:18:java.lang.String ascii4(byte[],int):0:0 -> h0
+    18:18:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    18:18:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    19:19:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    19:19:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    20:20:java.lang.String ascii4(byte[],int):0:0 -> h0
+    20:20:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0 -> h0
+    20:20:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    21:21:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    21:21:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    22:22:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0:0 -> h0
+    23:23:com.github.catvod.spider.Qingguoduanju$Prepared prepare(byte[],byte[]):0:0 -> h0
+    23:23:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0 -> h0
+    24:24:com.github.catvod.spider.Qingguoduanju$Prepared prepareFor(java.lang.String,com.github.catvod.spider.Qingguoduanju$StreamInfo,long,byte[]):0:0 -> h0
+    1:1:int ivOf(byte[],byte[],int):0:0 -> i
+    1:1:int branchOf(java.lang.String,byte[],int):0 -> i
+    2:2:int branchOf(java.lang.String,byte[],int):0:0 -> i
+    1:1:void primeEpisodes(java.util.List,java.lang.String):0:0 -> i0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/util/ArrayList;Ljava/lang/String;)V"}
+    1:1:int ivOf(byte[],byte[],int):0:0 -> j
+    1:1:byte[] hashF13branch0(byte[],byte[],int):0 -> j
+    1:1:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    2:2:byte[] hashF13branch0(byte[],byte[],int):0:0 -> j
+    2:2:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    3:3:int i32be(byte[],int):0:0 -> j
+    3:3:byte[] hashF13branch0(byte[],byte[],int):0 -> j
+    3:3:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    4:4:byte[] hashF13branch0(byte[],byte[],int):0:0 -> j
+    4:4:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    5:6:int sumMd5(byte[]):0:0 -> j
+    5:6:byte[] hashF13branch0(byte[],byte[],int):0 -> j
+    5:6:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    7:7:byte[] hashF13branch0(byte[],byte[],int):0:0 -> j
+    7:7:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    8:8:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    9:9:double com.github.catvod.spider.Qingguoduanju$9.next():0:0 -> j
+    9:9:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    10:10:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    11:11:byte[] deviceProto(java.lang.String):0:0 -> j
+    11:11:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    12:12:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    13:13:long com.github.catvod.spider.Qingguoduanju$10.now():0:0 -> j
+    13:13:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    14:14:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    15:15:double com.github.catvod.spider.Qingguoduanju$9.next():0:0 -> j
+    15:15:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    16:16:byte[][] keyHash(int):0:0 -> j
+    16:16:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    17:17:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    18:19:byte[] xmxor(byte[],byte[]):0:0 -> j
+    18:19:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    20:20:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    21:21:double com.github.catvod.spider.Qingguoduanju$9.next():0:0 -> j
+    21:21:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    22:22:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    23:24:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0:0 -> j
+    23:24:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    25:26:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0:0 -> j
+    25:26:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    25:26:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    27:27:void com.github.catvod.spider.Qingguoduanju$AesV3.sub(int[][]):0:0 -> j
+    27:27:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0 -> j
+    27:27:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    27:27:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    28:28:void com.github.catvod.spider.Qingguoduanju$AesV3.shift(int[][]):0:0 -> j
+    28:28:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0 -> j
+    28:28:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    28:28:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    29:29:void com.github.catvod.spider.Qingguoduanju$AesV3.shiftCon(int[][]):0:0 -> j
+    29:29:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0 -> j
+    29:29:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    29:29:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    30:30:void aesMix(int[][]):0:0 -> j
+    30:30:void access$600(int[][]):0 -> j
+    30:30:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0 -> j
+    30:30:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    30:30:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    31:31:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0:0 -> j
+    31:31:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    31:31:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    32:32:void com.github.catvod.spider.Qingguoduanju$AesV3.add(int[][],int):0:0 -> j
+    32:32:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0 -> j
+    32:32:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    32:32:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    33:33:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.block(byte[]):0:0 -> j
+    33:33:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    33:33:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    34:34:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0:0 -> j
+    34:34:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    35:35:byte[] access$700(byte[],byte[]):0:0 -> j
+    35:35:byte[] com.github.catvod.spider.Qingguoduanju$AesV3.encrypt(byte[],byte[]):0 -> j
+    35:35:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0 -> j
+    36:36:java.lang.String buildMedusa(java.lang.String,byte[],int,java.lang.String):0:0 -> j
+    1:1:byte[] proto(byte[][]):0:0 -> j0
+    1:1:boolean valid(java.lang.String,java.lang.String):0:0 -> k
+    1:1:java.util.List cards(org.json.JSONArray):0 -> k
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)Ljava/util/ArrayList;"}
+    2:2:java.util.List cards(org.json.JSONArray):0:0 -> k
+    1:1:byte[] protoFieldBytes(long,byte[]):0:0 -> k0
+    1:1:byte[] concat(byte[],byte[]):0:0 -> l
+    1:1:byte[] protoFieldFloat(long,double):0:0 -> l0
+    1:1:long u32(byte[],int):0:0 -> m
+    1:1:int count(byte[],int,int):0 -> m
+    2:2:int count(byte[],int,int):0:0 -> m
+    1:1:byte[] protoFieldSint(long,long):0:0 -> m0
+    1:1:byte[] decrypt(byte[],long,byte[],com.github.catvod.spider.Qingguoduanju$Prepared):0:0 -> n
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([BJ[BLa/t;)[B"}
+    1:1:byte[] protoFieldStr(long,java.lang.String):0:0 -> n0
+    1:1:java.lang.String decryptUrl(java.lang.String,byte[]):0:0 -> o
+    1:1:java.lang.String pythonEncodeValue(java.lang.String):0:0 -> o0
+    1:1:byte[] deriveKey(java.lang.String):0:0 -> p
+    1:1:java.lang.String pythonUrlEncode(java.util.LinkedHashMap):0:0 -> p0
+    1:1:byte[] digest(java.lang.String,byte[]):0:0 -> q
+    1:1:int qualityNumber(java.lang.String):0:0 -> q0
+    1:1:byte[] dmPkcs7(byte[]):0:0 -> r
+    1:1:java.lang.String dmArgus(java.lang.String,java.lang.String,long,long,int):0 -> r
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;JJI)Ljava/lang/String;"}
+    2:2:java.lang.String dmArgus(java.lang.String,java.lang.String,long,long,int):0:0 -> r
+    1:1:java.lang.String qualityText(org.json.JSONObject):0:0 -> r0
+    1:1:org.json.JSONObject dmCommentWindow(java.lang.String,java.lang.String,long,long,java.lang.String):0:0 -> s
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)Lorg/json/JSONObject;"}
+    1:1:byte[] range(java.lang.String,long,long,long[]):0:0 -> s0
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+    1:1:byte[] dmConcat(byte[][]):0:0 -> t
+    1:1:java.lang.String text(java.lang.String):0:0 -> t0
+    1:1:com.github.catvod.spider.Qingguoduanju$Page rankPage(int):0 -> t0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I)La/s;"}
+    2:2:com.github.catvod.spider.Qingguoduanju$Page rankPage(int):0:0 -> t0
+    3:3:java.lang.String htmlDecode(java.lang.String):0:0 -> t0
+    3:3:com.github.catvod.spider.Qingguoduanju$Page rankPage(int):0 -> t0
+    4:4:com.github.catvod.spider.Qingguoduanju$Page rankPage(int):0:0 -> t0
+    5:5:boolean valid(java.lang.String,java.lang.String):0:0 -> t0
+    5:5:com.github.catvod.spider.Qingguoduanju$Page rankPage(int):0 -> t0
+    6:6:com.github.catvod.spider.Qingguoduanju$Page rankPage(int):0:0 -> t0
+    1:1:java.lang.String dmEscape(java.lang.String):0:0 -> u
+    1:1:long com.github.catvod.spider.Qingguoduanju$10.now():0:0 -> u0
+    1:1:java.lang.String[] registerDevice():0 -> u0
+    2:2:byte[] registerPayload(long):0:0 -> u0
+    2:2:java.lang.String[] registerDevice():0 -> u0
+    3:3:java.lang.String[] registerDevice():0:0 -> u0
+    4:4:byte[] registerPayload(long):0:0 -> u0
+    4:4:java.lang.String[] registerDevice():0 -> u0
+    1:1:java.lang.String dmFetchXml(java.lang.String,java.lang.String):0:0 -> v
+    1:1:int rol32(int,int):0:0 -> v0
+    1:1:java.lang.String dmGorgon(byte[],int,int,int):0:0 -> w
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([BII)Ljava/lang/String;"}
+    1:1:void rotatePlayerDevice():0:0 -> w0
+    1:1:byte[] dmGorgonSeed(java.lang.String,java.lang.String,java.lang.String,long):0:0 -> x
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;J)[B"}
+    4:7:java.lang.String text(java.lang.String):0:0 -> x0
+    4:7:org.json.JSONObject router(java.lang.String):0 -> x0
+    8:29:org.json.JSONObject router(java.lang.String):0:0 -> x0
+    1:1:byte[] dmHex(java.lang.String):0:0 -> y
+    1:1:java.lang.String scanBalanced(java.lang.String,int):0:0 -> y0
+    1:1:java.lang.String dmHexOf(byte[]):0:0 -> z
+    1:1:java.lang.String enc(java.lang.String):0:0 -> z0
+    1:1:com.github.catvod.spider.Qingguoduanju$Page searchPage(java.lang.String,int):0 -> z0
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/lang/String;I)La/s;"}
+    2:2:com.github.catvod.spider.Qingguoduanju$Page searchPage(java.lang.String,int):0:0 -> z0
+    3:3:java.lang.String text(java.lang.String):0:0 -> z0
+    3:3:com.github.catvod.spider.Qingguoduanju$Page searchPage(java.lang.String,int):0 -> z0
+    4:4:com.github.catvod.spider.Qingguoduanju$Page searchPage(java.lang.String,int):0:0 -> z0
+com.github.catvod.spider.Qingguoduanju$$ExternalSyntheticApiModelOutline0 -> a.f:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}
+# {"id":"com.android.tools.r8.synthesized"}
+    1:1:long com.github.catvod.spider.Qingguoduanju$$InternalSyntheticApiModelOutline$1$6a80e390bdd757fcc28e5fdfa9d10a976fb83880077bfd53b91819dd9e3a711a$0.m(java.net.HttpURLConnection):0:0 -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+com.github.catvod.spider.Qingguoduanju$1 -> a.j:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    void <init>() -> <init>
+    1:1:void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String):0:0 -> checkClientTrusted
+    1:1:void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String):0:0 -> checkServerTrusted
+    1:1:java.security.cert.X509Certificate[] getAcceptedIssuers():0:0 -> getAcceptedIssuers
+com.github.catvod.spider.Qingguoduanju$10 -> a.g:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    1:4:void com.github.catvod.spider.Qingguoduanju$10.<init>():0:0 -> <init>
+    1:4:void $r8$init$synthetic():0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:long now():0:0 -> a
+com.github.catvod.spider.Qingguoduanju$11 -> a.h:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    1:1:void <init>(int,float,boolean):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()V"}
+    1:1:boolean removeEldestEntry(java.util.Map$Entry):0:0 -> removeEldestEntry
+com.github.catvod.spider.Qingguoduanju$12 -> a.i:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    1:1:void <init>(int):0:0 -> <init>
+    2:2:void com.github.catvod.spider.Qingguoduanju$13.<init>(long,long,byte[],java.lang.String,byte[]):0:0 -> <init>
+com.github.catvod.spider.Qingguoduanju$2 -> a.k:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    void <init>() -> <init>
+    1:1:boolean verify(java.lang.String,javax.net.ssl.SSLSession):0:0 -> verify
+com.github.catvod.spider.Qingguoduanju$3 -> a.l:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    1:1:void <init>(com.github.catvod.spider.Qingguoduanju):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"()V"}
+    1:1:java.lang.String com.github.catvod.spider.Qingguoduanju.access$000(org.json.JSONObject):0:0 -> compare
+    1:1:int com.github.catvod.spider.Qingguoduanju$3.compare(org.json.JSONObject,org.json.JSONObject):0 -> compare
+    1:1:int compare(java.lang.Object,java.lang.Object):0 -> compare
+    2:2:int com.github.catvod.spider.Qingguoduanju.access$100(java.lang.String):0:0 -> compare
+    2:2:int com.github.catvod.spider.Qingguoduanju$3.compare(org.json.JSONObject,org.json.JSONObject):0 -> compare
+    2:2:int compare(java.lang.Object,java.lang.Object):0 -> compare
+    3:3:java.lang.String com.github.catvod.spider.Qingguoduanju.access$000(org.json.JSONObject):0:0 -> compare
+    3:3:int com.github.catvod.spider.Qingguoduanju$3.compare(org.json.JSONObject,org.json.JSONObject):0 -> compare
+    3:3:int compare(java.lang.Object,java.lang.Object):0 -> compare
+    4:4:int com.github.catvod.spider.Qingguoduanju.access$100(java.lang.String):0:0 -> compare
+    4:4:int com.github.catvod.spider.Qingguoduanju$3.compare(org.json.JSONObject,org.json.JSONObject):0 -> compare
+    4:4:int compare(java.lang.Object,java.lang.Object):0 -> compare
+com.github.catvod.spider.Qingguoduanju$4 -> R8$$REMOVED$$CLASS$$2:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+com.github.catvod.spider.Qingguoduanju$5 -> a.m:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    int $r8$classId -> a
+      # {"id":"com.android.tools.r8.synthesized"}
+    1:1:void com.github.catvod.spider.Qingguoduanju$5.<init>(com.github.catvod.spider.Qingguoduanju,int,float,boolean):0:0 -> <init>
+    1:1:void $r8$init$synthetic(com.github.catvod.spider.Qingguoduanju,int,float,boolean,int):0 -> <init>
+      # {"id":"com.android.tools.r8.synthesized"}
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(II)V"}
+    10:17:boolean com.github.catvod.spider.Qingguoduanju$8.removeEldestEntry(java.util.Map$Entry):0:0 -> removeEldestEntry
+    10:17:boolean removeEldestEntry$bridge(java.util.Map$Entry):0 -> removeEldestEntry
+      # {"id":"com.android.tools.r8.synthesized"}
+    18:26:boolean com.github.catvod.spider.Qingguoduanju$5.removeEldestEntry(java.util.Map$Entry):0:0 -> removeEldestEntry
+    18:26:boolean removeEldestEntry$bridge(java.util.Map$Entry):0 -> removeEldestEntry
+com.github.catvod.spider.Qingguoduanju$6 -> a.n:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    void <init>() -> <init>
+    1:1:java.lang.Thread newThread(java.lang.Runnable):0:0 -> newThread
+com.github.catvod.spider.Qingguoduanju$7 -> a.o:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    java.util.List val$todo -> a
+    java.lang.String val$tag -> b
+    com.github.catvod.spider.Qingguoduanju this$0 -> c
+    1:1:void <init>(com.github.catvod.spider.Qingguoduanju,java.util.List,java.lang.String):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lcom/github/catvod/spider/Qingguoduanju;Ljava/util/ArrayList;Ljava/lang/String;)V"}
+    1:1:java.util.Map com.github.catvod.spider.Qingguoduanju.access$200():0:0 -> run
+    1:1:void run():0 -> run
+    2:2:void run():0:0 -> run
+    3:3:com.github.catvod.spider.Qingguoduanju$StreamInfo com.github.catvod.spider.Qingguoduanju.access$300(com.github.catvod.spider.Qingguoduanju,java.lang.String):0:0 -> run
+    3:3:void run():0 -> run
+    4:4:void run():0:0 -> run
+    5:5:java.util.Map com.github.catvod.spider.Qingguoduanju.access$200():0:0 -> run
+    5:5:void run():0 -> run
+    6:6:void run():0:0 -> run
+com.github.catvod.spider.Qingguoduanju$8 -> R8$$REMOVED$$CLASS$$3:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+com.github.catvod.spider.Qingguoduanju$9 -> R8$$REMOVED$$CLASS$$4:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+com.github.catvod.spider.Qingguoduanju$AesV3 -> a.p:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    byte[] box -> a
+    int[] con2 -> b
+    int[] order -> c
+    int init -> d
+    int[][] keys -> e
+    1:1:byte[] com.github.catvod.spider.Qingguoduanju.access$400():0:0 -> <init>
+    1:1:void <init>(byte[],int):0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(I[B)V"}
+    2:2:void <init>(byte[],int):0:0 -> <init>
+    1:1:void addCon(int[][],int):0:0 -> a
+com.github.catvod.spider.Qingguoduanju$Box -> a.q:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    int start -> a
+    int end -> b
+    int body -> c
+    java.lang.String type -> d
+    1:1:void <init>(int,int,int,java.lang.String):0:0 -> <init>
+com.github.catvod.spider.Qingguoduanju$LegacyTLSFactory -> a.r:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    javax.net.ssl.SSLSocketFactory base -> a
+    1:1:void <init>(javax.net.ssl.SSLSocketFactory):0:0 -> <init>
+    1:1:java.net.Socket tune(java.net.Socket):0:0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/net/Socket;)V"}
+    1:1:java.net.Socket createSocket(java.lang.String,int):0:0 -> createSocket
+    2:2:java.net.Socket createSocket(java.lang.String,int,java.net.InetAddress,int):0:0 -> createSocket
+    3:3:java.net.Socket createSocket(java.net.InetAddress,int):0:0 -> createSocket
+    4:4:java.net.Socket createSocket(java.net.InetAddress,int,java.net.InetAddress,int):0:0 -> createSocket
+    5:5:java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean):0:0 -> createSocket
+    1:1:java.lang.String[] getDefaultCipherSuites():0:0 -> getDefaultCipherSuites
+    1:1:java.lang.String[] getSupportedCipherSuites():0:0 -> getSupportedCipherSuites
+com.github.catvod.spider.Qingguoduanju$Page -> a.s:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    java.util.List items -> a
+    int lastPage -> b
+    boolean hasMore -> c
+    java.util.LinkedHashMap cursor -> d
+    1:1:void <init>(java.util.List,int,int):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/util/ArrayList;II)V"}
+com.github.catvod.spider.Qingguoduanju$Prepared -> a.t:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    byte[] header -> a
+    java.util.List samples -> b
+    1:1:void <init>(byte[],java.util.List):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"([BLjava/util/ArrayList;)V"}
+com.github.catvod.spider.Qingguoduanju$Sample -> a.u:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    long start -> a
+    long end -> b
+    long encryptedOffset -> c
+    byte[] iv -> d
+    1:1:void <init>(long,long,long,byte[]):0:0 -> <init>
+com.github.catvod.spider.Qingguoduanju$Series -> a.v:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    java.lang.String id -> a
+    java.lang.String name -> b
+    java.lang.String cover -> c
+    java.lang.String intro -> d
+    java.lang.String badge -> e
+    java.lang.String tags -> f
+    1:1:void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String):0:0 -> <init>
+com.github.catvod.spider.Qingguoduanju$StreamInfo -> a.w:
+# {"id":"sourceFile","fileName":"Qingguoduanju.java"}
+    java.lang.String url -> a
+    java.lang.String quality -> b
+    byte[] key -> c
+    1:1:void <init>(java.lang.String,byte[],java.lang.String):0:0 -> <init>

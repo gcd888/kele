@@ -1,0 +1,30 @@
+package com.github.catvod.spider.merge.h0;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+/* JADX INFO: loaded from: E:\HelloWorld\project\kele\src\ysc\diy\摸鱼儿\extracted2\classes.dex */
+public final class a extends c {
+    public a(Collection collection) {
+        this.a.addAll(collection);
+        this.b = this.a.size();
+    }
+
+    @Override // com.github.catvod.spider.merge.h0.n
+    public final boolean a(com.github.catvod.spider.merge.f0.k kVar, com.github.catvod.spider.merge.f0.k kVar2) {
+        for (int i = this.b - 1; i >= 0; i--) {
+            if (!((n) this.a.get(i)).a(kVar, kVar2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public final String toString() {
+        return com.github.catvod.spider.merge.e0.b.f("", this.a);
+    }
+
+    public a(n... nVarArr) {
+        this(Arrays.asList(nVarArr));
+    }
+}

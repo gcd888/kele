@@ -1,0 +1,22 @@
+{
+  "secKey": "abcdefghijklmnop",
+  "weapiMvUrl": {
+    "json": "{\"id\":\"543210\",\"r\":1080,\"csrf_token\":\"\"}",
+    "params": "hbRB9SRYq+Ji6AD2I1DngZNzr3Y9M/oerKIbeKfRqQIoW5X2egHQyIImbPe3qOjLW7Gkj90qUvV4AHkKFsX2YNHxEvjExd4m7CBSD+on0f4=",
+    "encSecKey": "d15a1683c992095d0c234c19966605c5c5964911268bbeda8cb8d08d834913e59d53b32358903a121b5fca784c1f5ae44951fd02524df58ecc98e52cc7cf8689b42c2e93ddf05b0592512d87f5960467e2f086c018849d76014d323500e30f13ef4cafbb0cf5a66731a3f1776c75ca35d0062dac70a3e33245afabcf47938487"
+  },
+  "weapiSearch": {
+    "json": "{\"s\":\"\u5468\u6770\u4f26\",\"type\":1004,\"limit\":30,\"offset\":0,\"csrf_token\":\"\"}",
+    "params": "n2nXn8LzSZtTIMti/1xqFh+noF6T53HYeX2Iecel/kEerRdDcYYnRDEddhhYd+Cc4EuneZvRLAQasoxMWHcAmGZXT548fWT5lppZVRzrKceb8X24rjw6/Ft7JMLxO2Y4iuBJDSWEIdIuXo3PTAN9YA==",
+    "encSecKey": "d15a1683c992095d0c234c19966605c5c5964911268bbeda8cb8d08d834913e59d53b32358903a121b5fca784c1f5ae44951fd02524df58ecc98e52cc7cf8689b42c2e93ddf05b0592512d87f5960467e2f086c018849d76014d323500e30f13ef4cafbb0cf5a66731a3f1776c75ca35d0062dac70a3e33245afabcf47938487"
+  },
+  "linux": {
+    "json": "{\"method\":\"POST\",\"url\":\"http://music.163.com/api/cloudsearch/pc\",\"params\":{\"s\":\"test\",\"type\":1,\"offset\":0,\"limit\":30}}",
+    "eparams": "A0D9583F4C5FF68DE851D2893A49DE98CC059A8845B664AA2459CEA7271A2C0E5BCA8A188E1BE398DB4C9A3FC117E19C3A77895903E2D61B18B1EF2085DE0DFDA71B323DD473BC443A5D2590DA5A3F662820DE52CB60A79E41C0FFFDFFAE7E34C33E9544BFFDE030DF5BE2BB03F67624CA72A2E78974544F3569BB35EF9B49BB"
+  },
+  "enc": [
+    ["周杰伦", "%E5%91%A8%E6%9D%B0%E4%BC%A6"],
+    ["a b+c*d.e~f!g'h(i)j", "a%20b%2Bc*d.e%7Ef%21g%27h%28i%29j"],
+    ["官方版 100%", "%E5%AE%98%E6%96%B9%E7%89%88%20100%25"]
+  ]
+}

@@ -1,0 +1,86 @@
+# compiler: R8
+# compiler_version: 8.2.33
+# min_api: 19
+# common_typos_disable
+# {"id":"com.android.tools.r8.mapping","version":"2.2"}
+# pg_map_id: 52d9ad1
+# pg_map_hash: SHA-256 52d9ad1203f01499abe142b88c1c16904dc60729ac3f0f70ff565ed8b802da0f
+com.github.catvod.crawler.Spider -> com.github.catvod.crawler.Spider:
+# {"id":"sourceFile","fileName":"Spider.java"}
+    1:1:void init(android.content.Context):0:0 -> init
+    2:2:void init(android.content.Context,java.lang.String):0:0 -> init
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.Haimajuchang -> com.github.catvod.spider.Haimajuchang:
+# {"id":"sourceFile","fileName":"Haimajuchang.java"}
+    java.lang.String[] DOMAINS -> a
+    byte[] AES_KEY -> b
+    byte[] AES_IV -> c
+    java.util.concurrent.ConcurrentHashMap CURSORS -> d
+    java.lang.String utdid -> e
+    java.lang.String userId -> f
+    java.lang.Object REG_LOCK -> g
+    javax.net.ssl.X509TrustManager TRUST_ALL -> h
+      # {"id":"com.android.tools.r8.residualsignature","signature":"La/a;"}
+    1:1:void ensureRegistered():0:0 -> a
+    1:1:org.json.JSONObject api(java.lang.String,org.json.JSONObject):0 -> a
+    2:2:org.json.JSONObject api(java.lang.String,org.json.JSONObject):0:0 -> a
+    3:3:void ensureRegistered():0:0 -> a
+    3:3:org.json.JSONObject api(java.lang.String,org.json.JSONObject):0 -> a
+    1:1:byte[] hexBytes(java.lang.String):0:0 -> b
+    1:1:java.lang.String decryptHex(java.lang.String):0 -> b
+    2:2:java.lang.String decryptHex(java.lang.String):0:0 -> b
+    3:3:byte[] hexBytes(java.lang.String):0:0 -> b
+    3:3:java.lang.String decryptHex(java.lang.String):0 -> b
+    4:4:java.lang.String decryptHex(java.lang.String):0:0 -> b
+    1:1:java.lang.String newUtdid():0:0 -> c
+    1:1:java.lang.String devHeadersJson():0 -> c
+    2:2:java.lang.String devHeadersJson():0:0 -> c
+    1:1:java.util.List dramaCards(org.json.JSONArray):0:0 -> d
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)Ljava/util/ArrayList;"}
+    1:1:void fileLog(java.lang.String):0:0 -> e
+    1:1:java.lang.String firstUrl(org.json.JSONObject):0:0 -> f
+    1:1:java.lang.String joinStrings(org.json.JSONArray,java.lang.String):0:0 -> g
+    1:1:java.net.HttpURLConnection open(java.lang.String):0:0 -> h
+    1:1:java.lang.String pageData(java.util.List,int,boolean):0:0 -> i
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/util/ArrayList;IZ)Ljava/lang/String;"}
+    1:1:java.lang.String post(java.lang.String,java.lang.String,java.lang.String):0:0 -> j
+    1:1:org.json.JSONObject request(java.lang.String,java.lang.String,org.json.JSONObject):0 -> j
+    2:2:org.json.JSONObject request(java.lang.String,java.lang.String,org.json.JSONObject):0:0 -> j
+    3:3:java.lang.String post(java.lang.String,java.lang.String,java.lang.String):0:0 -> j
+    3:3:org.json.JSONObject request(java.lang.String,java.lang.String,org.json.JSONObject):0 -> j
+    1:1:java.util.List theatreItems(org.json.JSONObject):0:0 -> k
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONObject;)Ljava/util/ArrayList;"}
+    1:1:org.json.JSONObject theatreParams(java.lang.String,java.lang.String,int):0:0 -> l
+    1:1:java.lang.String searchContent(java.lang.String,boolean):0:0 -> searchContent
+    2:2:java.lang.String searchContent(java.lang.String,boolean,java.lang.String):0:0 -> searchContent
+com.github.catvod.spider.Haimajuchang$1 -> a.a:
+# {"id":"sourceFile","fileName":"Haimajuchang.java"}
+    void <init>() -> <init>
+    1:1:void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String):0:0 -> checkClientTrusted
+    1:1:void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String):0:0 -> checkServerTrusted
+    1:1:java.security.cert.X509Certificate[] getAcceptedIssuers():0:0 -> getAcceptedIssuers
+com.github.catvod.spider.Haimajuchang$2 -> a.b:
+# {"id":"sourceFile","fileName":"Haimajuchang.java"}
+    void <init>() -> <init>
+    1:1:boolean verify(java.lang.String,javax.net.ssl.SSLSession):0:0 -> verify
+com.github.catvod.spider.Haimajuchang$3 -> a.c:
+# {"id":"sourceFile","fileName":"Haimajuchang.java"}
+    org.json.JSONArray val$cl -> a
+    1:1:void <init>(com.github.catvod.spider.Haimajuchang,org.json.JSONArray):0:0 -> <init>
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Lorg/json/JSONArray;)V"}
+    1:1:int com.github.catvod.spider.Haimajuchang$3.compare(int[],int[]):0:0 -> compare
+    1:1:int compare(java.lang.Object,java.lang.Object):0 -> compare
+com.github.catvod.spider.Haimajuchang$LegacyTLSFactory -> a.d:
+# {"id":"sourceFile","fileName":"Haimajuchang.java"}
+    javax.net.ssl.SSLSocketFactory base -> a
+    1:1:void <init>(javax.net.ssl.SSLSocketFactory):0:0 -> <init>
+    1:1:java.net.Socket tune(java.net.Socket):0:0 -> a
+      # {"id":"com.android.tools.r8.residualsignature","signature":"(Ljava/net/Socket;)V"}
+    1:1:java.net.Socket createSocket(java.lang.String,int):0:0 -> createSocket
+    2:2:java.net.Socket createSocket(java.lang.String,int,java.net.InetAddress,int):0:0 -> createSocket
+    3:3:java.net.Socket createSocket(java.net.InetAddress,int):0:0 -> createSocket
+    4:4:java.net.Socket createSocket(java.net.InetAddress,int,java.net.InetAddress,int):0:0 -> createSocket
+    5:5:java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean):0:0 -> createSocket
+    1:1:java.lang.String[] getDefaultCipherSuites():0:0 -> getDefaultCipherSuites
+    1:1:java.lang.String[] getSupportedCipherSuites():0:0 -> getSupportedCipherSuites

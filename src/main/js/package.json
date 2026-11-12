@@ -1,0 +1,9 @@
+{
+  "name": "guoju-js-spiders",
+  "private": true,
+  "type": "module",
+  "description": "果剧 JS 版内容源（QuickJS JsSpider 协议）；node 仅用于桌面自测，此 package.json 使 node 将 .js 按 ESM 加载，不随包发布",
+  "devDependencies": {
+    "javascript-obfuscator": "^5.10.1"
+  }
+}

@@ -29,3 +29,19 @@ case/
 src/guoju-api/r2.env
 src/guoju-api/*.zip
 *.log
+
+# ---- R2 发布凭据（Cloudflare API Token，任意层级防泄漏；java/js 发布脚本共用） ----
+r2.env
+
+# ---- 接口包产物（GJZ1 加密包，可由 guoju-api/*/pack.py 重建，体积大不入库） ----
+src/guoju-api/java/*.zip
+src/guoju-api/js/*.zip
+
+# ---- spider 桌面测试的设备身份存档（本地状态，非配置） ----
+*_device.json
+
+# ---- ysc 第三方源 token 配置 ----
+src/ysc/diy/短剧狗/json/tokenm.json
+
+# ---- js 编译混淆依赖锁与临时产物 ----
+src/main/js/**/*.plain.tmp
